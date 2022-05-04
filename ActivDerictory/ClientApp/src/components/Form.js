@@ -32,10 +32,12 @@ export default function Form(props) {
     const history = useHistory();
     const refSubmit = useRef(null);
 
+    // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
+        // Return to the start page if a user is unauthorized
         if (token === null || token === undefined)
             history.push("/");
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,7 +137,7 @@ export default function Form(props) {
                 setLoad(false);
                 setTimeout(() => { history.push("/"); }, 3000)
             } else
-                console.warn(error.response)
+                console.error("Error => " + error.response)
         })
     }
 
