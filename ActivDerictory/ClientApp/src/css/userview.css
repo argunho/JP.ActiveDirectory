@@ -1,0 +1,51 @@
+.userview-form  {
+    width: 95%;
+    margin: 40px auto;
+}
+
+.form-actions {
+    display: flex;
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    margin: 0 0 10px 0;
+}
+
+.form-actions button {
+margin: 0 0 0 25px !important;
+}
+
+.inputs-wrapper {   
+    display: flex;
+    margin-bottom: 20px;
+    clear: both;
+}
+
+.pr-inputs {
+    display: inline-flex;
+    margin: 0 2px !important;
+    width: 100%;
+}
+.pr-inputs input {
+    height: 16px;
+    line-height: 16px;
+}
+.pr-inputs label {
+    font-size: 12px !important;
+    letter-spacing: 0.5px;
+}
+.userview-form > button {
+    float: right !important;
+    margin-left: 15px;
+}
+.generate-password {
+    display: block !important;
+    font-size: 10px !important;
+    margin: 10px !important;
+    clear: both !important;
+    float: right !important;
+    background: none !important;
+}
+.generate-password:hover {
+    opacity: 0.6 !important;
+}
