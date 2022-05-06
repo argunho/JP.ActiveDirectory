@@ -20,13 +20,13 @@ function PaperComponent(props) {
     );
 }
 
-export default function ModalHelpTexts({ arr }) {
+export default function ModalHelpTexts({ arr, position }) {
     const [open, setOpen] = React.useState(false);
 
     return (
         <>
             <FormControlLabel
-                className='help-btn'
+                className={'help-btn' + (position ? " situated-btn" : "")}
                 control={<Checkbox size='small'
                     color="primary"
                     checked={open}
@@ -48,7 +48,7 @@ export default function ModalHelpTexts({ arr }) {
                     {arr.map((a, i) => (
                     <DialogContentText key={i} className="modal-tips">
                         <AlertTitle style={{fontWeight: 600}}>{a.label}</AlertTitle>
-                        <p>{a.tip}</p>
+                        <div dangerouslySetInnerHTML={{ __html: a.tip }}></div>
                     </DialogContentText>                        
                     ))}
                 </DialogContent>

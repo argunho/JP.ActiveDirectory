@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { ExpandLess, ExpandMore, KeyboardReturnTwoTone, LockOpen, Password } from '@mui/icons-material';
+import { ExpandLess, ExpandMore, KeyboardReturnTwoTone, Lock, LockOpen, Password } from '@mui/icons-material';
 import Form from './Form';
 
 import './../css/userview.css';
@@ -28,14 +28,9 @@ export class UserManager extends Component {
             load: false,
             open: false,
             openIndex: null,
-            list: [
-                { name: "Lås upp konto", symbol: <LockOpen /> },
-                { name: "Återställ lösenord", symbol: <Password /> }
-            ],
+            list: [],
             noAccess: false
         }
-
-        this.unlockContent = this.unlockContent.bind(this);
     }
 
     componentDidMount() {
@@ -53,8 +48,15 @@ export class UserManager extends Component {
 
         await axios.get("user/" + this.props.match.params.id, _config).then(res => {
             const { user } = res.data;
-            if (user !== undefined)
-                this.setState({ user: user })
+            if (user !== undefined) {
+                this.setState({
+                    user: user,
+                    list: [
+                        { name: "Lås upp konto", symbol: user.isLocked ? <Lock /> : <LockOpen />, disabled: user.isLocked },
+                        { name: "Återställ lösenord", symbol: <Password />, disabled: false }
+                    ]
+                })
+            }
         }, error => {
             if (error.response.status === 401) {
                 this.setState({ noAccess: true })
@@ -64,26 +66,6 @@ export class UserManager extends Component {
             } else
                 console.error("Error => " + error.response)
         })
-    }
-
-    unlockContent() {
-        const { user, name } = this.state;
-        if (user.isLocked)
-            return (
-                <>
-                    <Alert severity='error' className='alert'>Användarkontot är låst</Alert>
-                    <Form api="unlock"
-                        unlockForm
-                        name={name}
-                        list={[]}
-                        title="Lås upp konto"
-                        buttonText="Lås upp"
-                        refreshUserData={() => this.setState({ user: { ...this.state.user, isLocked: false } })}
-                    />
-                </>
-            )
-        else
-            return <Alert className='alert' severity="info">Användarkontot är inte låst</Alert>
     }
 
     handleClick = (i) => {
@@ -128,15 +110,24 @@ export class UserManager extends Component {
                     <List sx={{ width: '100%' }} component="nav">
                         {list.map((l, i) => (
                             <div key={i}>
-                                <ListItemButton onClick={() => this.handleClick(i)} className={(open && openIndex === i) ? "dropdown-list-active" : ""}>
+                                <ListItemButton
+                                    disabled={l.disabled}
+                                    onClick={() => this.handleClick(i)} className={(open && openIndex === i) ? "dropdown-list-active" : ""}>
                                     <ListItemIcon>
                                         {l.symbol}
                                     </ListItemIcon>
-                                    <ListItemText primary={l.name} />
+                                    <ListItemText primary={l.disabled ? "Användarkontot är inte låst" : l.name} />
                                     {(open && openIndex === i) ? <ExpandLess /> : <ExpandMore />}
                                 </ListItemButton>
                                 <Collapse in={open && openIndex === i} timeout="auto" unmountOnExit>
-                                    {i === 0 ? this.unlockContent() :
+                                    {i === 0 ?
+                                        <Form api="unlock"
+                                            name={name}
+                                            list={[]}
+                                            title="Lås upp konto"
+                                            buttonText="Lås upp"
+                                            refreshUserData={() => this.setState({ user: { ...this.state.user, isLocked: false } })} />
+                                        :
                                         <Form title={"Återställa lösenord"} api="resetPassword" name={name} list={[]} hidden={false} buttonText="Återställ" />}
                                 </Collapse>
                             </div>

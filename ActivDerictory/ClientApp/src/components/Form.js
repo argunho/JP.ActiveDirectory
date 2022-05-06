@@ -4,8 +4,9 @@ import {
     Alert, Button, Checkbox, CircularProgress,
     FormControl, FormControlLabel, TextField
 } from '@mui/material';
-import { ClearOutlined } from '@mui/icons-material';
+import { ClearOutlined, HelpCenter } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
+import ModalHelpTexts from './ModalHelpTexts';
 
 const _token = sessionStorage.getItem("token");
 const _config = {
@@ -26,8 +27,16 @@ export default function Form(props) {
     const [noConfirm, setNoConfirm] = useState(false);
     const [regexError, setRegexError] = useState(false);
     const [confirmSubmit, setConfirmSubmit] = useState(false);
-    const [passTerms, setPassTerms] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
+
+    const helpTexts = [
+        {label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk bokstav med stor bokstav</pre>" +
+            "<pre>* Minst en liten engelsk bokstav</pre>" +
+            "<pre>* Minst en siffra</pre>" +
+            "<pre>* Minst ett specialtecken</pre>" +
+            "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"},
+         {label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>"}
+    ]
 
     const history = useHistory();
     const refSubmit = useRef(null);
@@ -113,7 +122,6 @@ export default function Form(props) {
         e.preventDefault();
         // Check password field
         if (!regex.test(form.password)) {
-            setPassTerms(true);
             setRegexError(true);
             return;
         } else if (!confirmed) {
@@ -130,7 +138,7 @@ export default function Form(props) {
                 if (form.adminPassword.length > 0)
                     sessionStorage.setItem("credintails", "ok");
 
-                resetForm(true);
+                resetForm(true, true);
 
                 if (res.data?.unlocked)
                     setTimeout(() => { props.refresUserData(); }, 2000)
@@ -150,15 +158,14 @@ export default function Form(props) {
     }
 
     // Reset form
-    const resetForm = (reset) => {
+    const resetForm = (reset, skip = false) => {
         setRegexError(false);
-        setPassTerms(false);
         setConfirmed(false);
         setConfirmSubmit(false);
+            if(!skip) setResponse(null);
         if (reset) {
             setNoConfirm(false);
-            setForm(defaultForm)
-            setFormList([]);
+            setForm(defaultForm);
         }
     }
 
@@ -178,29 +185,12 @@ export default function Form(props) {
                         onClick={() => generatePassword()}
                         disabled={load}>Generate password</Button>}
 
-                    {/* Password terms button */}
-                    <Button variant="text"
-                        color={regexError ? "error" : (passTerms ? "info" : "inherit")}
-                        type="button"
-                        size="small"
-                        className="generate-password"
-                        onClick={() => setPassTerms(!passTerms)}
-                        disabled={load}>Lösenord vilkor</Button>
+                    {/* Modal  window with help texts */}
+                    <ModalHelpTexts arr={helpTexts} position={true} />
                 </div>
 
                 {/* Response message */}
                 {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
-
-                {/* Password terms */}
-                <Alert severity={regexError ? 'error' : 'info'} className={'alert dropdown-div' + (passTerms ? ' dropdown-open' : '')}>
-                    Lösenord ska innehålla:
-                    <pre>* Minst en engelsk bokstav med stor bokstav</pre>
-                    <pre>* Minst en liten engelsk bokstav</pre>
-                    <pre>* Minst en siffra</pre>
-                    <pre>* Minst ett specialtecken</pre>
-                    <pre>* Minst 8 & Max 20 karaktär i längd</pre>
-                </Alert>
-
 
                 {/* Passwords inputs */}
                 <div className='inputs-wrapper'>
