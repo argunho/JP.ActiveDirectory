@@ -303,6 +303,14 @@ input::placeholder {
   border-radius: 5px !important;
 }
 
+.MuiPaper-root {
+  padding: 20px 15px !important;
+}
+
+.modal-tips > div {
+color: rgba(0, 0, 0, 0.9) !important;
+}
+
 .list-alert p {
   margin-bottom: 3px !important;
 }
