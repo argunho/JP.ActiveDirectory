@@ -40,7 +40,7 @@ export class Home extends Component {
           }, 2000)
         }
       }, error => {
-        console.warn(error);
+        console.error("Error => " + error);
       })
     }
   }

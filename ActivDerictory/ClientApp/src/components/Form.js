@@ -40,15 +40,19 @@ export default function Form(props) {
         // Return to the start page if a user is unauthorized
         if (token === null || token === undefined)
             history.push("/");
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
         const credintails = sessionStorage.getItem("credintails");
+        // Building a suitable form to fill out
         if (formList.length === 0) {
+            // Required admin password if the user is authorized with windows credentials
             if (credintails !== "ok")
                 setFormList(formList => [...formList, { name: "adminPassword", label: "Admin lösenord", placeholder: "Bekräfta åtkomstbehörighet.", regex: false }]);
 
+            //  If the form is not used to unlock the user
             if (api !== "unlock") {
                 setFormList(formList => [...formList, { name: "password", label: "Lösenord", placeholder: "", regex: true }]);
                 setFormList(formList => [...formList, { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }]);
@@ -57,6 +61,7 @@ export default function Form(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formList.length === 0])
 
+    // Generate new password
     const generatePassword = () => {
         let generatedPassword = "";
         resetForm(false);
@@ -74,6 +79,7 @@ export default function Form(props) {
         setShowPassword(true);
     }
 
+    // Return random charaters to generate password
     const randomChars = (num) => {
         const symbols = "!@?$&#%*_";
         const strArr = [
@@ -87,6 +93,7 @@ export default function Form(props) {
         return strArr;
     }
 
+    // Handle change of form value
     const valueChangeHandler = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setResponse(null);
@@ -95,13 +102,16 @@ export default function Form(props) {
         resetForm(false);
     }
 
+    // Confirm new password and confirmPassword
     const checkConfirm = e => {
         setNoConfirm((e.name === "password") ? form.confirmPassword !== e.value
             : form.password !== e.value)
     }
 
+// Submit form
     const submitForm = e => {
         e.preventDefault();
+        // Check password field
         if (!regex.test(form.password)) {
             setPassTerms(true);
             setRegexError(true);
@@ -122,13 +132,11 @@ export default function Form(props) {
 
                 resetForm(true);
 
-                if (res.data?.unlocked) {
-                    setTimeout(() => {
-                        props.refresUserData();
-                    }, 2000)
-                }
+                if (res.data?.unlocked)
+                    setTimeout(() => { props.refresUserData(); }, 2000)
             }
         }, error => {
+            // Handle of error
             if (error.response.status === 401) {
                 setResponse({
                     msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
@@ -141,6 +149,7 @@ export default function Form(props) {
         })
     }
 
+    // Reset form
     const resetForm = (reset) => {
         setRegexError(false);
         setPassTerms(false);

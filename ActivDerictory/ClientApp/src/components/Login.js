@@ -53,7 +53,8 @@ export class Login extends Component {
                 load: false, response: res.data
             })
 
-            if (consoleMsg) console.warn(consoleMsg);
+            if (consoleMsg) console.error("Error => " + consoleMsg);
+
             if (access) {
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("credintails", "ok");

@@ -40,7 +40,7 @@ export class Search extends Component {
                 { label: "Match", match: true },
                 { label: "Exakt", match: false }
             ],
-            clMembers: sessionStorage.getItem("sParam") === "members",
+            classStudents: sessionStorage.getItem("sParam") === "members",
             match: true,
             msg: "",
             showTips: false,
@@ -70,12 +70,13 @@ export class Search extends Component {
     componentDidMount() {
         const token = sessionStorage.getItem("token");
 
-        if (token === null || token === undefined)
+        if (token === null || token === undefined) // Return to the start page if a user is unauthorized
             this.props.history.push("/");
-        else if (this.props.history.action === "POP")
+        else if (this.props.history.action === "POP") // Clean the old result if the page is refreshed
             sessionStorage.removeItem("users");
     }
 
+    // Handle a change of text fileds and radio input value
     valueChangeHandler = e => {
         if (!e.target) return;
         const inp = e.target;
@@ -89,6 +90,7 @@ export class Search extends Component {
         })
     }
 
+    // Handle a change of checkbox input value
     checkboxHandle = (capitalize) => {
         const { keyword, match } = this.state
         this.setState({
@@ -98,20 +100,15 @@ export class Search extends Component {
             users: [],
             warning: false
         })
-
-        sessionStorage.removeItem("users");
     }
 
-    handleKeyDown = (e) => {
-        if (e.key === 'Enter') this.getSearchResult.bind(this);
-    }
-
+    // Return one from help texts found by the keyword
     returnToolTipByKeyword(keyword) {
         if (!this.state.showTips) return "";
         return this.state.helpTexts.find(x => x.label === keyword)?.tip;
     }
 
-
+    // To select one by one user from the class students' list
     handleSelectedList = (name) => {
         const arr = this.state.selectedUsers;
         if (arr?.length > 0 && arr.indexOf(name) > -1)
@@ -119,58 +116,80 @@ export class Search extends Component {
         else
             arr.push(name);
 
+        // Update selected users
         this.setState({ selectedUsers: arr });
     }
 
+    // To select all from class students list
     selectList = (selected) => {
         const arr = [];
         if (!selected)
             this.state.users.forEach(u => { arr.push(u.name) });
 
         this.setState({ selectedUsers: arr })
-
     }
 
+    // Handle changes in search alternatives and parameters
     setSearchParameter = value => {
-
         this.setState({
             sParam: value,
             users: [],
             isResult: false,
-            match: this.state.clMembers,
-            clMembers: !this.state.clMembers
+            match: this.state.classStudents,
+            classStudents: !this.state.classStudents
         })
+
+        //  Save choice of search parameters in sessionStorage to mind the user choice and use it with page refresh
         sessionStorage.setItem("sParam", value)
     }
 
+    // Navigate to page
     goTo = (name) => {
+        // Save found result i sessionStorage
         sessionStorage.setItem("users", JSON.stringify(this.state.users));
+        // Navigation
         this.props.history.push("/manage-user/" + name);
     }
 
+    // Reset form
     reset = () => {
         this.setState({ users: [], isResult: false });
+        // Remove result from sessionStorage
         sessionStorage.removeItem("users");
     }
-    
-    // Submit function
+
+    // Recognize Enter press to submit search form
+    handleKeyDown = (e) => {
+        if (e.key === 'Enter') this.getSearchResult.bind(this);
+    }
+
+    // Function - submit form
     async getSearchResult(e) {
         e.preventDefault();
 
+        // To authorize
         const _config = {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
 
+        // Scroll to result box 
         this.refResult.current.scrollIntoView();
+        // Update state parameters
         this.setState({ inProgress: true, users: [], isResult: false });
-        const { keyword, match, capitalize, sParam, extraKeyword, clMembers } = this.state;
+        // State parameters
+        const { keyword, match, capitalize, sParam, extraKeyword, classStudents } = this.state;
 
+        // Return if form is invalid
         if (keyword.length < 2) return;
 
-        const params = (!clMembers) ? match + "/" + capitalize : extraKeyword;
+        // API parameters by chosen searching alternative
+        const params = (!classStudents) ? match + "/" + capitalize : extraKeyword;
 
+        // API request
         await axios.get("search/" + sParam + "/" + keyword + "/" + params, _config).then(res => {
+            // Response
             const { warning, msg, users, errorMsg, alert } = res.data;
+            // Update state parameters
             setTimeout(() => {
                 this.setState({
                     users: users || [],
@@ -184,8 +203,11 @@ export class Search extends Component {
                 })
                 this.refResult.current.scrollIntoView();
             }, 100);
-            if (errorMsg) console.warn(errorMsg)
+
+            // If something is wrong, view error messag in browser console
+            if (errorMsg) console.error("Error => " + errorMsg)
         }, error => {
+            // Error handle
             if (error.response.status === 401) {
                 this.setState({
                     msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
@@ -197,21 +219,25 @@ export class Search extends Component {
                     this.props.history.push("/");
                 }, 3000)
             } else
-                console.warn(error.response)
+                console.error("Error => " + error.response)
         });
     }
 
     render() {
+        // State parameters
         const { keyword, users, inProgress,
             isResult, choiceList, match, msg, warning,
             alert, capitalize, sParam, sParams, showTips,
-            clMembers, selectedUsers, open, helpTexts } = this.state;
-        const inputActive = keyword.length > 1;
-        const isSuccess = users.length > 0;
-        const sFormParams = !clMembers ? [{ name: "keyword", label: "Namn" }]
+            classStudents, selectedUsers, open, helpTexts } = this.state;
+
+        // List of textfields
+        const sFormParams = !classStudents ? [{ name: "keyword", label: "Namn" }]
             : [{ name: "keyword", label: "Klassnamn", clsName: "search-first-input" },
             { name: "extraKeyword", label: "Skola", clsName: "search-second-input" }];
 
+        // Boolean paramters
+        const inputActive = keyword.length > 1;
+        const isSuccess = users.length > 0;
         const selected = selectedUsers.length === users.length;
 
         return (
@@ -239,6 +265,7 @@ export class Search extends Component {
                             onKeyDown={this.handleKeyDown}
                             onChange={this.valueChangeHandler} />))}
 
+                    {/* Reset form - button */}
                     {inputActive ? <Button
                         variant="text"
                         color="error"
@@ -247,6 +274,8 @@ export class Search extends Component {
                         onClick={() => this.setState({ keyword: "", extraKeyword: "" })}>
                         <SearchOffSharp />
                     </Button> : null}
+
+                    {/* Submit form - button */}
                     <Button
                         variant={inputActive ? "contained" : "outlined"}
                         color={inputActive ? "primary" : "inherit"}
@@ -258,7 +287,7 @@ export class Search extends Component {
 
                 {/* The search paramters to choise */}
                 <div className="checkbox-radio-wrapper">
-                    
+
                     {/* Checkbox and radio to choice one of search alternatives */}
                     <FormControl style={{ display: "block" }}>
                         <RadioGroup row
@@ -293,7 +322,7 @@ export class Search extends Component {
                     <FormControl>
                         <RadioGroup row
                             name="row-radio-buttons-group" >
-                            
+
                             {/* Checkbox */}
                             <Tooltip arrow disableHoverListener={!showTips} classes={{ tooltip: "tooltip tooltip-blue", arrow: "arrow-blue" }}
                                 title={this.returnToolTipByKeyword("Versal")} >
@@ -301,7 +330,7 @@ export class Search extends Component {
                                     control={<Checkbox size='small'
                                         checked={capitalize && match}
                                         name="capitalize"
-                                        disabled={!match || clMembers}
+                                        disabled={!match || classStudents}
                                         onClick={() => this.checkboxHandle(!capitalize)} />}
                                     label="Versal" />
                             </Tooltip>
@@ -314,7 +343,7 @@ export class Search extends Component {
                                         control={<Radio
                                             size='small'
                                             checked={match === c.match}
-                                            disabled={clMembers} />}
+                                            disabled={classStudents} />}
                                         label={c.label}
                                         name="match"
                                         onChange={this.valueChangeHandler} />
@@ -352,7 +381,7 @@ export class Search extends Component {
                     {inProgress ? <Loading msg="Var vänlig och vänta, sökning pågår ..." img={loadImg} /> : null}
 
                     {/* Select or deselect all users in class members list */}
-                    {clMembers && users.length > 0 ?
+                    {classStudents && users.length > 0 ?
                         /* Hidden form to reset selected users password */
                         <List sx={{ width: '100%' }} component="nav">
                             {/* Form description */}
@@ -414,7 +443,7 @@ export class Search extends Component {
                                         </React.Fragment>} />
 
                                     {/* Checkbox visible only if is success result after users search by class name */}
-                                    {clMembers ? <Checkbox
+                                    {classStudents ? <Checkbox
                                         size='small'
                                         color="default"
                                         disabled={open}

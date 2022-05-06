@@ -62,7 +62,7 @@ export class UserManager extends Component {
                     this.props.history.push("/");
                 }, 3000)
             } else
-                console.warn(error.response)
+                console.error("Error => " + error.response)
         })
     }
 
