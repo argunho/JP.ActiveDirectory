@@ -16,7 +16,7 @@ const _config = {
 export default function Form(props) {
     const { title, api, buttonText, name, list } = props;
     const defaultForm = {
-        name: name, list: list, 
+        name: name, list: list,
         adminPassword: "", password: "", confirmPassword: ""
     };
     const [response, setResponse] = useState(null);
@@ -30,12 +30,14 @@ export default function Form(props) {
     const [confirmed, setConfirmed] = useState(false);
 
     const helpTexts = [
-        {label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk bokstav med stor bokstav</pre>" +
-            "<pre>* Minst en liten engelsk bokstav</pre>" +
-            "<pre>* Minst en siffra</pre>" +
-            "<pre>* Minst ett specialtecken</pre>" +
-            "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"},
-         {label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>"}
+        {
+            label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk bokstav med stor bokstav</pre>" +
+                "<pre>* Minst en liten engelsk bokstav</pre>" +
+                "<pre>* Minst en siffra</pre>" +
+                "<pre>* Minst ett specialtecken</pre>" +
+                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
+        },
+        { label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>" }
     ]
 
     const history = useHistory();
@@ -117,7 +119,7 @@ export default function Form(props) {
             : form.password !== e.value)
     }
 
-// Submit form
+    // Submit form
     const submitForm = e => {
         e.preventDefault();
         // Check password field
@@ -158,11 +160,12 @@ export default function Form(props) {
     }
 
     // Reset form
-    const resetForm = (reset, skip = false) => {
+    const resetForm = (reset, save = false) => {
         setRegexError(false);
         setConfirmed(false);
+        setShowPassword(false);
         setConfirmSubmit(false);
-            if(!skip) setResponse(null);
+        if (!save) setResponse(null);
         if (reset) {
             setNoConfirm(false);
             setForm(defaultForm);
