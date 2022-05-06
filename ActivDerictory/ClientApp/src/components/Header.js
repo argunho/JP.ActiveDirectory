@@ -36,7 +36,7 @@ export default function Header({ isAuthorized }) {
             <nav className="nav-wrapper">
                     <ul className='container'>
                         <li>
-                            <Link className="link" to="/find-user">
+                            <Link className="link" to="/finduser">
                                 <HomeSharp />Unlock User
                             </Link>
                         </li>

@@ -28,7 +28,7 @@ export class Login extends Component {
     componentDidMount() {
         const token = sessionStorage.getItem("token");
         if (token !== null && token !== undefined)
-            this.props.history.push("/find-user");
+            this.props.history.push("/finduser");
     }
 
     valueChangeHandler = (e) => {
@@ -59,7 +59,7 @@ export class Login extends Component {
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("credintails", "ok");
                 setTimeout(() => {
-                    this.props.history.push("/find-user");
+                    this.props.history.push("/finduser");
                 }, 1000)
             }
         })

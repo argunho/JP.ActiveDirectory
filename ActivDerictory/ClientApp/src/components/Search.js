@@ -5,17 +5,18 @@ import Loading from './Loading'
 import user from './../images/student.png'
 import axios from 'axios'
 import Form from './Form'
-import HelpTexts from './HelpTexts'
+
 import {
     DeleteSweep, Deselect, Password, SearchOffSharp, SearchSharp,
-    SelectAll, ExpandLess, ExpandMore, InfoOutlined, InfoSharp
+    SelectAll, ExpandLess, ExpandMore
 } from '@mui/icons-material'
 import {
     Alert, Avatar, Button, Checkbox, Collapse, FormControl,
     FormControlLabel, List, ListItem, ListItemAvatar,
     ListItemButton, ListItemIcon, Tooltip,
-    ListItemText, Radio, RadioGroup, TextField, Typography
+    ListItemText, Radio, RadioGroup, TextField, Typography, Switch
 } from '@mui/material'
+import ModalHelpTexts from './ModalHelpTexts'
 
 
 
@@ -43,7 +44,7 @@ export class Search extends Component {
             classStudents: sessionStorage.getItem("sParam") === "members",
             match: true,
             msg: "",
-            showTips: false,
+            showTips: localStorage.getItem("showTips") === "true",
             warning: false,
             alert: "warning",
             capitalize: false,
@@ -54,7 +55,8 @@ export class Search extends Component {
                 { label: "Klass elever", value: "members", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn." },
                 { label: "Versal", value: "capitalize", tip: "Matchning med exakt stavat namn. Resultatet kan ge 0 eller 1 hittade användare." },
                 { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers namn/användarnamn. Resultatet kan vara från 0 till ett obestämt antal hittade användare." },
-                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat namn. Resultatet kan ge 0 eller 1 hittade användare." }
+                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat namn. Resultatet kan ge 0 eller 1 hittade användare." },
+                { label: "Tips", value: "tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen." }
             ]
         }
 
@@ -74,6 +76,10 @@ export class Search extends Component {
             this.props.history.push("/");
         else if (this.props.history.action === "POP") // Clean the old result if the page is refreshed
             sessionStorage.removeItem("users");
+    }
+
+    componentWillUnmount(){
+        localStorage.setItem("showTips", this.state.showTips)
     }
 
     // Handle a change of text fileds and radio input value
@@ -148,7 +154,7 @@ export class Search extends Component {
         // Save found result i sessionStorage
         sessionStorage.setItem("users", JSON.stringify(this.state.users));
         // Navigation
-        this.props.history.push("/manage-user/" + name);
+        this.props.history.push("/manageuser/" + name);
     }
 
     // Reset form
@@ -288,22 +294,24 @@ export class Search extends Component {
                 {/* The search paramters to choise */}
                 <div className="checkbox-radio-wrapper">
 
-                    {/* Checkbox and radio to choice one of search alternatives */}
-                    <FormControl style={{ display: "block" }}>
+                    {/* Modal  window with help texts */}
+                    <ModalHelpTexts arr={helpTexts} />
+                    {/* Switchbox */}
+                    <FormControlLabel className='switch-btn'
+                        control={<Switch checked={showTips} color='info'
+                            onChange={() => this.setState({ showTips: !showTips })}
+                        />}
+                        label="Tips" />
+
+                    {/* Radio buttons to choice one of search alternatives */}
+                    <FormControl style={{ display: "inline-block" }}>
                         <RadioGroup row
                             name="row-radio-buttons-group">
-                            {/* Checkbox */}
-                            <FormControlLabel
-                                control={<Checkbox size='small'
-                                    checked={showTips}
-                                    icon={<InfoOutlined />}
-                                    checkedIcon={<InfoSharp />}
-                                    onClick={() => this.setState({ showTips: !showTips })} />}
-                                label={`${showTips ? "Dölj" : "Visa"}  hjälptexter`} />
 
                             {/* Loop of radio input choices */}
                             {sParams.map((p, index) => (
-                                <Tooltip key={index} arrow disableHoverListener={!showTips} title={this.returnToolTipByKeyword(p.label)} classes={{ tooltip: "tooltip tooltip-green", arrow: "arrow-green" }}>
+                                <Tooltip key={index} arrow disableHoverListener={!showTips} title={this.returnToolTipByKeyword(p.label)} 
+                                    classes={{ tooltip: "tooltip tooltip-green", arrow: "arrow-green" }}>
                                     <FormControlLabel
                                         value={sParam === p.value}
                                         control={<Radio
@@ -319,7 +327,7 @@ export class Search extends Component {
                     </FormControl>
 
                     {/* Checkbox and radio with search parameters to choose for user search */}
-                    <FormControl>
+                    <FormControl style={{ display: "block" }}>
                         <RadioGroup row
                             name="row-radio-buttons-group" >
 
@@ -354,7 +362,7 @@ export class Search extends Component {
                 </div>
 
                 {/* Drop-down list with help texts */}
-                <HelpTexts arr={helpTexts} />
+                {/* <HelpTexts arr={helpTexts} /> */}
 
                 {/* Box to view the result of search */}
                 <div className='intorior-div' ref={this.refResult}>

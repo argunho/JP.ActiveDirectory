@@ -218,6 +218,21 @@ body {
   margin-top: 0 !important;
 }
 
+.switch-btn, .help-btn {
+  float: right;
+}
+.switch-btn > .MuiSwitch-root {
+  height: 38px;
+}
+.switch-btn .MuiSwitch-thumb {
+  height: 18px;
+  width: 18px;
+}
+.help-btn label {
+  margin-right: 0 !important;
+  margin-left: 5px !important;
+}
+
 .user-avatar {
   width: 90%;
   background-color: #f0f0f0 !important;
@@ -274,7 +289,7 @@ input::placeholder {
   border-width: 1px;
 }
 
-.list-alert {
+.list-alert, .modal-tips {
   width: 100% !important;
   margin: 3px auto 0 auto !important;
   font-size: 12px !important;
