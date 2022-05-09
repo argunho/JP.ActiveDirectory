@@ -217,14 +217,15 @@ export default function Form(props) {
                 </div>
 
                 {/* Confirm actions block */}
-                {confirmSubmit ?
+                {confirmSubmit ? <div className='confirm-wrapper'>
                     <div className='confirm-block'>
                         Är du säker att du vill göra det?
                         <div className='buttons-wrapper'>
                             <Button type="submit" variant='contained' color="error" onMouseDown={() => setConfirmed(true)}>Ja</Button>
                             <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
                         </div>
-                    </div> : null}
+                    </div>                    
+                </div> : null}
 
                 {/* Change the password input type */}
                 <FormControlLabel className='checkbox'

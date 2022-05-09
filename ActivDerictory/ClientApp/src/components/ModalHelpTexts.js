@@ -47,7 +47,7 @@ export default function ModalHelpTexts({ arr, position }) {
                 <DialogContent>
                     {arr.map((a, i) => (
                     <DialogContentText key={i} className="modal-tips">
-                        <AlertTitle style={{fontWeight: 600}}>{a.label}</AlertTitle>
+                        <AlertTitle style={{fontWeight: 600 }}><span style={{color: (a?.color ? a.color : "#000")}}>{a.label}</span></AlertTitle>
                         <div dangerouslySetInnerHTML={{ __html: a.tip }}></div>
                     </DialogContentText>                        
                     ))}

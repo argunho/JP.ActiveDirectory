@@ -53,10 +53,11 @@ export class Search extends Component {
             helpTexts: [
                 { label: "Änvändare", value: "user", tip: "Det här alternativet är till för att söka efter en specifik användare. Välj rätt sökalternativ nedan för att få den förväntande resultat." },
                 { label: "Klass elever", value: "members", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn." },
-                { label: "Versal", value: "capitalize", tip: "Matchning med exakt stavat namn. Resultatet kan ge 0 eller 1 hittade användare." },
-                { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers namn/användarnamn. Resultatet kan vara från 0 till ett obestämt antal hittade användare." },
-                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat namn. Resultatet kan ge 0 eller 1 hittade användare." },
-                { label: "Tips", value: "tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen." }
+                { label: "Versal", value: "capitalize", tip: "Matchning med Namn/Efternamn/Anvädarnamn vilka börjar med samma Versal." },
+                { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers Namn/Efternamn/Anvädarnamn vilka innehåller angiven sökord." },
+                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat Namn/Efternamn/Anvädarnamn." },
+                { label: "Tips", value: "tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen." },
+                {label: "Resultat", value: "", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", color: "#c00" }
             ]
         }
 
