@@ -52,7 +52,7 @@ export class UserManager extends Component {
                 this.setState({
                     user: user,
                     list: [
-                        { name: "Lås upp konto", symbol: user.isLocked ? <Lock /> : <LockOpen />, disabled: user.isLocked },
+                        { name: "Lås upp konto", symbol: user.isLocked ? <Lock /> : <LockOpen />, disabled: !user.isLocked },
                         { name: "Återställ lösenord", symbol: <Password />, disabled: false }
                     ]
                 })
