@@ -17,7 +17,7 @@ export class UserManager extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: this.props.match.params.id,
+            name: this.props.match.params?.id || null,
             user: {
                 name: "User",
                 displayName: "-----",
@@ -37,8 +37,8 @@ export class UserManager extends Component {
         const token = sessionStorage.getItem("token");
         if (token == null || token === undefined)
             this.props.history.push("/");
-
-        this.getUser();
+        else if (this.state.name)
+            this.getUser();
     }
 
     async getUser() {

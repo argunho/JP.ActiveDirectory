@@ -40,7 +40,7 @@ class App extends Component {
           <Route exact path='/' render={(props) => <Home {...props} isAuthorized={isAuthorized} />} />
           <Route exact path='/login' component={Login} />
           <Route exact path='/find-user' component={Search} />
-          <Route exact path='/manage-user/:id' component={UserManager} />
+          <Route exact path={['/manage-users', '/manage-user/:id' ]} component={UserManager} />
         </Switch>
       </Layout>
     );

@@ -79,7 +79,7 @@ export class Search extends Component {
             sessionStorage.removeItem("users");
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         localStorage.setItem("showTips", this.state.showTips)
     }
 
@@ -161,7 +161,7 @@ export class Search extends Component {
     // Switch show of tips
     switchShowTips = (showTips) => {
         localStorage.setItem("showTips", !showTips)
-        this.setState({ showTips: !showTips })      
+        this.setState({ showTips: !showTips })
     }
 
     // Reset form
@@ -269,7 +269,8 @@ export class Search extends Component {
                             required
                             inputProps={{
                                 maxLength: 30,
-                                minLength: 2
+                                minLength: 2,
+                                autoCapitalize: true
                                 // autoComplete: this.state[s.name],
                                 // form: { autoComplete: 'off', }
                             }}
@@ -277,6 +278,7 @@ export class Search extends Component {
                             placeholder="Min 2 & Max 30 tecken ..."
                             onKeyDown={this.handleKeyDown}
                             onChange={this.valueChangeHandler} />))}
+
 
                     {/* Reset form - button */}
                     {inputActive ? <Button
@@ -317,7 +319,7 @@ export class Search extends Component {
 
                             {/* Loop of radio input choices */}
                             {sParams.map((p, index) => (
-                                <Tooltip key={index} arrow disableHoverListener={!showTips} title={this.returnToolTipByKeyword(p.label)} 
+                                <Tooltip key={index} arrow disableHoverListener={!showTips} title={this.returnToolTipByKeyword(p.label)}
                                     classes={{ tooltip: "tooltip tooltip-green", arrow: "arrow-green" }}>
                                     <FormControlLabel
                                         value={sParam === p.value}
@@ -368,9 +370,6 @@ export class Search extends Component {
                     </FormControl>
                 </div>
 
-                {/* Drop-down list with help texts */}
-                {/* <HelpTexts arr={helpTexts} /> */}
-
                 {/* Box to view the result of search */}
                 <div className='interior-div' ref={this.refResult}>
                     {/* Result info box */}
@@ -380,6 +379,21 @@ export class Search extends Component {
                             primary="Result"
                             secondary={isSuccess ? ("Hittades: " + users.length + " användare")
                                 : "Ditt sökresultat kommer att visas här nedan"} />
+
+                        {classStudents && users.length > 0 ?
+                            /* Hidden form to reset selected users password */
+                            <Tooltip arrow acti title={`Klicka här att ställa in nytt lösenord för valda ${selectedUsers.length} användare`}
+                                classes={{ tooltip: "tooltip tooltip-blue", arrow: "arrow-blue" }}
+                                open={selectedUsers.length > 0}
+                                leaveTouchDelay={1000}
+                                >
+                                <Button
+                                    disabled={selectedUsers.length === 0}
+                                    onClick={() => this.props.history.push("/manage-users")}>
+                                    <Password />
+                                </Button>
+                            </Tooltip>
+                            : null}
 
                         {/* Button to reset search result */}
                         <Tooltip arrow disableHoverListener={!showTips} title="Ta bort sök resultat." classes={{ tooltip: "tooltip tooltip-error", arrow: "arrow-error" }}>
@@ -400,21 +414,21 @@ export class Search extends Component {
                         /* Hidden form to reset selected users password */
                         <List sx={{ width: '100%' }} component="nav">
                             {/* Form description */}
-                            <ListItemButton onClick={() => this.setState({ open: !open })}
+                            {/* <ListItemButton onClick={() => this.setState({ open: !open })}
                                 className={open && selectedUsers.length > 0 ? "dropdown-list-active" : ""}
                                 disabled={selectedUsers.length === 0}>
                                 <ListItemIcon> <Password /> </ListItemIcon>
                                 <ListItemText primary={`Ställ in nytt lösenord för valda ${selectedUsers.length} användare`} />
                                 {(open) ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
+                            </ListItemButton> */}
 
                             {/* Form wrapper, the user has to click on to open a hidden form if this selected user's count is more than 0 */}
-                            <Collapse in={open} timeout="auto" unmountOnExit>
+                            {/* <Collapse in={open} timeout="auto" unmountOnExit>
                                 <Form list={selectedUsers}
                                     title={"Nytt lösenord"}
                                     api="setPasswords"
                                     buttonText="Verkställ" />
-                            </Collapse>
+                            </Collapse> */}
 
                             {/* Select or deselect all list */}
                             <ListItem className='search-result-select'>
@@ -424,7 +438,17 @@ export class Search extends Component {
                                     </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={`${selected ? "Avmarkera" : "Markera"} alla`} />
+                                    primary={`${selected ? "Avmarkera" : "Markera"} alla`}
+                                    secondary={<React.Fragment>
+                                        <Typography
+                                            sx={{ display: 'inline' }}
+                                            component="span"
+                                            variant="body2"
+                                            color={selectedUsers.length > 0 ? "primary" : "inherit"}>
+                                            {selectedUsers.length} användare har valts
+                                        </Typography>
+                                    </React.Fragment>}
+                                />
                                 <Checkbox
                                     checked={selected}
                                     disabled={open}
