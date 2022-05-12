@@ -8,6 +8,11 @@ import { ClearOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ModalHelpTexts from './ModalHelpTexts';
 
+// Json files
+import words from './../../json/words.json';
+import cities from 'cities.json';
+import colors from 'color-name-list';
+
 const _token = sessionStorage.getItem("token");
 const _config = {
     headers: { 'Authorization': `Bearer ${_token}` }
@@ -46,6 +51,7 @@ export default function Form(props) {
 
     // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
+    const eng = /^[a-zA-Z0-9]$/;
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -53,6 +59,8 @@ export default function Form(props) {
         if (token === null || token === undefined)
             history.push("/");
 
+    console.log(cities[0])
+    console.log(colors[0])
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
