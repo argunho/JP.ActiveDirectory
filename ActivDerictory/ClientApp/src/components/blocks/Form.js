@@ -28,7 +28,6 @@ export default function Form(props) {
     const [regexError, setRegexError] = useState(false);
     const [confirmSubmit, setConfirmSubmit] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
-    const [regexActive, setRegexActive] = useState(true);
     const [errors, setErrors] = useState([]);
 
     const helpTexts = [
@@ -213,7 +212,7 @@ export default function Form(props) {
             {/* Confirm actions block */}
             {confirmSubmit ? <div className='confirm-wrapper'>
                 <div className='confirm-block'>
-                    <p>Är du säker att du vill göra det?</p>
+                    Är du säker att du vill göra det?
                     <div className='buttons-wrapper'>
                         <Button type="submit" variant='contained' color="error" onMouseDown={() => setConfirmed(true)}>Ja</Button>
                         <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
