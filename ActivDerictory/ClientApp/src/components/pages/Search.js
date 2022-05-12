@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
-import loadImg from './../images/search.gif'
-import Loading from './Loading'
-import user from './../images/student.png'
 import axios from 'axios'
-import Form from './Form'
+import loadImg from './../../images/search.gif'
+import Loading from './../blocks/Loading'
+import user from './../../images/student.png'
+
+import Form from './../blocks/Form'
 
 import {
     DeleteSweep, Deselect, Password, SearchOffSharp, SearchSharp,
@@ -16,7 +17,7 @@ import {
     ListItemButton, ListItemIcon, Tooltip,
     ListItemText, Radio, RadioGroup, TextField, Typography, Switch
 } from '@mui/material'
-import ModalHelpTexts from './ModalHelpTexts'
+import ModalHelpTexts from './../blocks/ModalHelpTexts'
 
 
 
@@ -53,11 +54,11 @@ export class Search extends Component {
             helpTexts: [
                 { label: "Änvändare", value: "user", tip: "Det här alternativet är till för att söka efter en specifik användare. Välj rätt sökalternativ nedan för att få den förväntande resultat." },
                 { label: "Klass elever", value: "members", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn." },
-                { label: "Versal", value: "capitalize", tip: "Matchning med Namn/Efternamn/Anvädarnamn vilka börjar med samma Versal." },
-                { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers Namn/Efternamn/Anvädarnamn vilka innehåller angiven sökord." },
-                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat Namn/Efternamn/Anvädarnamn." },
+                { label: "Versal", value: "capitalize", tip: "Matchning med Namn/Efternamn/Användarnamn vilka börjar med samma Versal." },
+                { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers Namn/Efternamn/Användarnamn vilka innehåller angiven sökord." },
+                { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat Namn/Efternamn/Användarnamn." },
                 { label: "Tips", value: "tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen." },
-                {label: "Resultat", value: "", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", color: "#c00" }
+                { label: "Resultat", value: "", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", color: "#c00" }
             ]
         }
 
@@ -83,7 +84,7 @@ export class Search extends Component {
         localStorage.setItem("showTips", this.state.showTips)
     }
 
-    // Handle a change of text fileds and radio input value
+    // Handle a change of text fields and radio input value
     valueChangeHandler = e => {
         if (!e.target) return;
         const inp = e.target;
@@ -155,7 +156,7 @@ export class Search extends Component {
         // Save found result i sessionStorage
         sessionStorage.setItem("users", JSON.stringify(this.state.users));
         // Navigation
-        this.props.history.push("/manageuser/" + name);
+        this.props.history.push("/manage-user/" + name);
     }
 
     // Reset form
@@ -211,7 +212,7 @@ export class Search extends Component {
                 this.refResult.current.scrollIntoView();
             }, 100);
 
-            // If something is wrong, view error messag in browser console
+            // If something is wrong, view error message in browser console
             if (errorMsg) console.error("Error => " + errorMsg)
         }, error => {
             // Error handle
@@ -237,18 +238,18 @@ export class Search extends Component {
             alert, capitalize, sParam, sParams, showTips,
             classStudents, selectedUsers, open, helpTexts } = this.state;
 
-        // List of textfields
+        // List of text fields
         const sFormParams = !classStudents ? [{ name: "keyword", label: "Namn" }]
             : [{ name: "keyword", label: "Klassnamn", clsName: "search-first-input" },
             { name: "extraKeyword", label: "Skola", clsName: "search-second-input" }];
 
-        // Boolean paramters
+        // Boolean parameters
         const inputActive = keyword.length > 1;
         const isSuccess = users.length > 0;
         const selected = selectedUsers.length === users.length;
 
         return (
-            <div className='intorior-div' onSubmit={this.getSearchResult.bind(this)}>
+            <div className='interior-div' onSubmit={this.getSearchResult.bind(this)}>
                 {/* Search form */}
                 <form className='search-wrapper'>
                     {/* List loop of text fields */}
@@ -292,12 +293,12 @@ export class Search extends Component {
                         <SearchSharp /></Button>
                 </form>
 
-                {/* The search paramters to choise */}
+                {/* The search parameters to choice */}
                 <div className="checkbox-radio-wrapper">
 
                     {/* Modal  window with help texts */}
                     <ModalHelpTexts arr={helpTexts} />
-                    {/* Switchbox */}
+                    {/* Switchable box */}
                     <FormControlLabel className='switch-btn'
                         control={<Switch checked={showTips} color='info'
                             onChange={() => this.setState({ showTips: !showTips })}
@@ -366,13 +367,13 @@ export class Search extends Component {
                 {/* <HelpTexts arr={helpTexts} /> */}
 
                 {/* Box to view the result of search */}
-                <div className='intorior-div' ref={this.refResult}>
+                <div className='interior-div' ref={this.refResult}>
                     {/* Result info box */}
                     <ListItem className='search-result-reset'>
                         {/* Result info */}
                         <ListItemText
                             primary="Result"
-                            secondary={isSuccess ? ("Hittades: " + users.length + " anvädare")
+                            secondary={isSuccess ? ("Hittades: " + users.length + " användare")
                                 : "Ditt sökresultat kommer att visas här nedan"} />
 
                         {/* Button to reset search result */}

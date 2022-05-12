@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import { Alert, Button } from '@mui/material';
-import Loading from './Loading';
-import loading from './../images/loading.gif'
+import Loading from './../blocks/Loading';
+import loading from './../../images/loading.gif'
 
 export class Home extends Component {
   static displayName = Home.name;
@@ -25,7 +25,7 @@ export class Home extends Component {
     const token = sessionStorage.getItem("token");
     const login = sessionStorage.getItem("login");
     if (token !== null && token !== undefined)
-      this.props.history.push("/finduser");
+      this.props.history.push("/find-user");
     else if (login !== null && login !== undefined)
       this.props.history.push("/login");
     else {
@@ -36,7 +36,7 @@ export class Home extends Component {
         if (res.data?.access) {
           sessionStorage.setItem("token", res.data?.token);
           setTimeout(() => {
-            this.props.history.push("/finduser");
+            this.props.history.push("/find-user");
           }, 2000)
         }
       }, error => {
@@ -48,7 +48,7 @@ export class Home extends Component {
   responseBlock(response) {
     return (
       <div className='block-centered'>
-        <Alert severity={response?.alert} className="acces-response">{response.msg}</Alert>
+        <Alert severity={response?.alert} className="access-response">{response.msg}</Alert>
         {(!response?.access)
           ? <Button className='login-link'
             color="inherit"

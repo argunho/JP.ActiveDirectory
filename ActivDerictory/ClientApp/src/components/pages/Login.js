@@ -4,7 +4,7 @@ import { Alert, Button, CircularProgress, FormControl, TextField } from '@mui/ma
 import { DesktopWindows } from '@mui/icons-material'
 import { withRouter } from 'react-router-dom'
 
-import './../css/login.css';
+import './../../css/login.css';
 
 export class Login extends Component {
     static displayName = Login.name;
@@ -14,21 +14,21 @@ export class Login extends Component {
 
         this.state = {
             form: { username: "", password: "" },
-            formFileds: [
-                { label: "Anvädarnamn", name: "username", type: "text" },
+            formFields: [
+                { label: "Användarnamn", name: "username", type: "text" },
                 { label: "Lösenord", name: "password", type: "password" }
             ],
             response: null,
             load: false
         }
 
-        this.loginWithWindowsCredintails = this.loginWithWindowsCredintails.bind(this);
+        this.loginWithWindowsCredentials = this.loginWithWindowsCredentials.bind(this);
     }
 
     componentDidMount() {
         const token = sessionStorage.getItem("token");
         if (token !== null && token !== undefined)
-            this.props.history.push("/finduser");
+            this.props.history.push("/find-user");
     }
 
     valueChangeHandler = (e) => {
@@ -57,26 +57,26 @@ export class Login extends Component {
 
             if (access) {
                 sessionStorage.setItem("token", token);
-                sessionStorage.setItem("credintails", "ok");
+                sessionStorage.setItem("credentials", "ok");
                 setTimeout(() => {
-                    this.props.history.push("/finduser");
+                    this.props.history.push("/find-user");
                 }, 1000)
             }
         })
     }
 
-    loginWithWindowsCredintails() {
+    loginWithWindowsCredentials() {
         sessionStorage.removeItem("login");
         this.props.history.push("/");
     }
 
     render() {
-        const { load, response, formFileds,form } = this.state;
+        const { load, response, formFields, form } = this.state;
         return (
             <form className='login-form' onSubmit={this.submitForm}>
                 <p className='form-title'>Logga in</p>
                 {response != null ? <Alert severity={response.alert}>{response.msg}</Alert> : null}
-                {formFileds.map((x, i) => (
+                {formFields.map((x, i) => (
                     <FormControl key={i}>
                         <TextField
                             id="outlined-basic"
@@ -106,7 +106,7 @@ export class Login extends Component {
                     color="primary"
                     type="button"
                     title="Logga in med Windows-autentiseringsuppgifter"
-                    onClick={this.loginWithWindowsCredintails}
+                    onClick={this.loginWithWindowsCredentials}
                     disabled={load}>
                     <DesktopWindows />
                 </Button>

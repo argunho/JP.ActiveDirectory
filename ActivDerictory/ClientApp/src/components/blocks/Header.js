@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
 import { HomeSharp, Logout } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import logo from './../images/logotyp.png'
+import logo from './../../images/logotype.png'
 
 export default function Header({ isAuthorized }) {
 
@@ -36,7 +36,7 @@ export default function Header({ isAuthorized }) {
             <nav className="nav-wrapper">
                     <ul className='container'>
                         <li>
-                            <Link className="link" to="/finduser">
+                            <Link className="link" to="/find-user">
                                 <HomeSharp />Unlock User
                             </Link>
                         </li>

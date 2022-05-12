@@ -4,7 +4,7 @@ import {
     Alert, Button, Checkbox, CircularProgress,
     FormControl, FormControlLabel, TextField
 } from '@mui/material';
-import { ClearOutlined, HelpCenter } from '@mui/icons-material';
+import { ClearOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ModalHelpTexts from './ModalHelpTexts';
 
@@ -56,11 +56,11 @@ export default function Form(props) {
     }, [])
 
     useEffect(() => {
-        const credintails = sessionStorage.getItem("credintails");
+        const credentials = sessionStorage.getItem("credentials");
         // Building a suitable form to fill out
         if (formList.length === 0) {
             // Required admin password if the user is authorized with windows credentials
-            if (credintails !== "ok")
+            if (credentials !== "ok")
                 setFormList(formList => [...formList, { name: "adminPassword", label: "Admin lösenord", placeholder: "Bekräfta åtkomstbehörighet.", regex: false }]);
 
             //  If the form is not used to unlock the user
@@ -90,7 +90,7 @@ export default function Form(props) {
         setShowPassword(true);
     }
 
-    // Return random charaters to generate password
+    // Return random characters to generate password
     const randomChars = (num) => {
         const symbols = "!@?$&#%*_";
         const strArr = [
@@ -138,7 +138,7 @@ export default function Form(props) {
             setLoad(false);
             if (res.data?.success) {
                 if (form.adminPassword.length > 0)
-                    sessionStorage.setItem("credintails", "ok");
+                    sessionStorage.setItem("credentials", "ok");
 
                 resetForm(true, true);
 
@@ -191,7 +191,7 @@ export default function Form(props) {
                 <div className='form-actions'>
                     <p className='form-title'>{title}</p>
 
-                    {/* Generate pasword button */}
+                    {/* Generate password button */}
                     {api === "unlock" ? null : <Button variant="text"
                         color="primary"
                         type="button"

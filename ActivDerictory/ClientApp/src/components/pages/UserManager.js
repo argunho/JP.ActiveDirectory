@@ -8,9 +8,9 @@ import {
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import { ExpandLess, ExpandMore, KeyboardReturnTwoTone, Lock, LockOpen, Password } from '@mui/icons-material';
-import Form from './Form';
+import Form from './../blocks/Form';
 
-import './../css/userview.css';
+import './../../css/userview.css';
 
 export class UserManager extends Component {
     static displayName = UserManager.name;
@@ -20,7 +20,7 @@ export class UserManager extends Component {
             name: this.props.match.params.id,
             user: {
                 name: "User",
-                displayname: "-----",
+                displayName: "-----",
                 isLocked: false,
                 date: null
             },
@@ -80,7 +80,7 @@ export class UserManager extends Component {
 
         return (
             noAccess ? <Alert severity='error'>Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.</Alert>
-                : <div className='intorior-div'>
+                : <div className='interior-div'>
                     <List sx={{ width: '100%' }}>
                         <ListItem className='search-result-reset'>
                             {/* Users data */}
