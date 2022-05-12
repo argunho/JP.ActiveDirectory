@@ -3,7 +3,6 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
@@ -31,7 +30,7 @@ export default function ModalHelpTexts({ arr, position }) {
                     color="primary"
                     checked={open}
                     icon={<HelpOutline />}
-                    checkedIcon={<LiveHelpOutlined/>}
+                    checkedIcon={<LiveHelpOutlined />}
                     onClick={() => setOpen(true)}
                     inputProps={{ 'aria-label': 'controlled', color: "primary" }} />}
                 label="Hjälp" />
@@ -41,16 +40,14 @@ export default function ModalHelpTexts({ arr, position }) {
                 onClose={() => setOpen(false)}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title">
-                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                Förklaring av sökparametrar
-                </DialogTitle>
+                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title"> Förklaring av sökparametrar </DialogTitle>
                 <DialogContent>
-                    {arr.map((a, i) => (
-                    <DialogContentText key={i} className="modal-tips">
-                        <AlertTitle style={{fontWeight: 600 }}><span style={{color: (a?.color ? a.color : "#000")}}>{a.label}</span></AlertTitle>
+                    {arr.map((a, i) => (<div key={i} className="modal-tips">
+                        <AlertTitle style={{ fontWeight: 600 }}>
+                            <span style={{ color: (a?.color ? a.color : "#000") }}>{a.label}</span>
+                        </AlertTitle>
                         <div dangerouslySetInnerHTML={{ __html: a.tip }}></div>
-                    </DialogContentText>                        
-                    ))}
+                    </div>))}
                 </DialogContent>
                 <DialogActions>
                     <Button variant='outlined' color="error" autoFocus onClick={() => setOpen(false)}>

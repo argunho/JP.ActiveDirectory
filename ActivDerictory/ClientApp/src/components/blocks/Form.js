@@ -28,6 +28,8 @@ export default function Form(props) {
     const [regexError, setRegexError] = useState(false);
     const [confirmSubmit, setConfirmSubmit] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
+    const [regexActive, setRegexActive] = useState(true);
+    const [errors, setErrors] = useState([]);
 
     const helpTexts = [
         {
@@ -69,6 +71,7 @@ export default function Form(props) {
                 setFormList(formList => [...formList, { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }]);
             }
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formList.length === 0])
 
@@ -110,6 +113,10 @@ export default function Form(props) {
         setResponse(null);
         if (e.target.name !== "adminPassword" && form.confirmPassword)
             checkConfirm(e.target);
+
+        if (e.target.value.length >= 8 && errors?.indexOf(e.target.name) > -1)
+            resetError(e.target.name);
+
         resetForm(false);
     }
 
@@ -119,10 +126,35 @@ export default function Form(props) {
             : form.password !== e.value)
     }
 
+    // Validate form's field
+    const validateField = (name) => {
+        if (form[name].length < 8 && errors?.indexOf(name) === -1)
+            if (errors.length > 0) setErrors(errors => [...errors, name]);
+            else setErrors([name]);
+        else if (errors?.indexOf(name) > -1)
+            resetError(name);
+    }
+
+    // Reset validation error from specific form field 
+    const resetError = (name) => {
+        let arr = errors;
+        arr.splice(arr.indexOf(name), 1);
+        setErrors(arr);
+    }
+
     // Submit form
     const submitForm = e => {
         e.preventDefault();
-        // Check password field
+
+        // Validate form
+        let arrErrors = [];
+        formList.forEach(x => { if (form[x.name].length < 8) arrErrors.push(x.name) })
+        if (arrErrors.length > 0) {
+            setErrors(arrErrors);
+            return;
+        }
+
+        // Check password fields confirm
         if (!regex.test(form.password)) {
             setRegexError(true);
             return;
@@ -133,6 +165,8 @@ export default function Form(props) {
             resetForm(false);
 
         setLoad(true);
+
+        // Request
         axios.post("user/" + api, form, _config).then(res => {
             setResponse(res.data);
             setLoad(false);
@@ -143,7 +177,7 @@ export default function Form(props) {
                 resetForm(true, true);
 
                 if (res.data?.unlocked)
-                    setTimeout(() => { props.refresUserData(); }, 2000)
+                    setTimeout(() => { props.refreshUserData(); }, 2000)
             }
         }, error => {
             // Handle of error
@@ -169,25 +203,26 @@ export default function Form(props) {
         if (reset) {
             setNoConfirm(false);
             setForm(defaultForm);
+            setErrors([]);
         }
     }
 
     return (
         <div className='collapse-wrapper'>
-                            
-        {/* Confirm actions block */}
-                {confirmSubmit ? <div className='confirm-wrapper'>
-                    <div className='confirm-block'>
-                        Är du säker att du vill göra det?
-                        <div className='buttons-wrapper'>
-                            <Button type="submit" variant='contained' color="error" onMouseDown={() => setConfirmed(true)}>Ja</Button>
-                            <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
-                        </div>
-                    </div>                    
-                </div> : null}
+
+            {/* Confirm actions block */}
+            {confirmSubmit ? <div className='confirm-wrapper'>
+                <div className='confirm-block'>
+                    <p>Är du säker att du vill göra det?</p>
+                    <div className='buttons-wrapper'>
+                        <Button type="submit" variant='contained' color="error" onMouseDown={() => setConfirmed(true)}>Ja</Button>
+                        <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
+                    </div>
+                </div>
+            </div> : null}
 
             {/* Password form */}
-            <form className='userview-form' onSubmit={submitForm}>
+            <form className='user-view-form' onSubmit={submitForm}>
                 <div className='form-actions'>
                     <p className='form-title'>{title}</p>
 
@@ -219,12 +254,19 @@ export default function Form(props) {
                                 variant="outlined"
                                 required
                                 value={form[n.name] || ""}
+                                inputProps={{
+                                    maxLength: 20,
+                                    minLength: 8,
+                                    autoComplete: formList[n.name],
+                                    form: { autoComplete: 'off', }
+                                }}
                                 className={(n.regex && regexError) ? "error" : ""}
-                                error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError)}
+                                error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
                                 placeholder={n.placeholder}
-                                inputProps={{ minLength: 8, maxLength: 20 }}
                                 disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit}
-                                onChange={valueChangeHandler} />
+                                onChange={valueChangeHandler}
+                                onBlur={() => validateField(n.name)}
+                            />
                         </FormControl>)) : null}
                 </div>
 

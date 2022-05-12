@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import axios from 'axios'
+
 import loadImg from './../../images/search.gif'
-import Loading from './../blocks/Loading'
 import user from './../../images/student.png'
 
+import Loading from './../blocks/Loading'
 import Form from './../blocks/Form'
+import ModalHelpTexts from './../blocks/ModalHelpTexts'
 
 import {
     DeleteSweep, Deselect, Password, SearchOffSharp, SearchSharp,
@@ -17,9 +19,6 @@ import {
     ListItemButton, ListItemIcon, Tooltip,
     ListItemText, Radio, RadioGroup, TextField, Typography, Switch
 } from '@mui/material'
-import ModalHelpTexts from './../blocks/ModalHelpTexts'
-
-
 
 export class Search extends Component {
     static displayName = Search.name;
@@ -157,6 +156,12 @@ export class Search extends Component {
         sessionStorage.setItem("users", JSON.stringify(this.state.users));
         // Navigation
         this.props.history.push("/manage-user/" + name);
+    }
+
+    // Switch show of tips
+    switchShowTips = (showTips) => {
+        localStorage.setItem("showTips", !showTips)
+        this.setState({ showTips: !showTips })      
     }
 
     // Reset form
@@ -301,7 +306,7 @@ export class Search extends Component {
                     {/* Switchable box */}
                     <FormControlLabel className='switch-btn'
                         control={<Switch checked={showTips} color='info'
-                            onChange={() => this.setState({ showTips: !showTips })}
+                            onChange={this.switchShowTips.bind(this, showTips)}
                         />}
                         label="Tips" />
 
