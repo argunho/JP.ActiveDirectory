@@ -1,7 +1,10 @@
 
 
 import React, { useEffect, useRef, useState } from 'react'
-import { Alert, Avatar, Button, Checkbox, List, ListItem, ListItemAvatar, ListItemText, Tooltip, Typography } from '@mui/material'
+import {
+    Alert, Avatar, Button, Checkbox, List, ListItem,
+    ListItemAvatar, ListItemText, Tooltip, Typography
+} from '@mui/material'
 import { DeleteSweep, Deselect, Password, SelectAll } from '@mui/icons-material';
 import Loading from './Loading';
 import loadImg from './../../images/search.gif'
@@ -10,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
-export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult}) {
+export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult }) {
 
     const refResult = useRef(null);
     const [selectedUsers, setSelectedUsers] = useState([]);

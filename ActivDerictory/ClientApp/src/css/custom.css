@@ -149,6 +149,12 @@ body {
   width: 100%;
 }
 
+.css-1wc848c-MuiFormHelperText-root {
+  font-size: 10px !important;
+  margin-left: 5px !important;
+  margin-bottom: -10px !important;
+}
+
 .search-first-input {
   width: 24.5% !important;
   margin-right: 0.5% !important;

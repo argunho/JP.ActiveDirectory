@@ -3,11 +3,13 @@ import { withRouter } from 'react-router-dom'
 import axios from 'axios'
 import ModalHelpTexts from './../blocks/ModalHelpTexts'
 
-import {SearchOffSharp, SearchSharp } from '@mui/icons-material'
-import { Button, Checkbox, FormControl, FormControlLabel,Tooltip,
-    Radio, RadioGroup, TextField, Switch
+import { SearchOffSharp, SearchSharp } from '@mui/icons-material'
+import {
+    Button, Checkbox, FormControl, FormControlLabel, Tooltip,
+    Radio, RadioGroup, TextField, Switch, FormHelperText
 } from '@mui/material'
 import Result from '../blocks/Result'
+import { capitalize } from '@mui/material'
 
 export class Search extends Component {
     static displayName = Search.name;
@@ -50,7 +52,6 @@ export class Search extends Component {
         }
 
         this.checkboxHandle = this.checkboxHandle.bind(this);
-        this.setSearchParameter = this.setSearchParameter.bind(this);
     }
 
     componentDidMount() {
@@ -73,20 +74,23 @@ export class Search extends Component {
 
         this.setState({
             [inp.name]: (inp.type === "radio") ? inp.value === "true"
-                : (this.state.match && this.state.capitalize ? (inp.value.charAt(0).toUpperCase() + inp.value.slice(1)) : inp.value),
+                : (this.state.capitalize ? capitalize(inp.value) : inp.value),
             isResult: false,
             users: [],
             warning: false,
             isActive: (this.state.keyword || this.state.extraKeyword).length > 0
         })
+
+        // Capitalize i js
+        // str.charAt(0).toUpperCase() + str.slice(1)
     }
 
     // Handle a change of checkbox input value
-    checkboxHandle = (capitalize) => {
-        const { keyword, match } = this.state
+    checkboxHandle = (capitalized) => {
+        const { keyword } = this.state
         this.setState({
-            keyword: (match && capitalize) ? (keyword.charAt(0).toUpperCase() + keyword.slice(1)) : keyword.toLowerCase(),
-            capitalize: capitalize,
+            keyword: capitalized ? capitalize(keyword) : keyword.toLowerCase(),
+            capitalize: capitalized,
             isResult: false,
             users: [],
             warning: false
@@ -101,12 +105,14 @@ export class Search extends Component {
 
     // Handle changes in search alternatives and parameters
     setSearchParameter = value => {
+        console.log(value)
         this.setState({
             sParam: value,
             users: [],
             isResult: false,
             match: this.state.clsStudents,
-            clsStudents: !this.state.clsStudents
+            clsStudents: !this.state.clsStudents,
+            capitalize: !this.state.clsStudents
         })
 
         //  Save choice of search parameters in sessionStorage to mind the user choice and use it with page refresh
@@ -197,9 +203,9 @@ export class Search extends Component {
             clsStudents, helpTexts, isActive } = this.state;
 
         // List of text fields
-        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn" }]
-            : [{ name: "keyword", label: "Klassnamn", clsName: "search-first-input" },
-            { name: "extraKeyword", label: "Skola", clsName: "search-second-input" }];
+        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Exakt namn här ..." : "" }]
+            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Exakt klassbeteckning här ..." },
+            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Exakt skolnamn här .." }];
 
         return (
             <div className='interior-div' onSubmit={this.getSearchResult.bind(this)}>
@@ -217,24 +223,28 @@ export class Search extends Component {
                             required
                             inputProps={{
                                 maxLength: 30,
-                                minLength: 2,
-                                autoCapitalize: "true"
+                                minLength: 2
                             }}
                             disabled={inProgress}
-                            placeholder="Min 2 & Max 30 tecken ..."
+                            placeholder={s.placeholder}
+                            title="Min 2 & Max 30 tecken"
                             onKeyDown={this.handleKeyDown}
-                            onChange={this.valueChangeHandler} />))}
-
+                            onChange={this.valueChangeHandler}
+                            helperText="Min 2 & Max 30 tecken"
+                        />
+                    ))}
 
                     {/* Reset form - button */}
-                    {isActive ? <Button
-                        variant="text"
-                        color="error"
-                        className="search-reset"
-                        disabled={inProgress}
-                        onClick={() => this.setState({ keyword: "", extraKeyword: "" })}>
-                        <SearchOffSharp />
-                    </Button> : null}
+                    {
+                        isActive ? <Button
+                            variant="text"
+                            color="error"
+                            className="search-reset"
+                            disabled={inProgress}
+                            onClick={() => this.setState({ keyword: "", extraKeyword: "" })}>
+                            <SearchOffSharp />
+                        </Button> : null
+                    }
 
                     {/* Submit form - button */}
                     <Button
@@ -244,23 +254,23 @@ export class Search extends Component {
                         type="submit"
                         disabled={!isActive || inProgress}>
                         <SearchSharp /></Button>
-                </form>
+                </form >
 
                 {/* The search parameters to choice */}
-                <div className="checkbox-radio-wrapper">
+                < div className="checkbox-radio-wrapper" >
 
                     {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={helpTexts} />
+                    < ModalHelpTexts arr={helpTexts} />
 
                     {/* Switchable box */}
-                    <FormControlLabel className='switch-btn'
-                        control={<Switch checked={showTips} color='info'
+                    < FormControlLabel className='switch-btn'
+                        control={< Switch checked={showTips} color='info'
                             onChange={this.switchShowTips.bind(this, showTips)}
                         />}
                         label="Tips" />
 
                     {/* Radio buttons to choice one of search alternatives */}
-                    <FormControl style={{ display: "inline-block" }}>
+                    < FormControl style={{ display: "inline-block" }}>
                         <RadioGroup row
                             name="row-radio-buttons-group">
 
@@ -276,14 +286,14 @@ export class Search extends Component {
                                             color="success" />}
                                         label={p.label}
                                         name="sParam"
-                                        onChange={() => this.setSearchParameter(p.value)} />
+                                        onChange={this.setSearchParameter.bind(this, p.value)} />
                                 </Tooltip>
                             ))}
                         </RadioGroup>
-                    </FormControl>
+                    </FormControl >
 
                     {/* Checkbox and radio with search parameters to choose for user search */}
-                    <FormControl style={{ display: "block" }}>
+                    < FormControl style={{ display: "block" }}>
                         <RadioGroup row
                             name="row-radio-buttons-group" >
 
@@ -292,7 +302,7 @@ export class Search extends Component {
                                 title={this.returnToolTipByKeyword("Versal")} >
                                 <FormControlLabel
                                     control={<Checkbox size='small'
-                                        checked={capitalize && match}
+                                        checked={capitalize}
                                         name="capitalize"
                                         disabled={!match || clsStudents}
                                         onClick={() => this.checkboxHandle(!capitalize)} />}
@@ -314,11 +324,11 @@ export class Search extends Component {
                                 </Tooltip>
                             ))}
                         </RadioGroup>
-                    </FormControl>
-                </div>
+                    </FormControl >
+                </div >
 
                 {/* Result list */}
-                <Result 
+                < Result
                     users={users}
                     clsStudents={clsStudents}
                     isResult={isResult}
@@ -329,7 +339,7 @@ export class Search extends Component {
                     resetResult={this.resetResult.bind(this)}
                 />
 
-            </div>
+            </div >
         )
     }
 }
