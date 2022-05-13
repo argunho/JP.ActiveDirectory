@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import {
     Alert, Button, Checkbox, CircularProgress,
-    FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField
+    FormControl, FormControlLabel, FormLabel, Radio, TextField
 } from '@mui/material';
-import { ClearOutlined } from '@mui/icons-material';
+import { Apple, ClearOutlined, LocalFlorist, LocationCity, Palette, Public, Spa, Subtitles, TimeToLeave } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ModalHelpTexts from './ModalHelpTexts';
 
@@ -35,8 +35,7 @@ export default function Form(props) {
     const [confirmed, setConfirmed] = useState(false);
     const [errors, setErrors] = useState([]);
     const [open, setOpen] = useState(false);
-    const [strongPassword, setStrongPassword] = useState(false);
-    const [samePassword, setSamePassword] = useState(false);
+    const [strongPassword, setStrongPassword] = useState(true);
 
     const helpTexts = [
         {
@@ -47,6 +46,17 @@ export default function Form(props) {
                 "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
         },
         { label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>" }
+    ]
+
+    const passwordKeys = [
+        { label: "Alla städer", value: "cities", icon: <Public /> },
+        { label: "Svenska städer", value: "cities", sort: "SE", icon: <LocationCity /> },
+        { label: "Färg", value: "colors", icon: <Palette /> },
+        { label: "Blommor", value: "words", sort: "flowers", icon: <LocalFlorist /> },
+        { label: "Frukter", value: "words", sort: "fruits", icon: <Apple /> },
+        { label: "Grönsaker", value: "words", sort: "vegetables", icon: <Spa /> },
+        { label: "Bilar", value: "words", sort: "cars", icon: <TimeToLeave /> },
+        { label: "Elevens namn", value: "users", icon: <Subtitles /> }
     ]
 
     const history = useHistory();
@@ -234,71 +244,70 @@ export default function Form(props) {
             {/* Modal  window with help texts */}
             <ModalHelpTexts arr={helpTexts} position={true} />
 
+            {/* Title */}
+            <p className='form-title'>{title}</p>
+
             {/* Form actions */}
             <div className='form-actions'>
-                <p className='form-title'>{title}</p>
 
                 {/* Generate password button */}
-                {api === "unlock" ? null : <Button variant="text"
+                {/* {api === "unlock" ? null : <Button variant="text"
                     color="primary"
                     type="button"
                     size="small"
                     className="generate-password"
                     onClick={() => setOpen(!open)}
-                    disabled={load}>Generate password</Button>}
-            </div>
+                    disabled={load}>Generate password</Button>} */}
 
-            {/* Different alternatives for password generation */}
-            <div className={`form-actions dropdown-div${(open ? " dropdown-open" : "")}`}>
-                {/* Radio buttons to choice one of search alternatives */}
-                <FormControl>
-                    <RadioGroup row name="row-radio-buttons-group">
+                {/* Loop of radio input choices to choose is password same or not for all students */}
+                {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
+                    <FormControlLabel
+                        key={index}
+                        control={<Radio size='small' />}
+                        checked={p.value === open}
+                        label={p.label}
+                        name="samePassword"
+                        onChange={() => setOpen(p.value)} />
+                ))}
 
+                {/* Different alternatives for password generation */}
+                <div className={`dropdown-div${(open ? " dropdown-open" : "")}`}>
+                    <div className='dropdown-interior-div'>
                         {/* Loop of radio input choices to choose password type strong or not */}
-                        <div className='col-12'>
-                            <FormLabel className="label">Välj önskad lösenordstyp:</FormLabel>
-                            {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
-                                <FormControlLabel
-                                    key={index}
-                                    control={<Radio
-                                        size='small'
-                                        checked={p.value === strongPassword}
-                                        color="error" />}
-                                    label={p.label}
-                                    name="strongPassword"
-                                    onChange={() => setStrongPassword(p.value)} />
-                            ))}
+                        <FormLabel className="label">Önskad lösenordstyp</FormLabel>
+                        {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
+                            <FormControlLabel
+                                key={index}
+                                control={<Radio
+                                    size='small'
+                                    checked={p.value === strongPassword}
+                                    color={strongPassword ? "error" : "success"} />}
+                                label={p.label}
+                                name="strongPassword"
+                                onChange={() => setStrongPassword(p.value)} />
+                        ))}
 
-                        </div>
-
-
-                        {/* Loop of radio input choices to choose is password same or not for all students */}
-                        {list.length > 0 && open ?
-                            <div className='col-12'>
-                                <FormLabel className="label">Lösenord till alla:</FormLabel>
-                                {[{ label: "Samma", value: true }, { label: "Olika", value: false }].map((p, index) => (
-                                    <FormControlLabel
-                                        key={index}
-                                        control={<Radio size='small' />}
-                                        label={p.label}
-                                        checked={p.value === samePassword}
-                                        name="samePassword"
-                                        onChange={() => setSamePassword(p.value)} />
+                        <div className={`dropdown-div${(!strongPassword ? " dropdown-open" : "")}`}>
+                            <div className='dropdown-interior-div'>
+                                <FormLabel className="label">Önskad ords kategory</FormLabel>
+                                {passwordKeys.map((l, index) => (
+                                    <Button variant="text" key={index}>
+                                        <span style={{ marginLeft: "10px" }}>{l.icon}&nbsp;&nbsp;{l.label}</span>
+                                    </Button>
                                 ))}
                             </div>
-                            : null}
-                    </RadioGroup>
-                </FormControl >
+                        </div>
 
-
-                {/* Generate password button */}
-                {api === "unlock" ? null : <Button variant="text"
-                    color="primary"
-                    type="button"
-                    size="small"
-                    className="generate-password"
-                    onClick={() => generatePassword()}
-                    disabled={load}>Generate password</Button>}
+                        {/* Generate password button */}
+                        {strongPassword ? null : <Button variant="text"
+                            color="primary"
+                            type="button"
+                            size="small"
+                            className="generate-password"
+                            onClick={() => generatePassword()}
+                            disabled={load}>Generate password</Button>}
+                    </div>
+                </div>
             </div>
 
             {/* Password form */}
