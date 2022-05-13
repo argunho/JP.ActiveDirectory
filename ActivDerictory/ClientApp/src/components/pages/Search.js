@@ -6,7 +6,7 @@ import ModalHelpTexts from './../blocks/ModalHelpTexts'
 import { SearchOffSharp, SearchSharp } from '@mui/icons-material'
 import {
     Button, Checkbox, FormControl, FormControlLabel, Tooltip,
-    Radio, RadioGroup, TextField, Switch, FormHelperText
+    Radio, RadioGroup, TextField, Switch
 } from '@mui/material'
 import Result from '../blocks/Result'
 import { capitalize } from '@mui/material'
@@ -35,7 +35,7 @@ export class Search extends Component {
             clsStudents: sessionStorage.getItem("sParam") === "members",
             match: true,
             warning: false,
-            capitalize: false,
+            capitalize: sessionStorage.getItem("sParam") === "members",
             isActive: false,
             msg: "",
             alert: "warning",
@@ -146,6 +146,9 @@ export class Search extends Component {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
 
+        sessionStorage.removeItem("selectedUsers");
+        sessionStorage.removeItem("users");
+
         // Update state parameters
         this.setState({ inProgress: true, users: [], isResult: false });
 
@@ -227,10 +230,9 @@ export class Search extends Component {
                             }}
                             disabled={inProgress}
                             placeholder={s.placeholder}
-                            title="Min 2 & Max 30 tecken"
                             onKeyDown={this.handleKeyDown}
                             onChange={this.valueChangeHandler}
-                            helperText="Min 2 & Max 30 tecken"
+                            helperText={this.state[s.name].length > 0 ? `${30 - this.state[s.name].length} tecken kvar` : "Min 2 & Max 30 tecken"}
                         />
                     ))}
 

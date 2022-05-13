@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
-export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult }) {
+export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, value, resetResult }) {
 
     const refResult = useRef(null);
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -40,29 +40,29 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
     }
 
     // Navigate to page
-    const goTo = (name) => {
+    const goTo = (name = null) => {
         // Save found result i sessionStorage
         sessionStorage.setItem("users", JSON.stringify(users));
+        sessionStorage.setItem("selectedUsers", JSON.stringify(selectedUsers));
+
         // Navigation
-        history.push("/manage-user/" + name);
+        history.push(name ? "/manage-user/" + name : `/manage-users/${users[0].department}/${users[0].office}`);
     }
 
 
     // To select one by one user from the class students' list
     const handleSelectedList = (name) => {
-        const arr = this.state.selectedUsers;
+        const arr = selectedUsers;
         if (arr?.length > 0 && arr.indexOf(name) > -1)
             arr.splice(arr.indexOf(name), 1);
         else
             arr.push(name);
 
         // Update selected users
-        this.setState({
-            selectedUsers: arr,
-            isOpenTip: arr.length > 0
-        });
+        setSelectedUsers(arr);
+        setIsOpenTip(arr.length > 0);
 
-        setTimeout(() => { setIsOpenTip(false); }, 2000)
+        setTimeout(() => { setIsOpenTip(false); }, 1000)
     }
 
     return (
@@ -78,14 +78,14 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
                 {clsStudents && ul > 0 ?
                     /* Hidden form to reset selected users password */
-                    <Tooltip arrow acti title={`Klicka här att ställa in nytt lösenord för valda ${sl} elev${sl === 1 ? "" : "er"}`}
+                    <Tooltip arrow title={`Klicka här att ställa in nytt lösenord för valda ${sl} elev${sl === 1 ? "" : "er"}`}
                         classes={{ tooltip: "tooltip tooltip-blue", arrow: "arrow-blue" }}
                         open={isOpenTip}
                         leaveTouchDelay={1000}
                     >
                         <Button
                             disabled={sl === 0}
-                            onClick={() => history.push("/manage-users")}>
+                            onClick={() => goTo()}>
                             <Password />
                         </Button>
                     </Tooltip>
@@ -124,7 +124,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                                     component="span"
                                     variant="body2"
                                     color={sl > 0 ? "primary" : "inherit"}>
-                                    {sl} elev + {sl === 1 ? "" : "er"} har valts
+                                    {sl} elev{sl === 1 ? "" : "er"} har valts
                                 </Typography>
                             </React.Fragment>}
                         />

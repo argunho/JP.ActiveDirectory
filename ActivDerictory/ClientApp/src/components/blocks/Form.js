@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import {
     Alert, Button, Checkbox, CircularProgress,
-    FormControl, FormControlLabel, TextField
+    FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField
 } from '@mui/material';
 import { ClearOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
@@ -34,6 +34,9 @@ export default function Form(props) {
     const [confirmSubmit, setConfirmSubmit] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
     const [errors, setErrors] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [strongPassword, setStrongPassword] = useState(false);
+    const [samePassword, setSamePassword] = useState(false);
 
     const helpTexts = [
         {
@@ -59,8 +62,8 @@ export default function Form(props) {
         if (token === null || token === undefined)
             history.push("/");
 
-    console.log(cities[0])
-    console.log(colors[0])
+        console.log(cities[0])
+        console.log(colors[1])
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -228,23 +231,79 @@ export default function Form(props) {
                 </div>
             </div> : null}
 
+            {/* Modal  window with help texts */}
+            <ModalHelpTexts arr={helpTexts} position={true} />
+
+            {/* Form actions */}
+            <div className='form-actions'>
+                <p className='form-title'>{title}</p>
+
+                {/* Generate password button */}
+                {api === "unlock" ? null : <Button variant="text"
+                    color="primary"
+                    type="button"
+                    size="small"
+                    className="generate-password"
+                    onClick={() => setOpen(!open)}
+                    disabled={load}>Generate password</Button>}
+            </div>
+
+            {/* Different alternatives for password generation */}
+            <div className={`form-actions dropdown-div${(open ? " dropdown-open" : "")}`}>
+                {/* Radio buttons to choice one of search alternatives */}
+                <FormControl>
+                    <RadioGroup row name="row-radio-buttons-group">
+
+                        {/* Loop of radio input choices to choose password type strong or not */}
+                        <div className='col-12'>
+                            <FormLabel className="label">Välj önskad lösenordstyp:</FormLabel>
+                            {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
+                                <FormControlLabel
+                                    key={index}
+                                    control={<Radio
+                                        size='small'
+                                        checked={p.value === strongPassword}
+                                        color="error" />}
+                                    label={p.label}
+                                    name="strongPassword"
+                                    onChange={() => setStrongPassword(p.value)} />
+                            ))}
+
+                        </div>
+
+
+                        {/* Loop of radio input choices to choose is password same or not for all students */}
+                        {list.length > 0 && open ?
+                            <div className='col-12'>
+                                <FormLabel className="label">Lösenord till alla:</FormLabel>
+                                {[{ label: "Samma", value: true }, { label: "Olika", value: false }].map((p, index) => (
+                                    <FormControlLabel
+                                        key={index}
+                                        control={<Radio size='small' />}
+                                        label={p.label}
+                                        checked={p.value === samePassword}
+                                        name="samePassword"
+                                        onChange={() => setSamePassword(p.value)} />
+                                ))}
+                            </div>
+                            : null}
+                    </RadioGroup>
+                </FormControl >
+
+
+                {/* Generate password button */}
+                {api === "unlock" ? null : <Button variant="text"
+                    color="primary"
+                    type="button"
+                    size="small"
+                    className="generate-password"
+                    onClick={() => generatePassword()}
+                    disabled={load}>Generate password</Button>}
+            </div>
+
             {/* Password form */}
             <form className='user-view-form' onSubmit={submitForm}>
-                <div className='form-actions'>
-                    <p className='form-title'>{title}</p>
 
-                    {/* Generate password button */}
-                    {api === "unlock" ? null : <Button variant="text"
-                        color="primary"
-                        type="button"
-                        size="small"
-                        className="generate-password"
-                        onClick={() => generatePassword()}
-                        disabled={load}>Generate password</Button>}
-
-                    {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={helpTexts} position={true} />
-                </div>
 
                 {/* Response message */}
                 {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
@@ -276,8 +335,6 @@ export default function Form(props) {
                             />
                         </FormControl>)) : null}
                 </div>
-
-
 
                 {/* Change the password input type */}
                 <FormControlLabel className='checkbox'

@@ -1,51 +1,58 @@
-.user-view-form  {
-    width: 95%;
-    margin: 40px auto;
+.user-view-form {
+  width: 95%;
+  margin: 40px auto;
 }
 
 .form-actions {
-    display: flex;
-    width: 100%;
-    height: 50px;
-    line-height: 50px;
-    margin: 0 0 10px 0;
+  display: flex;
+  width: 95%;
+  min-height: 50px;
+  max-height: 500px;
+  margin: 50px auto 10px auto;
 }
 
 .form-actions button {
-margin: 0 0 0 25px !important;
+  margin: 0 0 0 25px !important;
 }
 
-.inputs-wrapper {   
-    display: flex;
-    margin-bottom: 20px;
-    clear: both;
+.label {
+  color: rgb(49, 47, 47) !important;
+  width: max-content;
+  margin: 15px 15px 15px 0;
+  display: inline-block;
+}
+
+.inputs-wrapper {
+  display: flex;
+  margin-bottom: 20px;
+  clear: both;
 }
 
 .pr-inputs {
-    display: inline-flex;
-    margin: 0 2px !important;
-    width: 100%;
+  display: inline-flex;
+  margin: 0 2px !important;
+  width: 100%;
 }
 .pr-inputs input {
-    height: 16px;
-    line-height: 16px;
+  height: 16px;
+  line-height: 16px;
 }
 .pr-inputs label {
-    font-size: 12px !important;
-    letter-spacing: 0.5px;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
 }
 .user-view-form > button {
-    float: right !important;
-    margin-left: 15px;
+  float: right !important;
+  margin-left: 15px;
 }
 .generate-password {
-    display: block !important;
-    font-size: 10px !important;
-    margin: 10px !important;
-    clear: both !important;
-    float: right !important;
-    background: none !important;
+  display: block !important;
+  font-size: 10px !important;
+  margin: 10px !important;
+  clear: both !important;
+  float: right !important;
+  background: none !important;
 }
 .generate-password:hover {
-    opacity: 0.6 !important;
+  opacity: 0.6 !important;
 }
