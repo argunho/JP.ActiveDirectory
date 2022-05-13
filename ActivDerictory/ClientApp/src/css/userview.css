@@ -1,25 +1,30 @@
 .user-view-form {
   width: 95%;
-  margin: 40px auto;
+  margin: 20px auto 30px auto;
 }
 
 .form-actions {
-  display: flex;
   width: 95%;
   min-height: 50px;
   max-height: 500px;
-  margin: 50px auto 10px auto;
+  margin: 10px auto;
 }
 
 .form-actions button {
   margin: 0 0 0 25px !important;
 }
 
+.form-actions label > span {
+font-size: 14px !important;
+font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+letter-spacing: 0.5px;
+}
+
 .label {
   color: rgb(49, 47, 47) !important;
   width: max-content;
-  margin: 15px 15px 15px 0;
-  display: inline-block;
+  margin: 15px 15px 5px 0;
+  display: block;
 }
 
 .inputs-wrapper {

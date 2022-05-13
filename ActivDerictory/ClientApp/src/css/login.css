@@ -13,6 +13,8 @@
 }
 
 .form-title {
+  width: 95%;
+  margin: 50px auto 10px auto;
   color: rgb(70, 69, 69);
   text-transform: uppercase;
   font-size: 20px;
