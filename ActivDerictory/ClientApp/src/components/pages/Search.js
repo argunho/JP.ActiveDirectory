@@ -1,24 +1,13 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import axios from 'axios'
-
-import loadImg from './../../images/search.gif'
-import user from './../../images/student.png'
-
-import Loading from './../blocks/Loading'
-import Form from './../blocks/Form'
 import ModalHelpTexts from './../blocks/ModalHelpTexts'
 
-import {
-    DeleteSweep, Deselect, Password, SearchOffSharp, SearchSharp,
-    SelectAll, ExpandLess, ExpandMore
-} from '@mui/icons-material'
-import {
-    Alert, Avatar, Button, Checkbox, Collapse, FormControl,
-    FormControlLabel, List, ListItem, ListItemAvatar,
-    ListItemButton, ListItemIcon, Tooltip,
-    ListItemText, Radio, RadioGroup, TextField, Typography, Switch
+import {SearchOffSharp, SearchSharp } from '@mui/icons-material'
+import { Button, Checkbox, FormControl, FormControlLabel,Tooltip,
+    Radio, RadioGroup, TextField, Switch
 } from '@mui/material'
+import Result from '../blocks/Result'
 
 export class Search extends Component {
     static displayName = Search.name;
@@ -41,15 +30,14 @@ export class Search extends Component {
                 { label: "Match", match: true },
                 { label: "Exakt", match: false }
             ],
-            classStudents: sessionStorage.getItem("sParam") === "members",
+            clsStudents: sessionStorage.getItem("sParam") === "members",
             match: true,
-            msg: "",
-            showTips: localStorage.getItem("showTips") === "true",
             warning: false,
-            alert: "warning",
             capitalize: false,
-            selectedUsers: [],
-            open: false,
+            isActive: false,
+            msg: "",
+            alert: "warning",
+            showTips: localStorage.getItem("showTips") === "true",
             helpTexts: [
                 { label: "Änvändare", value: "user", tip: "Det här alternativet är till för att söka efter en specifik användare. Välj rätt sökalternativ nedan för att få den förväntande resultat." },
                 { label: "Klass elever", value: "members", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn." },
@@ -61,13 +49,8 @@ export class Search extends Component {
             ]
         }
 
-        this.reset = this.reset.bind(this);
         this.checkboxHandle = this.checkboxHandle.bind(this);
-        this.handleSelectedList = this.handleSelectedList.bind(this);
-        this.selectList = this.selectList.bind(this);
         this.setSearchParameter = this.setSearchParameter.bind(this);
-
-        this.refResult = React.createRef(null);
     }
 
     componentDidMount() {
@@ -93,7 +76,8 @@ export class Search extends Component {
                 : (this.state.match && this.state.capitalize ? (inp.value.charAt(0).toUpperCase() + inp.value.slice(1)) : inp.value),
             isResult: false,
             users: [],
-            warning: false
+            warning: false,
+            isActive: (this.state.keyword || this.state.extraKeyword).length > 0
         })
     }
 
@@ -115,47 +99,18 @@ export class Search extends Component {
         return this.state.helpTexts.find(x => x.label === keyword)?.tip;
     }
 
-    // To select one by one user from the class students' list
-    handleSelectedList = (name) => {
-        const arr = this.state.selectedUsers;
-        if (arr?.length > 0 && arr.indexOf(name) > -1)
-            arr.splice(arr.indexOf(name), 1);
-        else
-            arr.push(name);
-
-        // Update selected users
-        this.setState({ selectedUsers: arr });
-    }
-
-    // To select all from class students list
-    selectList = (selected) => {
-        const arr = [];
-        if (!selected)
-            this.state.users.forEach(u => { arr.push(u.name) });
-
-        this.setState({ selectedUsers: arr })
-    }
-
     // Handle changes in search alternatives and parameters
     setSearchParameter = value => {
         this.setState({
             sParam: value,
             users: [],
             isResult: false,
-            match: this.state.classStudents,
-            classStudents: !this.state.classStudents
+            match: this.state.clsStudents,
+            clsStudents: !this.state.clsStudents
         })
 
         //  Save choice of search parameters in sessionStorage to mind the user choice and use it with page refresh
         sessionStorage.setItem("sParam", value)
-    }
-
-    // Navigate to page
-    goTo = (name) => {
-        // Save found result i sessionStorage
-        sessionStorage.setItem("users", JSON.stringify(this.state.users));
-        // Navigation
-        this.props.history.push("/manage-user/" + name);
     }
 
     // Switch show of tips
@@ -165,7 +120,7 @@ export class Search extends Component {
     }
 
     // Reset form
-    reset = () => {
+    resetResult = () => {
         this.setState({ users: [], isResult: false });
         // Remove result from sessionStorage
         sessionStorage.removeItem("users");
@@ -185,18 +140,17 @@ export class Search extends Component {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
 
-        // Scroll to result box 
-        this.refResult.current.scrollIntoView();
         // Update state parameters
         this.setState({ inProgress: true, users: [], isResult: false });
+
         // State parameters
-        const { keyword, match, capitalize, sParam, extraKeyword, classStudents } = this.state;
+        const { keyword, match, capitalize, sParam, extraKeyword, clsStudents } = this.state;
 
         // Return if form is invalid
         if (keyword.length < 2) return;
 
         // API parameters by chosen searching alternative
-        const params = (!classStudents) ? match + "/" + capitalize : extraKeyword;
+        const params = (!clsStudents) ? match + "/" + capitalize : extraKeyword;
 
         // API request
         await axios.get("search/" + sParam + "/" + keyword + "/" + params, _config).then(res => {
@@ -214,7 +168,6 @@ export class Search extends Component {
                     msg: msg,
                     alert: (alert) ? alert : this.state.alert
                 })
-                this.refResult.current.scrollIntoView();
             }, 100);
 
             // If something is wrong, view error message in browser console
@@ -238,20 +191,15 @@ export class Search extends Component {
 
     render() {
         // State parameters
-        const { keyword, users, inProgress,
+        const { users, inProgress,
             isResult, choiceList, match, msg, warning,
             alert, capitalize, sParam, sParams, showTips,
-            classStudents, selectedUsers, open, helpTexts } = this.state;
+            clsStudents, helpTexts, isActive } = this.state;
 
         // List of text fields
-        const sFormParams = !classStudents ? [{ name: "keyword", label: "Namn" }]
+        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn" }]
             : [{ name: "keyword", label: "Klassnamn", clsName: "search-first-input" },
             { name: "extraKeyword", label: "Skola", clsName: "search-second-input" }];
-
-        // Boolean parameters
-        const inputActive = keyword.length > 1;
-        const isSuccess = users.length > 0;
-        const selected = selectedUsers.length === users.length;
 
         return (
             <div className='interior-div' onSubmit={this.getSearchResult.bind(this)}>
@@ -270,9 +218,7 @@ export class Search extends Component {
                             inputProps={{
                                 maxLength: 30,
                                 minLength: 2,
-                                autoCapitalize: true
-                                // autoComplete: this.state[s.name],
-                                // form: { autoComplete: 'off', }
+                                autoCapitalize: "true"
                             }}
                             disabled={inProgress}
                             placeholder="Min 2 & Max 30 tecken ..."
@@ -281,7 +227,7 @@ export class Search extends Component {
 
 
                     {/* Reset form - button */}
-                    {inputActive ? <Button
+                    {isActive ? <Button
                         variant="text"
                         color="error"
                         className="search-reset"
@@ -292,11 +238,11 @@ export class Search extends Component {
 
                     {/* Submit form - button */}
                     <Button
-                        variant={inputActive ? "contained" : "outlined"}
-                        color={inputActive ? "primary" : "inherit"}
+                        variant={isActive ? "contained" : "outlined"}
+                        color={isActive ? "primary" : "inherit"}
                         className="search-button"
                         type="submit"
-                        disabled={!inputActive || inProgress}>
+                        disabled={!isActive || inProgress}>
                         <SearchSharp /></Button>
                 </form>
 
@@ -305,6 +251,7 @@ export class Search extends Component {
 
                     {/* Modal  window with help texts */}
                     <ModalHelpTexts arr={helpTexts} />
+
                     {/* Switchable box */}
                     <FormControlLabel className='switch-btn'
                         control={<Switch checked={showTips} color='info'
@@ -347,7 +294,7 @@ export class Search extends Component {
                                     control={<Checkbox size='small'
                                         checked={capitalize && match}
                                         name="capitalize"
-                                        disabled={!match || classStudents}
+                                        disabled={!match || clsStudents}
                                         onClick={() => this.checkboxHandle(!capitalize)} />}
                                     label="Versal" />
                             </Tooltip>
@@ -360,7 +307,7 @@ export class Search extends Component {
                                         control={<Radio
                                             size='small'
                                             checked={match === c.match}
-                                            disabled={classStudents} />}
+                                            disabled={clsStudents} />}
                                         label={c.label}
                                         name="match"
                                         onChange={this.valueChangeHandler} />
@@ -370,134 +317,22 @@ export class Search extends Component {
                     </FormControl>
                 </div>
 
-                {/* Box to view the result of search */}
-                <div className='interior-div' ref={this.refResult}>
-                    {/* Result info box */}
-                    <ListItem className='search-result-reset'>
-                        {/* Result info */}
-                        <ListItemText
-                            primary="Result"
-                            secondary={isSuccess ? ("Hittades: " + users.length + " användare")
-                                : "Ditt sökresultat kommer att visas här nedan"} />
+                {/* Result list */}
+                <Result 
+                    users={users}
+                    clsStudents={clsStudents}
+                    isResult={isResult}
+                    isVisibleTips={showTips}
+                    inProgress={inProgress}
+                    isResponseMessage={msg}
+                    isAlertBg={alert}
+                    resetResult={this.resetResult.bind(this)}
+                />
 
-                        {classStudents && users.length > 0 ?
-                            /* Hidden form to reset selected users password */
-                            <Tooltip arrow acti title={`Klicka här att ställa in nytt lösenord för valda ${selectedUsers.length} användare`}
-                                classes={{ tooltip: "tooltip tooltip-blue", arrow: "arrow-blue" }}
-                                open={selectedUsers.length > 0}
-                                leaveTouchDelay={1000}
-                                >
-                                <Button
-                                    disabled={selectedUsers.length === 0}
-                                    onClick={() => this.props.history.push("/manage-users")}>
-                                    <Password />
-                                </Button>
-                            </Tooltip>
-                            : null}
-
-                        {/* Button to reset search result */}
-                        <Tooltip arrow disableHoverListener={!showTips} title="Ta bort sök resultat." classes={{ tooltip: "tooltip tooltip-error", arrow: "arrow-error" }}>
-                            <span>
-                                <Button variant="text"
-                                    color="error"
-                                    onClick={this.reset}
-                                    disabled={!isResult && users.length === 0} ><DeleteSweep /></Button>
-                            </span>
-                        </Tooltip>
-                    </ListItem>
-
-                    {/* Visible image under search progress */}
-                    {inProgress ? <Loading msg="Var vänlig och vänta, sökning pågår ..." img={loadImg} /> : null}
-
-                    {/* Select or deselect all users in class members list */}
-                    {classStudents && users.length > 0 ?
-                        /* Hidden form to reset selected users password */
-                        <List sx={{ width: '100%' }} component="nav">
-                            {/* Form description */}
-                            {/* <ListItemButton onClick={() => this.setState({ open: !open })}
-                                className={open && selectedUsers.length > 0 ? "dropdown-list-active" : ""}
-                                disabled={selectedUsers.length === 0}>
-                                <ListItemIcon> <Password /> </ListItemIcon>
-                                <ListItemText primary={`Ställ in nytt lösenord för valda ${selectedUsers.length} användare`} />
-                                {(open) ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton> */}
-
-                            {/* Form wrapper, the user has to click on to open a hidden form if this selected user's count is more than 0 */}
-                            {/* <Collapse in={open} timeout="auto" unmountOnExit>
-                                <Form list={selectedUsers}
-                                    title={"Nytt lösenord"}
-                                    api="setPasswords"
-                                    buttonText="Verkställ" />
-                            </Collapse> */}
-
-                            {/* Select or deselect all list */}
-                            <ListItem className='search-result-select'>
-                                <ListItemAvatar>
-                                    <Avatar className='user-avatar'>
-                                        {!selected ? <SelectAll /> : <Deselect color="primary" />}
-                                    </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={`${selected ? "Avmarkera" : "Markera"} alla`}
-                                    secondary={<React.Fragment>
-                                        <Typography
-                                            sx={{ display: 'inline' }}
-                                            component="span"
-                                            variant="body2"
-                                            color={selectedUsers.length > 0 ? "primary" : "inherit"}>
-                                            {selectedUsers.length} användare har valts
-                                        </Typography>
-                                    </React.Fragment>}
-                                />
-                                <Checkbox
-                                    checked={selected}
-                                    disabled={open}
-                                    onClick={() => this.selectList(selected)} />
-                            </ListItem>
-                        </List> : null}
-
-                    {/* Loop of search result list if result is not null */}
-                    {users?.length > 0 ?
-                        <List sx={{ width: '100%' }}>
-                            {users.map((s, index) => (
-                                /* List object */
-                                <ListItem key={index} className="list-link">
-
-                                    {/* Avatar */}
-                                    <ListItemAvatar>
-                                        <Avatar className='user-avatar'>
-                                            <img className="user-avatar" src={user} alt="user" />
-                                        </Avatar>
-                                    </ListItemAvatar>
-
-                                    {/* User data */}
-                                    <ListItemText primary={s.name} onClick={() => this.goTo(s.name)}
-                                        secondary={<React.Fragment>
-                                            <Typography
-                                                sx={{ display: 'inline' }}
-                                                component="span"
-                                                variant="body2"
-                                                color="primary"> {s.displayName} </Typography>
-                                            <span className='typography-span'>{s.office + " " + s.department}</span>
-                                        </React.Fragment>} />
-
-                                    {/* Checkbox visible only if is success result after users search by class name */}
-                                    {classStudents ? <Checkbox
-                                        size='small'
-                                        color="default"
-                                        disabled={open}
-                                        checked={selectedUsers.indexOf(s.name) > -1}
-                                        onClick={() => this.handleSelectedList(s.name)} />
-                                        : null}
-                                </ListItem>))}
-                        </List> : null}
-
-                    {/* Message if result is null */}
-                    {(isResult && users.length === 0) ? <Alert severity={alert}>{msg}</Alert> : null}
-                </div>
             </div>
         )
     }
 }
 
 export default withRouter(Search);
+
