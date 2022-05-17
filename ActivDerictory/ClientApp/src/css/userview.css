@@ -19,7 +19,10 @@
 .select-list > div {
   height: 50px !important;
   width: 300px;
-  font-size: 11px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: #232323;
 }
 
 .select-list .MuiSelect-select {

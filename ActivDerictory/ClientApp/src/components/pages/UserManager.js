@@ -96,7 +96,7 @@ export class UserManager extends Component {
     }
 
     manageUser() {
-        const { open, openIndex, list, name } = this.state;
+        const { open, openIndex, list, name, users } = this.state;
         return (
             <List sx={{ width: '100%' }} component="nav">
                 {list.map((l, i) => (
@@ -119,7 +119,7 @@ export class UserManager extends Component {
                                     buttonText="Lås upp"
                                     refreshUserData={() => this.setState({ user: { ...this.state.user, isLocked: false } })} />
                                 :
-                                <Form title={"Återställa lösenord"} api="resetPassword" name={name} list={[]} hidden={false} buttonText="Återställ" />}
+                                <Form title={"Återställa lösenord"} api="resetPassword" name={name} list={[]} users={users} hidden={false} buttonText="Återställ" />}
                         </Collapse>
                     </div>
                 ))}

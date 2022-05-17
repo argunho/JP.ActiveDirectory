@@ -38,6 +38,7 @@ export class Search extends Component {
             capitalize: sessionStorage.getItem("sParam") === "members",
             isActive: false,
             isOpen: false,
+            isNoOptions: false,
             msg: "",
             alert: "warning",
             showTips: localStorage.getItem("showTips") === "true",
@@ -92,7 +93,7 @@ export class Search extends Component {
             isResult: false,
             users: [],
             warning: false,
-            isOpen: this.schools.filter(x => x.value.includes(inp.value)).length > 0,
+            isNoOptions: this.schools.filter(x => x.value.includes(inp.value)).length === 0,
             isActive: (this.state.keyword || this.state.extraKeyword).length > 0
         })
 
@@ -232,7 +233,7 @@ export class Search extends Component {
         const { users, inProgress,
             isResult, choiceList, match, msg, warning,
             alert, capitalize, sParam, sParams, showTips,
-            clsStudents, helpTexts, isActive, isOpen } = this.state;
+            clsStudents, helpTexts, isActive, isOpen, isNoOptions } = this.state;
 
         // List of text fields
         const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Exakt namn här ..." : "", autoOpen: false }]
@@ -254,12 +255,12 @@ export class Search extends Component {
                             options={this.schools}
                             getOptionLabel={(option) => option.label}
                             autoHighlight
-                            open={s.autoOpen && isOpen}
+                            open={s.autoOpen && isOpen && !isNoOptions}
                             inputValue={this.state[s.name]}
                             onChange={(e, option) => this.setState({ [s.name]: option.value })}
                             onBlur={() => this.setState({ isOpen: false })}
                             onClose={() => this.setState({ isOpen: false })}
-                            onFocus={() => this.setState({ isOpen: s.autoOpen })}
+                            onFocus={() => this.setState({ isOpen: (s.autoOpen && !isNoOptions) })}
                             renderInput={(params) =>
                                 <TextField
                                     {...params}
@@ -374,7 +375,7 @@ export class Search extends Component {
                 </div >
 
                 {/* Result list */}
-                < Result
+                <Result
                     users={users}
                     clsStudents={clsStudents}
                     isResult={isResult}

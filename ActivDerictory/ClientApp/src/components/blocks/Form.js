@@ -4,15 +4,15 @@ import {
     Alert, Button, Checkbox, CircularProgress,
     FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, Select, TextField
 } from '@mui/material';
-import { Apple, Cancel, ClearOutlined, LocalFlorist, LocationCity, Palette, Public, Spa, Subtitles, TimeToLeave } from '@mui/icons-material';
+import { Cancel, ClearOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ModalHelpTexts from './ModalHelpTexts';
+import { capitalize } from '@mui/material'
 
 // Json files
 import words from './../../json/words.json';
 import cities from 'cities.json';
 import colors from 'color-name-list';
-import { Box } from '@mui/system';
 
 const _token = sessionStorage.getItem("token");
 const _config = {
@@ -39,6 +39,7 @@ export default function Form(props) {
     const [strongPassword, setStrongPassword] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("");
     const [isOpenTip, setIsOpenTip] = useState(false);
+    const [wordsList, setWordsList] = useState([]);
 
     const helpTexts = [
         {
@@ -52,14 +53,15 @@ export default function Form(props) {
     ]
 
     const passwordKeys = [
-        { label: "Elevens namn", value: "users", icon: <Subtitles /> },
-        { label: "Alla städer", value: "cities", icon: <Public /> },
-        { label: "Svenska städer", value: "cities", sort: "SE", icon: <LocationCity /> },
-        { label: "Färg", value: "colors", icon: <Palette /> },
-        { label: "Blommor", value: "words", sort: "flowers", icon: <LocalFlorist /> },
-        { label: "Frukter", value: "words", sort: "fruits", icon: <Apple /> },
-        { label: "Grönsaker", value: "words", sort: "vegetables", icon: <Spa /> },
-        { label: "Bilar", value: "words", sort: "cars", icon: <TimeToLeave /> }
+        { label: "Elevens namn", value: "users" },
+        { label: "Alla städer", value: "cities" },
+        { label: "Svenska städer", value: "svCities" },
+        { label: "Färg", value: "colors" },
+        { label: "Blommor", value: "flowers" },
+        { label: "Frukter", value: "fruits" },
+        { label: "Grönsaker", value: "vegetables" },
+        { label: "Kattens namn (smeknamn)", value: "cats" },
+        { label: "Bilar", value: "cars" }
     ]
 
     const history = useHistory();
@@ -104,16 +106,43 @@ export default function Form(props) {
     const generatePassword = () => {
         let generatedPassword = "";
         resetForm(false);
-        for (var i = 0; i < 12; i++) {
-            var chars = randomChars(i);
-            var sortedChars = chars[Math.floor(Math.random() * chars.length)];
+        if (strongPassword) {
+            for (var i = 0; i < 12; i++) {
+                var chars = randomChars(i);
+                var sortedChars = chars[Math.floor(Math.random() * chars.length)];
+                if (i > 10 && !regex.test(generatedPassword + sortedChars)) {
+                    i = 0;
+                    generatedPassword = "";
+                } else
+                    generatedPassword += sortedChars;
+            }
+        } else {
+            let usersArray = [];
+            let numbers = "1234567890";
+            let chars = "@!_&?#";
+            for (let i = 0; i < list.length; i++) {
+                let password = ""
+                const randomWord = capitalize(wordsList[Math.floor(Math.random() * wordsList.length)]);
+                password += randomWord;
+                // if (usersArray.length === 0 || usersArray.find(x => x.password.includes(randomWord)) === null) {
+                    for (let n = 0; n < 3; n++)
+                        password += numbers[Math.floor(Math.random() * numbers.length)];
 
-            if (i > 10 && !regex.test(generatedPassword + sortedChars)) {
-                i = 0;
-                generatedPassword = "";
-            } else
-                generatedPassword += sortedChars;
+                    password += chars[Math.floor(Math.random() * chars.length)];
+
+                    usersArray.push({
+                        name: list[i].name,
+                        displayName: list[i].displayName,
+                        office: list[i].office,
+                        department: list[i].department,
+                        password: password
+                    })
+                // } else i -= 1;
+            }
+
+            console.log(usersArray);
         }
+
         setForm({ ...form, password: generatedPassword, confirmPassword: generatedPassword });
         setShowPassword(true);
     }
@@ -147,6 +176,19 @@ export default function Form(props) {
 
     // Password words category
     const handleSelectListChange = (e) => {
+
+        const keyword = passwordKeys.find(x => x.label === e.target.value).value;
+        let wList = words[keyword];
+        if (wList === undefined) {
+            if (keyword === "cities") wList = cities;
+            else if (keyword === "colors") wList = colors;
+            else wList = cities.filter(x => x.country === "SE");
+
+            wList = wList.filter(x => x.name.indexOf(" ") === -1 && x.name.length < 10);
+        } else
+            wList = wList.filter(x => x.indexOf(" ") === -1 && x.length < 10);
+
+        setWordsList(wList);
         setSelectedCategory(e.target.value);
     }
 
@@ -300,7 +342,7 @@ export default function Form(props) {
                                 <MenuItem></MenuItem>
                                 {passwordKeys.map((l, index) => (
                                     <MenuItem value={l.label} key={index}>
-                                        <span style={{ marginLeft: "10px" }}>{l.icon}&nbsp;&nbsp;{l.label}</span>
+                                        <span style={{ marginLeft: "10px" }}> - {l.label}</span>
                                     </MenuItem>
                                 ))}
                             </Select>
