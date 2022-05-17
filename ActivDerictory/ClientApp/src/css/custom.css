@@ -143,10 +143,16 @@ body {
 .search-wrapper {
   position: relative;
   margin: 20px 0 !important;
+  display: flex;
 }
 
 .search-input {
   width: 100%;
+}
+
+.input-root {
+  padding: 0 !important;
+  background: "#000"
 }
 
 .css-1wc848c-MuiFormHelperText-root {
@@ -280,6 +286,11 @@ input::placeholder {
   margin: 10px auto 25px auto !important;
 }
 
+.disabled, .disabled:hover {
+  opacity: 0.3 !important;
+  cursor: no-drop !important;
+}
+
 .dropdown-div {
   overflow: hidden;
   max-height: 0;
@@ -302,6 +313,30 @@ input::placeholder {
   padding: 15px;
   width: 100%;
   margin: 10px 0;
+}
+
+.list-wrapper {
+  border: 1px solid #bdbdbd;
+  padding: 10px 5px;
+  font-size: 12px !important;
+  color: #000 !important;
+  position: fixed;
+  top: 20px;
+  z-index: 3000;
+  background-color: #FFF;
+}
+
+
+
+.list-wrapper> p {
+  font-weight: 600;
+  margin-bottom: 3px;
+  padding: 5px 3px !important;
+}
+
+.list-wrapper> p:hover {
+  background: #ededed;
+  cursor: pointer;
 }
 
 .modal-tips {

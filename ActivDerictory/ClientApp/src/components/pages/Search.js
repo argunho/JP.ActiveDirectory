@@ -6,7 +6,7 @@ import ModalHelpTexts from './../blocks/ModalHelpTexts'
 import { SearchOffSharp, SearchSharp } from '@mui/icons-material'
 import {
     Button, Checkbox, FormControl, FormControlLabel, Tooltip,
-    Radio, RadioGroup, TextField, Switch
+    Radio, RadioGroup, TextField, Switch, Stack, Autocomplete
 } from '@mui/material'
 import Result from '../blocks/Result'
 import { capitalize } from '@mui/material'
@@ -37,6 +37,7 @@ export class Search extends Component {
             warning: false,
             capitalize: sessionStorage.getItem("sParam") === "members",
             isActive: false,
+            isOpen: false,
             msg: "",
             alert: "warning",
             showTips: localStorage.getItem("showTips") === "true",
@@ -52,6 +53,19 @@ export class Search extends Component {
         }
 
         this.checkboxHandle = this.checkboxHandle.bind(this);
+
+        
+        // All schools list in Alvesta kommun
+        this.schools = [
+            { label: "Capellaskolan (Alvesta)", value: "Capellaskolan" },
+            { label: "Grönkullaskolan (Alvesta)", value: "Grönkullaskolan" },
+            { label: "Hagaskolan (Alvesta)", value: "Hagaskolan" },
+            { label: "Hjortsbergaskolan (Hjortsberga)", value: "Hjortsbergaskolan" },
+            { label: "Mohedaskolan (Moheda)", value: "Mohedaskolan" },
+            { label: "Prästängsskolan (Alvesta)", value: "Prästängsskolan" },
+            { label: "Skatelövskolan (Grimslöv)", value: "Skatelövskolan" },
+            { label: "Vislandaskolan (Vislanda)", value: "Vislandaskolan" }
+        ];
     }
 
     componentDidMount() {
@@ -78,6 +92,7 @@ export class Search extends Component {
             isResult: false,
             users: [],
             warning: false,
+            isOpen: this.schools.filter(x => x.value.includes(inp.value)).length > 0,
             isActive: (this.state.keyword || this.state.extraKeyword).length > 0
         })
 
@@ -105,7 +120,6 @@ export class Search extends Component {
 
     // Handle changes in search alternatives and parameters
     setSearchParameter = value => {
-        console.log(value)
         this.setState({
             sParam: value,
             users: [],
@@ -135,6 +149,21 @@ export class Search extends Component {
     // Recognize Enter press to submit search form
     handleKeyDown = (e) => {
         if (e.key === 'Enter') this.getSearchResult.bind(this);
+    }
+
+    // Return schools list
+    schoolsList() {
+        // All schools list in Alvesta kommun
+        const schools = ["Mohedaskolan (Moheda)", "Grönkullaskolan (Alvesta)",
+            "Hagaskolan (Alvesta)",
+            "Prästängsskolan (Alvesta)",
+            "Hjortsbergaskolan (Hjortsberga)",
+            "Capellaskolan (Alvesta)", "Vislandaskolan (Vislanda)", "Skatelövskolan (Grimslöv)"
+        ]
+
+        return <div className='list-wrapper'>{schools.map((school, ind) => (
+            <p>{school}</p>
+        ))}</div>
     }
 
     // Function - submit form
@@ -203,12 +232,13 @@ export class Search extends Component {
         const { users, inProgress,
             isResult, choiceList, match, msg, warning,
             alert, capitalize, sParam, sParams, showTips,
-            clsStudents, helpTexts, isActive } = this.state;
+            clsStudents, helpTexts, isActive, isOpen } = this.state;
 
         // List of text fields
-        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Exakt namn här ..." : "" }]
-            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Exakt klassbeteckning här ..." },
-            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Exakt skolnamn här .." }];
+        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Exakt namn här ..." : "", autoOpen: false }]
+            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Exakt klassbeteckning här ...", autoOpen: false },
+            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Exakt skolnamn här ..", autoOpen: true }];
+
 
         return (
             <div className='interior-div' onSubmit={this.getSearchResult.bind(this)}>
@@ -216,37 +246,51 @@ export class Search extends Component {
                 <form className='search-wrapper'>
                     {/* List loop of text fields */}
                     {sFormParams.map((s, index) => (
-                        <TextField
+                        <Autocomplete
                             key={index}
-                            name={s.name}
-                            label={s.label}
-                            value={this.state[s.name]}
+                            freeSolo
+                            disableClearable
                             className={s.clsName || 'search-input'}
-                            error={warning}
-                            required
-                            inputProps={{
-                                maxLength: 30,
-                                minLength: 2
-                            }}
-                            disabled={inProgress}
-                            placeholder={s.placeholder}
-                            onKeyDown={this.handleKeyDown}
-                            onChange={this.valueChangeHandler}
-                            helperText={this.state[s.name].length > 0 ? `${30 - this.state[s.name].length} tecken kvar` : "Min 2 & Max 30 tecken"}
+                            options={this.schools}
+                            getOptionLabel={(option) => option.label}
+                            autoHighlight
+                            open={s.autoOpen && isOpen}
+                            inputValue={this.state[s.name]}
+                            onChange={(e, option) => this.setState({ [s.name]: option.value })}
+                            onBlur={() => this.setState({ isOpen: false })}
+                            onClose={() => this.setState({ isOpen: false })}
+                            onFocus={() => this.setState({ isOpen: s.autoOpen })}
+                            renderInput={(params) =>
+                                <TextField
+                                    {...params}
+                                    name={s.name}
+                                    label={s.label}
+                                    error={warning}
+                                    required
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        maxLength: 30,
+                                        minLength: 2
+                                    }}
+                                    disabled={inProgress}
+                                    placeholder={s.placeholder}
+                                    onKeyDown={this.handleKeyDown}
+                                    onChange={this.valueChangeHandler}
+                                    helperText={this.state[s.name].length > 0
+                                        ? `${30 - this.state[s.name].length} tecken kvar` : "Min 2 & Max 30 tecken"}
+                                />}
                         />
                     ))}
 
                     {/* Reset form - button */}
-                    {
-                        isActive ? <Button
-                            variant="text"
-                            color="error"
-                            className="search-reset"
-                            disabled={inProgress}
-                            onClick={() => this.setState({ keyword: "", extraKeyword: "" })}>
-                            <SearchOffSharp />
-                        </Button> : null
-                    }
+                    {isActive ? <Button
+                        variant="text"
+                        color="error"
+                        className="search-reset"
+                        disabled={inProgress}
+                        onClick={() => this.setState({ keyword: "", extraKeyword: "", isOpen: false })}>
+                        <SearchOffSharp />
+                    </Button> : null}
 
                     {/* Submit form - button */}
                     <Button

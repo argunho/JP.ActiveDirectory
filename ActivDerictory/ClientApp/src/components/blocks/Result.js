@@ -26,9 +26,13 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
     const selected = (ul === sl)
 
     useEffect(() => {
-        console.log(isOpenTip)
         refResult.current.scrollIntoView();
     }, [inProgress, isResult])
+
+    useEffect(() => {
+        if (isOpenTip)
+            setTimeout(() => { setIsOpenTip(false); }, 1000)
+    }, [isOpenTip])
 
     // To select all from class students list
     const selectList = (selected) => {
@@ -37,6 +41,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
             users.forEach(u => { arr.push(u.name) });
 
         setSelectedUsers(arr);
+        setIsOpenTip(arr.length > 0);
     }
 
     // Navigate to page
@@ -61,8 +66,6 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
         // Update selected users
         setSelectedUsers(arr);
         setIsOpenTip(arr.length > 0);
-
-        setTimeout(() => { setIsOpenTip(false); }, 1000)
     }
 
     return (

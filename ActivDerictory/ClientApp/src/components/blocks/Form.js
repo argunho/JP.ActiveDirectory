@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import {
     Alert, Button, Checkbox, CircularProgress,
-    FormControl, FormControlLabel, FormLabel, Radio, TextField
+    FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, Select, TextField
 } from '@mui/material';
-import { Apple, ClearOutlined, LocalFlorist, LocationCity, Palette, Public, Spa, Subtitles, TimeToLeave } from '@mui/icons-material';
+import { Apple, Cancel, ClearOutlined, LocalFlorist, LocationCity, Palette, Public, Spa, Subtitles, TimeToLeave } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ModalHelpTexts from './ModalHelpTexts';
 
@@ -12,6 +12,7 @@ import ModalHelpTexts from './ModalHelpTexts';
 import words from './../../json/words.json';
 import cities from 'cities.json';
 import colors from 'color-name-list';
+import { Box } from '@mui/system';
 
 const _token = sessionStorage.getItem("token");
 const _config = {
@@ -36,6 +37,8 @@ export default function Form(props) {
     const [errors, setErrors] = useState([]);
     const [open, setOpen] = useState(false);
     const [strongPassword, setStrongPassword] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [isOpenTip, setIsOpenTip] = useState(false);
 
     const helpTexts = [
         {
@@ -49,14 +52,14 @@ export default function Form(props) {
     ]
 
     const passwordKeys = [
+        { label: "Elevens namn", value: "users", icon: <Subtitles /> },
         { label: "Alla städer", value: "cities", icon: <Public /> },
         { label: "Svenska städer", value: "cities", sort: "SE", icon: <LocationCity /> },
         { label: "Färg", value: "colors", icon: <Palette /> },
         { label: "Blommor", value: "words", sort: "flowers", icon: <LocalFlorist /> },
         { label: "Frukter", value: "words", sort: "fruits", icon: <Apple /> },
         { label: "Grönsaker", value: "words", sort: "vegetables", icon: <Spa /> },
-        { label: "Bilar", value: "words", sort: "cars", icon: <TimeToLeave /> },
-        { label: "Elevens namn", value: "users", icon: <Subtitles /> }
+        { label: "Bilar", value: "words", sort: "cars", icon: <TimeToLeave /> }
     ]
 
     const history = useHistory();
@@ -71,11 +74,13 @@ export default function Form(props) {
         // Return to the start page if a user is unauthorized
         if (token === null || token === undefined)
             history.push("/");
-
-        console.log(cities[0])
-        console.log(colors[1])
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        if (isOpenTip)
+            setTimeout(() => { setIsOpenTip(!isOpenTip) })
+    }, [isOpenTip])
 
     useEffect(() => {
         const credentials = sessionStorage.getItem("credentials");
@@ -138,6 +143,11 @@ export default function Form(props) {
             resetError(e.target.name);
 
         resetForm(false);
+    }
+
+    // Password words category
+    const handleSelectListChange = (e) => {
+        setSelectedCategory(e.target.value);
     }
 
     // Confirm new password and confirmPassword
@@ -249,16 +259,6 @@ export default function Form(props) {
 
             {/* Form actions */}
             <div className='form-actions'>
-
-                {/* Generate password button */}
-                {/* {api === "unlock" ? null : <Button variant="text"
-                    color="primary"
-                    type="button"
-                    size="small"
-                    className="generate-password"
-                    onClick={() => setOpen(!open)}
-                    disabled={load}>Generate password</Button>} */}
-
                 {/* Loop of radio input choices to choose is password same or not for all students */}
                 {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
                     <FormControlLabel
@@ -274,7 +274,7 @@ export default function Form(props) {
                 <div className={`dropdown-div${(open ? " dropdown-open" : "")}`}>
                     <div className='dropdown-interior-div'>
                         {/* Loop of radio input choices to choose password type strong or not */}
-                        <FormLabel className="label">Önskad lösenordstyp</FormLabel>
+                        <FormLabel className="label">Lösenordstyp</FormLabel>
                         {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
                             <FormControlLabel
                                 key={index}
@@ -287,26 +287,34 @@ export default function Form(props) {
                                 onChange={() => setStrongPassword(p.value)} />
                         ))}
 
-                        <div className={`dropdown-div${(!strongPassword ? " dropdown-open" : "")}`}>
-                            <div className='dropdown-interior-div'>
-                                <FormLabel className="label">Önskad ords kategory</FormLabel>
+                        <FormControl className={'select-list' + (!strongPassword ? "" : " disabled")}>
+                            <InputLabel className='select-label'>Lösenords kategory</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-standard-label"
+                                value={selectedCategory}
+                                onChange={handleSelectListChange}
+                                label="Lösenords kategory"
+                                disabled={strongPassword}
+                            >
+                                <MenuItem value=""><span style={{ marginLeft: "10px", color: "#c00" }}><Cancel />&nbsp;&nbsp;Ingen</span></MenuItem>
+                                <MenuItem></MenuItem>
                                 {passwordKeys.map((l, index) => (
-                                    <Button variant="text" key={index}>
+                                    <MenuItem value={l.label} key={index}>
                                         <span style={{ marginLeft: "10px" }}>{l.icon}&nbsp;&nbsp;{l.label}</span>
-                                    </Button>
+                                    </MenuItem>
                                 ))}
-                            </div>
-                        </div>
-
-                        {/* Generate password button */}
-                        {strongPassword ? null : <Button variant="text"
-                            color="primary"
-                            type="button"
-                            size="small"
-                            className="generate-password"
-                            onClick={() => generatePassword()}
-                            disabled={load}>Generate password</Button>}
+                            </Select>
+                        </FormControl>
                     </div>
+
+                    {/* Generate password button */}
+                    <Button variant="text"
+                        color="primary"
+                        type="button"
+                        size="small"
+                        className="generate-password"
+                        onClick={() => generatePassword()}
+                        disabled={load}>Generate password</Button>
                 </div>
             </div>
 
