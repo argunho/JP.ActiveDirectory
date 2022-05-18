@@ -13,16 +13,16 @@ import { useHistory } from 'react-router-dom';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
-export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, value, resetResult }) {
+export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult }) {
 
     const refResult = useRef(null);
-    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [selectedList, setSelectedList] = useState([]);
     const [isOpenTip, setIsOpenTip] = useState(false);
 
     const history = useHistory();
 
     const ul = users.length;
-    const sl = selectedUsers.length;
+    const sl = selectedList.length;
     const selected = (ul === sl)
 
     useEffect(() => {
@@ -31,7 +31,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
     useEffect(() => {
         if (isOpenTip)
-            setTimeout(() => { setIsOpenTip(false); }, 1000)
+            setTimeout(() => { setIsOpenTip(false); }, 2000)
     }, [isOpenTip])
 
     // To select all from class students list
@@ -40,7 +40,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
         if (!selected)
             users.forEach(u => { arr.push(u.name) });
 
-        setSelectedUsers(arr);
+        setSelectedList(arr);
         setIsOpenTip(arr.length > 0);
     }
 
@@ -48,7 +48,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
     const goTo = (name = null) => {
         // Save found result i sessionStorage
         sessionStorage.setItem("users", JSON.stringify(users));
-        sessionStorage.setItem("selectedUsers", JSON.stringify(selectedUsers));
+        sessionStorage.setItem("selectedList", JSON.stringify(selectedList));
+        sessionStorage.setItem("selectedUsers", JSON.stringify(users.filter(x => selectedList.some(s => s === x.name))));
 
         // Navigation
         history.push(name ? "/manage-user/" + name : `/manage-users/${users[0].department}/${users[0].office}`);
@@ -57,14 +58,13 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
     // To select one by one user from the class students' list
     const handleSelectedList = (name) => {
-        const arr = selectedUsers;
+        const arr = selectedList;
         if (arr?.length > 0 && arr.indexOf(name) > -1)
             arr.splice(arr.indexOf(name), 1);
-        else
-            arr.push(name);
+        else arr.push(name);
 
         // Update selected users
-        setSelectedUsers(arr);
+        setSelectedList(arr);
         setIsOpenTip(arr.length > 0);
     }
 
@@ -81,26 +81,30 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
                 {clsStudents && ul > 0 ?
                     /* Hidden form to reset selected users password */
-                    <Tooltip arrow title={`Klicka här att ställa in nytt lösenord för valda ${sl} elev${sl === 1 ? "" : "er"}`}
+                    <Tooltip arrow
+                        title={`Klicka här att ställa in nytt lösenord för valda ${sl} elev${sl === 1 ? "" : "er"}`}
                         classes={{ tooltip: "tooltip tooltip-blue", arrow: "arrow-blue" }}
-                        open={isOpenTip}
-                        leaveTouchDelay={1000}
-                    >
+                        open={isOpenTip}>
                         <Button
                             disabled={sl === 0}
+                            onMouseOver={() => setIsOpenTip(isVisibleTips)}
+                            onMouseLeave={() => setIsOpenTip(false)}
                             onClick={() => goTo()}>
                             <Password />
                         </Button>
-                    </Tooltip>
-                    : null}
+                    </Tooltip> : null}
 
                 {/* Button to reset search result */}
-                <Tooltip arrow disableHoverListener={!isVisibleTips} title="Ta bort sök resultat." classes={{ tooltip: "tooltip tooltip-error", arrow: "arrow-error" }}>
+                <Tooltip arrow
+                    disableHoverListener={!isVisibleTips}
+                    title="Ta bort sökresultat."
+                    classes={{ tooltip: "tooltip tooltip-error", arrow: "arrow-error" }}>
                     <span>
                         <Button variant="text"
                             color="error"
                             onClick={() => resetResult()}
-                            disabled={!isResult && ul === 0} ><DeleteSweep /></Button>
+                            disabled={!isResult && ul === 0} >
+                            <DeleteSweep /></Button>
                     </span>
                 </Tooltip>
             </ListItem>
@@ -166,7 +170,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                             {clsStudents ? <Checkbox
                                 size='small'
                                 color="default"
-                                checked={selectedUsers.indexOf(s.name) > -1}
+                                checked={selectedList.indexOf(s.name) > -1}
+                                onMouseDown={() => setIsOpenTip(false)}
                                 onClick={() => handleSelectedList(s.name)} />
                                 : null}
                         </ListItem>))}

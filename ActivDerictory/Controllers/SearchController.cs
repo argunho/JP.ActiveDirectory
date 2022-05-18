@@ -28,35 +28,43 @@ namespace ActiveDirectory.Controllers
             List<User> users = new List<User>();
             try
             {
+                var group = _provider.FindGroupName("Students");
+
                 if (match)
                 {
-                    var group = _provider.FindGroupName("Students");
-                    if (group != null)
-                    {
-                        var members = group.GetMembers(true).Where(x => (!capitalize
-                                ? (x.Name.ToLower().Contains(name) || x.DisplayName.ToLower().Contains(name))
-                                : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
+                    var members = group.GetMembers(true).Where(x => (!capitalize
+                            ? (x.Name.ToLower().Contains(name) || x.DisplayName.ToLower().Contains(name))
+                            : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
 
-                        foreach (Principal p in members)
+                    foreach (Principal p in members)
+                    {
+                        var user = _provider.FindUserByExtensionProperty(p.Name);
+                        users.Add(new User
                         {
-                            var user = _provider.FindUserByExtensionProperty(p.Name);
-                            users.Add(new User
-                            {
-                                Name = user.Name,
-                                DisplayName = user.DisplayName,
-                                Office = user.Office,
-                                Department = user.Department
-                            });
-                        }
-                        group.Dispose();
+                            Name = user.Name,
+                            DisplayName = user.DisplayName,
+                            Office = user.Office,
+                            Department = user.Department
+                        });
                     }
+                    group.Dispose();
                 }
                 else
                 {
-                    var user = _provider.FindUserByExtensionProperty(name);
-                    if (user == null)
-                        return new JsonResult(new { warning = true, msg = $"Användaren {name} hittades inte. Var vänlig, kontrollera användarnanmnet." }); // User {name} not found. Please check the input username.
-                    if (_provider.MembershipCheck(name, "Students"))
+                    var member = group.GetMembers(true).FirstOrDefault(x => x.Name == name || x.DisplayName == name);
+                    if (member == null) // Return if user not found.
+                        return new JsonResult(new
+                        {
+                            warning = true,
+                            msg = $"Användaren {name} hittades inte. Deta kan bli så att användaren {name} tillhör " +
+                                        $"inte studentgruppen eller felstavat namn/användarnamn. " +
+                                        $"Var vänlig, kontrollera namn/användarnam."
+                        });
+
+                    var user = _provider.FindUserByExtensionProperty(member.Name);
+                    //_provider.MembershipCheck(name, "Students");
+
+                    if (user != null)
                     {
                         users.Add(new User
                         {
@@ -66,8 +74,6 @@ namespace ActiveDirectory.Controllers
                             Department = user.Department
                         });
                     }
-                    else
-                        return new JsonResult(new { msg = $"Användaren {name} tillhör inte studentgruppen." }); //User {name} does not belong to the Students group.
                 }
 
                 if (users.Count > 0)

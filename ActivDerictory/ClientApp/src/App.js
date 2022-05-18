@@ -5,6 +5,7 @@ import { Switch, withRouter } from 'react-router-dom';
 import { Home } from './components/pages/Home';
 import { Login } from './components/pages/Login';
 import { UserManager } from './components/pages/UserManager';
+import UsersManager from './components/pages/UsersManager';
 import { Search } from './components/pages/Search';
 
 import './css/custom.css'
@@ -40,7 +41,9 @@ class App extends Component {
           <Route exact path='/' render={(props) => <Home {...props} isAuthorized={isAuthorized} />} />
           <Route exact path='/login' component={Login} />
           <Route exact path='/find-user' component={Search} />
-          <Route exact path={['/manage-users/:cls/:school', '/manage-user/:id' ]} component={UserManager} />
+          {/* <Route exact path={['/manage-users/:cls/:school', '/manage-user/:id' ]} component={UserManager} /> */}
+          <Route exact path='/manage-user/:id' component={UserManager} />
+          <Route exact path='/manage-users/:cls/:school' component={UsersManager} />
         </Switch>
       </Layout>
     );

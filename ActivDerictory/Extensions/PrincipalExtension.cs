@@ -69,6 +69,7 @@ public class UserPrincipalExtension : UserPrincipal
         set { ExtensionSet("physicalDeliveryOfficeName", value); }
 
     }
+
     public static new UserPrincipalExtension FindByIdentity(PrincipalContext context, string identityValue)
     {
         return (UserPrincipalExtension)FindByIdentityWithType(context, typeof(UserPrincipalExtension), identityValue);
