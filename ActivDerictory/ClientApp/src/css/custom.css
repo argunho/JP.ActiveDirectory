@@ -152,7 +152,7 @@ body {
 
 .input-root {
   padding: 0 !important;
-  background: "#000"
+  background: "#000";
 }
 
 .css-1wc848c-MuiFormHelperText-root {
@@ -246,10 +246,20 @@ body {
   margin-left: 5px !important;
 }
 
+.help-btn span:last-child {
+  font-size: 11px !important;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.help-btn span:first-child > svg {
+  width: 14px !important;
+}
+
 .situated-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
 }
 
 .user-avatar {
@@ -271,7 +281,7 @@ input {
 }
 
 label {
-  font-size: 14px !important;
+  font-size: 13px !important;
   letter-spacing: 1px !important;
   font-weight: 600 !important;
   font-family: Arial, Helvetica, sans-serif !important;
@@ -286,7 +296,8 @@ input::placeholder {
   margin: 10px auto 25px auto !important;
 }
 
-.disabled, .disabled:hover {
+.disabled,
+.disabled:hover {
   opacity: 0.3 !important;
   cursor: no-drop !important;
 }
@@ -304,7 +315,6 @@ input::placeholder {
 
 .dropdown-div.dropdown-open {
   max-height: 1000px;
-  /* transition: max-height 0.9s ease-in; */
 }
 
 .dropdown-interior-div {
@@ -315,6 +325,12 @@ input::placeholder {
   margin: 10px 0;
 }
 
+.last-options {
+  width: 97%;
+  margin: 0 auto 10px auto;
+  color: #686868 !important
+}
+
 .list-wrapper {
   border: 1px solid #bdbdbd;
   padding: 10px 5px;
@@ -323,18 +339,16 @@ input::placeholder {
   position: fixed;
   top: 20px;
   z-index: 3000;
-  background-color: #FFF;
+  background-color: #fff;
 }
 
-
-
-.list-wrapper> p {
+.list-wrapper > p {
   font-weight: 600;
   margin-bottom: 3px;
   padding: 5px 3px !important;
 }
 
-.list-wrapper> p:hover {
+.list-wrapper > p:hover {
   background: #ededed;
   cursor: pointer;
 }
@@ -403,13 +417,22 @@ pre {
   margin: 30px auto 0 auto;
   width: max-content;
 }
+
 .buttons-wrapper > button {
   display: inline;
   margin: 0 10px;
 }
 
-.checkbox {
-  margin-top: -3px !important;
+form .buttons-wrapper {
+  margin-top: 5px !important;
+  text-align: right !important;
+  width: 100% !important;
+}
+
+.buttons-wrapper .checkbox {
+  float: left;
+  height: max-content;
+  margin-top: 15px;
 }
 
 .checkbox span {

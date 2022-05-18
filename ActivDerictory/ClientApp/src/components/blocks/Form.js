@@ -20,9 +20,9 @@ const _config = {
 };
 
 export default function Form(props) {
-    const { title, api, buttonText, name, list } = props;
+    const { title, api, buttonText, name, multiple, users } = props;
     const defaultForm = {
-        name: name, list: list,
+        name: name, list: users,
         adminPassword: "", password: "", confirmPassword: ""
     };
     const [response, setResponse] = useState(null);
@@ -35,11 +35,12 @@ export default function Form(props) {
     const [confirmSubmit, setConfirmSubmit] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
     const [errors, setErrors] = useState([]);
-    const [open, setOpen] = useState(false);
+    const [various, setVarious] = useState(false);
     const [strongPassword, setStrongPassword] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("");
     const [isOpenTip, setIsOpenTip] = useState(false);
     const [wordsList, setWordsList] = useState([]);
+    const [randomNumber, setRandomNumber] = useState(1000);
 
     const helpTexts = [
         {
@@ -85,6 +86,10 @@ export default function Form(props) {
     }, [isOpenTip])
 
     useEffect(() => {
+        if (!various) setPassType(true);
+    }, [various])
+
+    useEffect(() => {
         const credentials = sessionStorage.getItem("credentials");
         // Building a suitable form to fill out
         if (formList.length === 0) {
@@ -118,26 +123,24 @@ export default function Form(props) {
             }
         } else {
             let usersArray = [];
-            let numbers = "1234567890";
             let chars = "@!_&?#";
-            for (let i = 0; i < list.length; i++) {
+            let min = (randomNumber / 10);
+            for (let i = 0; i < users.length; i++) {
                 let password = ""
                 const randomWord = capitalize(wordsList[Math.floor(Math.random() * wordsList.length)]);
+
+                console.log(wordsList)
                 password += randomWord;
-                // if (usersArray.length === 0 || usersArray.find(x => x.password.includes(randomWord)) === null) {
-                    for (let n = 0; n < 3; n++)
-                        password += numbers[Math.floor(Math.random() * numbers.length)];
+                password += (Math.random() * (randomNumber - min) + min).toFixed(0);
+                password += chars[Math.floor(Math.random() * chars.length)];
 
-                    password += chars[Math.floor(Math.random() * chars.length)];
-
-                    usersArray.push({
-                        name: list[i].name,
-                        displayName: list[i].displayName,
-                        office: list[i].office,
-                        department: list[i].department,
-                        password: password
-                    })
-                // } else i -= 1;
+                usersArray.push({
+                    name: users[i].name,
+                    displayName: users[i].displayName,
+                    office: users[i].office,
+                    department: users[i].department,
+                    password: password
+                })
             }
 
             console.log(usersArray);
@@ -178,15 +181,20 @@ export default function Form(props) {
     const handleSelectListChange = (e) => {
 
         const keyword = passwordKeys.find(x => x.label === e.target.value).value;
-        let wList = words[keyword];
-        if (wList === undefined) {
-            if (keyword === "cities") wList = cities;
-            else if (keyword === "colors") wList = colors;
-            else wList = cities.filter(x => x.country === "SE");
+        let wList = words[keyword] || [];
+        if (wList.length === 0) {
+            if (keyword === "users")
+                users.forEach(u => { wList.push(u.displayName.substr(0, u.displayName.indexOf(" "))) })
+            else {
+                if (keyword === "cities") wList = cities;
+                else if (keyword === "colors") wList = colors;
+                else wList = cities.filter(x => x.country === "SE");
 
-            wList = wList.filter(x => x.name.indexOf(" ") === -1 && x.name.length < 10);
+                wList = wList.filter(x => x.name.indexOf(" ") === -1 && x.name.length < 10);
+            }
         } else
             wList = wList.filter(x => x.indexOf(" ") === -1 && x.length < 10);
+
 
         setWordsList(wList);
         setSelectedCategory(e.target.value);
@@ -205,6 +213,16 @@ export default function Form(props) {
             else setErrors([name]);
         else if (errors?.indexOf(name) > -1)
             resetError(name);
+    }
+
+    // Set password type
+    const setPassType = (value) => {
+        if (value) {
+            setWordsList([]);
+            setRandomNumber(1000);
+            setSelectedCategory("");
+        }
+        setStrongPassword(value);
     }
 
     // Reset validation error from specific form field 
@@ -300,75 +318,82 @@ export default function Form(props) {
             <p className='form-title'>{title}</p>
 
             {/* Form actions */}
-            <div className='form-actions'>
-                {/* Loop of radio input choices to choose is password same or not for all students */}
-                {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
-                    <FormControlLabel
-                        key={index}
-                        control={<Radio size='small' />}
-                        checked={p.value === open}
-                        label={p.label}
-                        name="samePassword"
-                        onChange={() => setOpen(p.value)} />
-                ))}
+            {multiple ?
+                <div className='form-actions'>
+                    {/* Loop of radio input choices to choose is password same or not for all students */}
+                    {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
+                        <FormControlLabel
+                            key={index}
+                            control={<Radio size='small' />}
+                            checked={p.value === various}
+                            label={p.label}
+                            name="samePassword"
+                            onChange={() => setVarious(p.value)} />
+                    ))}
 
-                {/* Different alternatives for password generation */}
-                <div className={`dropdown-div${(open ? " dropdown-open" : "")}`}>
-                    <div className='dropdown-interior-div'>
-                        {/* Loop of radio input choices to choose password type strong or not */}
-                        <FormLabel className="label">Lösenordstyp</FormLabel>
-                        {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
-                            <FormControlLabel
-                                key={index}
-                                control={<Radio
-                                    size='small'
-                                    checked={p.value === strongPassword}
-                                    color={strongPassword ? "error" : "success"} />}
-                                label={p.label}
-                                name="strongPassword"
-                                onChange={() => setStrongPassword(p.value)} />
-                        ))}
+                    {/* Different alternatives for password generation */}
+                    <div className={`dropdown-div${(various ? " dropdown-open" : "")}`}>
+                        <div className='dropdown-interior-div'>
+                            {/* Loop of radio input choices to choose password type strong or not */}
+                            <FormLabel className="label">Lösenordstyp</FormLabel>
+                            {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
+                                <FormControlLabel
+                                    key={index}
+                                    control={<Radio
+                                        size='small'
+                                        checked={p.value === strongPassword}
+                                        color={strongPassword ? "error" : "success"} />}
+                                    label={p.label}
+                                    name="strongPassword"
+                                    onChange={() => setPassType(p.value)} />
+                            ))}
 
-                        <FormControl className={'select-list' + (!strongPassword ? "" : " disabled")}>
-                            <InputLabel className='select-label'>Lösenords kategory</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-standard-label"
-                                value={selectedCategory}
-                                onChange={handleSelectListChange}
-                                label="Lösenords kategory"
-                                disabled={strongPassword}
-                            >
-                                <MenuItem value=""><span style={{ marginLeft: "10px", color: "#c00" }}><Cancel />&nbsp;&nbsp;Ingen</span></MenuItem>
-                                <MenuItem></MenuItem>
-                                {passwordKeys.map((l, index) => (
-                                    <MenuItem value={l.label} key={index}>
-                                        <span style={{ marginLeft: "10px" }}> - {l.label}</span>
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                            <FormControl className={'select-list' + (!strongPassword ? "" : " disabled")}>
+                                <InputLabel className='select-label'>Lösenords kategory</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-standard-label"
+                                    value={selectedCategory}
+                                    onChange={handleSelectListChange}
+                                    label="Lösenords kategory"
+                                    disabled={strongPassword}
+                                >
+                                    <MenuItem value=""><span style={{ marginLeft: "10px", color: "#1976D2" }}>Välj en från listan ...</span></MenuItem>
+                                    <MenuItem></MenuItem>
+                                    {passwordKeys.map((l, index) => (
+                                        <MenuItem value={l.label} key={index}>
+                                            <span style={{ marginLeft: "10px" }}> - {l.label}</span>
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+
+                            {wordsList.length > 0 ?
+                                <div className="last-options">
+                                    <FormLabel className="label-small">Lösenords alternativ (antal siffror i lösenord)</FormLabel>
+                                    {[{ label: "Password012_", value: 1000 }, { label: "Password01_", value: 100 }, { label: "Password0_", value: 10 }].map((p, index) => (
+                                        <FormControlLabel
+                                            key={index}
+                                            control={<Radio
+                                                size='small'
+                                                checked={p.value === randomNumber}
+                                                color="info" />}
+                                            label={p.label}
+                                            name="digits"
+                                            onChange={() => setRandomNumber(p.value)} />
+                                    ))}</div>
+                                : null}
+                        </div>
                     </div>
-
-                    {/* Generate password button */}
-                    <Button variant="text"
-                        color="primary"
-                        type="button"
-                        size="small"
-                        className="generate-password"
-                        onClick={() => generatePassword()}
-                        disabled={load}>Generate password</Button>
-                </div>
-            </div>
+                </div> : null}
 
             {/* Password form */}
             <form className='user-view-form' onSubmit={submitForm}>
-
 
                 {/* Response message */}
                 {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
 
                 {/* Passwords inputs */}
-                <div className='inputs-wrapper'>
+                <div className={`inputs-wrapper dropdown-div${(!various ? " dropdown-open" : "")}`}>
                     {formList.length > 0 ? formList.map((n, i) => (
                         <FormControl key={i} className="pr-inputs">
                             <TextField
@@ -388,29 +413,40 @@ export default function Form(props) {
                                 className={(n.regex && regexError) ? "error" : ""}
                                 error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
                                 placeholder={n.placeholder}
-                                disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit}
+                                disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || various}
                                 onChange={valueChangeHandler}
                                 onBlur={() => validateField(n.name)}
                             />
                         </FormControl>)) : null}
                 </div>
 
-                {/* Change the password input type */}
-                <FormControlLabel className='checkbox'
-                    control={<Checkbox
-                        size='small'
-                        checked={showPassword}
-                        onClick={() => setShowPassword(!showPassword)} />}
-                    label="Visa lösenord" />
+                <div className='buttons-wrapper'>
+                    {/* Change the password input type */}
+                    <FormControlLabel className='checkbox'
+                        control={<Checkbox
+                            size='small'
+                            checked={showPassword}
+                            onClick={() => setShowPassword(!showPassword)} />}
+                        label="Visa lösenord" />
 
-                {/* Submit form */}
-                <Button variant="outlined"
-                    ref={refSubmit}
-                    className='submit-btn'
-                    color="primary"
-                    type='submit'
-                    disabled={load || noConfirm || confirmSubmit || regexError}>
-                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : buttonText}</Button>
+                    {/* Generate password button */}
+                    <Button variant="text"
+                        color="primary"
+                        type="button"
+                        size="small"
+                        className="generate-password"
+                        onClick={() => generatePassword()}
+                        disabled={load}>Generate password</Button>
+
+                    {/* Submit form */}
+                    <Button variant="outlined"
+                        ref={refSubmit}
+                        className='submit-btn'
+                        color="primary"
+                        type='submit'
+                        disabled={load || noConfirm || confirmSubmit || regexError}>
+                        {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : buttonText}</Button>
+                </div>
 
                 {/* Reset button */}
                 {(form.adminPassword + form.password + form.confirmPassword).length > 1 ?
