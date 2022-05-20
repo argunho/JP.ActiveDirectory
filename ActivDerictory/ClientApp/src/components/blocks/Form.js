@@ -47,7 +47,6 @@ export default function Form(props) {
 
     const dslGenerate = !strongPassword && !ready;
 
-    const refModal = useRef(null);
 
     const formList = [
         { name: "password", label: "Lösenord", placeholder: "", regex: true },
@@ -79,6 +78,7 @@ export default function Form(props) {
 
     const history = useHistory();
     const refSubmit = useRef(null);
+    const refModal = useRef(null);
 
     // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
@@ -250,7 +250,13 @@ export default function Form(props) {
         setErrors(arr);
     }
 
-    // Get preview passwords list
+    // Confirm action
+    const confirmHandle = () => {
+        setConfirmed(true);
+        setTimeout(() => {
+            refSubmit.current.click();
+        }, 500)
+    }
 
     // Reset form
     const resetForm = (reset, save = false) => {
@@ -275,18 +281,22 @@ export default function Form(props) {
         e.preventDefault();
 
         // Validate form
-        let arrErrors = [];
-        formList.forEach(x => { if (form[x.name].length < 8) arrErrors.push(x.name) })
-        if (arrErrors.length > 0) {
-            setErrors(arrErrors);
-            return;
+        if (!variousPassword) {
+            let arrErrors = [];
+            formList.forEach(x => { if (form[x.name].length < 8) arrErrors.push(x.name) })
+            if (arrErrors.length > 0) {
+                setErrors(arrErrors);
+                return;
+            }
+
+            // Check password fields confirm
+            if (!regex.test(form.password)) {
+                setRegexError(true);
+                return;
+            }
         }
 
-        // Check password fields confirm
-        if (!regex.test(form.password)) {
-            setRegexError(true);
-            return;
-        } else if (!confirmed) {
+        if (!confirmed) {
             setConfirmSubmit(true);
             return;
         } else
@@ -329,7 +339,7 @@ export default function Form(props) {
                 <div className='confirm-block'>
                     Är du säker att du vill göra det?
                     <div className='buttons-wrapper'>
-                        <Button type="submit" variant='contained' color="error" onMouseDown={() => setConfirmed(true)}>Ja</Button>
+                        <Button type="submit" variant='contained' color="error" onClick={() => confirmHandle()}>Ja</Button>
                         <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
                     </div>
                 </div>
@@ -409,11 +419,11 @@ export default function Form(props) {
                 </div>
             </div> : null}
 
+            {/* Response message */}
+            {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
+
             {/* Password form */}
             <form className='user-view-form' onSubmit={submitForm}>
-
-                {/* Response message */}
-                {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
 
                 {/* Passwords inputs */}
                 <div className={`inputs-wrapper dropdown-div${(!variousPassword ? " dropdown-open" : "")}`}>
@@ -445,13 +455,12 @@ export default function Form(props) {
 
                 <div className='buttons-wrapper'>
                     {/* Change the password input type */}
-                    <FormControlLabel className='checkbox'
+                    {variousPassword ? null : <FormControlLabel className='checkbox'
                         control={<Checkbox
                             size='small'
                             checked={showPassword}
-                            disabled={variousPassword}
                             onClick={() => setShowPassword(!showPassword)} />}
-                        label="Visa lösenord" />
+                        label="Visa lösenord" />}
 
                     {/* Generate password button */}
                     <Tooltip arrow
@@ -475,7 +484,7 @@ export default function Form(props) {
                     <Button variant="text"
                         color="error"
                         type="button"
-                        disabled={load || confirmSubmit || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
+                        disabled={load || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
                         onClick={() => resetForm(true)}
                     ><ClearOutlined /></Button>
 
@@ -487,13 +496,15 @@ export default function Form(props) {
                             disabled={load || usersList.length === 0}
                             onClick={() => refModal.current.click()}>
                             Granska
-                        </Button> : <Button variant="outlined"
-                            ref={refSubmit}
-                            className='submit-btn'
-                            color="primary"
-                            type='submit'
-                            disabled={load || noConfirm || confirmSubmit || regexError}>
-                            {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : buttonText}</Button>}
+                        </Button> : null}
+
+                    <Button variant="outlined"
+                        ref={refSubmit}
+                        className={'submit-btn' + (variousPassword ? " none" : "")}
+                        color="primary"
+                        type='submit'
+                        disabled={load || (!variousPassword && (noConfirm || regexError))}>
+                        {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : buttonText}</Button>
                 </div>
 
                 {/* Preview the list of generated passwords */}

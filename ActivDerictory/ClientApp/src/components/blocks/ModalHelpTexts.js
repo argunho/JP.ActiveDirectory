@@ -26,10 +26,15 @@ function ModalHelpTexts({
     title = "Förklaring av sökparametrar",  
     inverseFunction }, 
     ref) {
-        
+
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
+
+    const clickHandle = () => {
+        inverseFunction();
+        setOpen(false);
+    }
 
     return (
         <>
@@ -65,7 +70,7 @@ function ModalHelpTexts({
                         <Button variant="outlined"
                             className='submit-btn'
                             color="primary"
-                            onClick={() => inverseFunction()}>
+                            onClick={() => clickHandle()}>
                             Verkställ</Button>
                         : null}
                     <Button variant='outlined' color="error" autoFocus onClick={() => setOpen(false)}>
