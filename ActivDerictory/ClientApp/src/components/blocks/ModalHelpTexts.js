@@ -19,12 +19,12 @@ function PaperComponent(props) {
     );
 }
 
-function ModalHelpTexts({ 
-    arr, 
-    cls = "", 
-    button = false, 
-    title = "Förklaring av sökparametrar",  
-    inverseFunction }, 
+function ModalHelpTexts({
+    arr,
+    cls = "",
+    button = false,
+    title = "Förklaring av sökparametrar",
+    inverseFunction },
     ref) {
 
     const [open, setOpen] = React.useState(false);
@@ -56,7 +56,11 @@ function ModalHelpTexts({
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
                 className='modal-wrapper'>
-                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">{title}</DialogTitle>
+                <DialogTitle
+                    style={{ cursor: 'move' }}
+                    id="draggable-dialog-title"
+                    dangerouslySetInnerHTML={{ __html: title }}>
+                </DialogTitle>
                 <DialogContent>
                     {arr.map((a, i) => (<div key={i} className="modal-tips">
                         <AlertTitle style={{ fontWeight: 600 }}>

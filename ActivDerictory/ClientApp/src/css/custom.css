@@ -417,6 +417,12 @@ pre {
   text-align: center;
 }
 
+.input-block {
+  margin: 20px auto !important;
+  width: 100%;
+  max-width: 300px;
+}
+
 .buttons-wrapper {
   display: block;
   line-height: 60px;
@@ -516,4 +522,10 @@ button {
   width: 100% !important;
   max-width: 800px !important;
   margin: auto !important;
+}
+
+.modal-wrapper .typography-span {
+  display: block !important;
+  margin: 15px 0 !important;
+  width: max-content !important;
 }

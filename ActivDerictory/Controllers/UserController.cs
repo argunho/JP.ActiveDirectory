@@ -56,8 +56,8 @@ public class UserController : ControllerBase
         if (warning != null)
             return warning;
         string message = string.Empty;
-        foreach (var user in model.Users)
-            message += _provider.ResetPassword(user);
+        //foreach (var user in model.Users)
+        //    message += _provider.ResetPassword(user);
 
         return ReturnResultMessage(message);
     }

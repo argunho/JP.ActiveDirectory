@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
         return new JsonResult(new { access = false, alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); //Failed! You do not have permission to edit a student's password
     }
 
-    [HttpPut("{password}")]
+    [HttpPut("credential/{password}")]
     [Authorize]
     public ActionResult SetPassword(string password)
     {

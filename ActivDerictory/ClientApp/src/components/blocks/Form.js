@@ -22,7 +22,7 @@ const _config = {
 export default function Form(props) {
     const { title, api, buttonText, name, multiple, users } = props;
     const defaultForm = {
-        name: name, list: users,
+        name: name, list: [],
         password: "", confirmPassword: ""
     };
     const [response, setResponse] = useState(null);
@@ -42,8 +42,8 @@ export default function Form(props) {
     const [randomNumber, setRandomNumber] = useState(1000);
     const [ready, setReady] = useState([]);
     const [previewList, setPreviewList] = useState([]);
-    const [usersList, setUsersList] = useState([]);
     const [credentials, setCredentials] = useState(sessionStorage.getItem("credentials") === "ok");
+    const [adminPassword, setAdminPassword] = useState("");
 
     const dslGenerate = !strongPassword && !ready;
 
@@ -55,23 +55,25 @@ export default function Form(props) {
 
     const helpTexts = [
         {
-            label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk bokstav med stor bokstav</pre>" +
-                "<pre>* Minst en liten engelsk bokstav</pre>" +
+            label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
+                "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
                 "<pre>* Minst en siffra</pre>" +
                 "<pre>* Minst ett specialtecken</pre>" +
-                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
+                "<pre>* Minst 6 & Max 20 karaktär i längd</pre>"
         },
         { label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>" }
     ]
 
     const passwordKeys = [
         { label: "Elevens namn", value: "users" },
+        { label: "Länder", value: "countries" },
         { label: "Alla städer/tätort", value: "cities" },
         { label: "Svenska städer/tätort", value: "svCities" },
         { label: "Färg", value: "colors" },
         { label: "Blommor", value: "flowers" },
         { label: "Frukter", value: "fruits" },
         { label: "Grönsaker", value: "vegetables" },
+        { label: "Djur", value: "animals" },
         { label: "Kattens namn (smeknamn)", value: "cats" },
         { label: "Bilar", value: "cars" }
     ]
@@ -81,7 +83,7 @@ export default function Form(props) {
     const refModal = useRef(null);
 
     // Regex to validate password
-    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
+    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{6,20}$/;
     const eng = /^[a-zA-Z]$/;
 
     useEffect(() => {
@@ -103,6 +105,17 @@ export default function Form(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [variousPassword])
 
+    useEffect(() => {
+        setPreviewList([]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [randomNumber])
+
+    // Confirm credential
+    const confirmCredential = e => {
+        e.preventDefault();
+        axios.get("auth/credential/" + adminPassword, _config);
+    }
+
     // Set password type
     const setPassType = (value) => {
         if (value) {
@@ -110,6 +123,7 @@ export default function Form(props) {
             setReady(false);
             setRandomNumber(1000);
             setSelectedCategory("");
+            setPreviewList([]);
         }
         setStrongPassword(value);
     }
@@ -117,7 +131,6 @@ export default function Form(props) {
     // Password words category
     const handleSelectListChange = (e) => {
         setPreviewList([]);
-        setUsersList([]);
         const keyword = passwordKeys.find(x => x.label === e.target.value).value;
         let wList = words[keyword] || [];
         if (wList.length === 0 && keyword !== "users") {
@@ -132,6 +145,7 @@ export default function Form(props) {
 
         setWordsList(wList);
         setReady(true);
+        setForm(defaultForm);
         setSelectedCategory(e.target.value);
     }
 
@@ -139,10 +153,9 @@ export default function Form(props) {
     const valueChangeHandler = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setResponse(null);
-        if (e.target.name !== "adminPassword" && form.confirmPassword)
-            checkConfirm(e.target);
+        if (form.confirmPassword) checkConfirm(e.target);
 
-        if (e.target.value.length >= 8 && errors?.indexOf(e.target.name) > -1)
+        if (e.target.value.length >= 6 && errors?.indexOf(e.target.name) > -1)
             resetError(e.target.name);
 
         resetForm(false);
@@ -193,7 +206,7 @@ export default function Form(props) {
                 }]);
             }
 
-            setUsersList(usersArray);
+            setForm({ ...form, list: usersArray })
         }
     }
 
@@ -235,13 +248,12 @@ export default function Form(props) {
 
     // Validate form's field
     const validateField = (name) => {
-        if (form[name].length < 8 && errors?.indexOf(name) === -1)
+        if (form[name].length < 6 && errors?.indexOf(name) === -1)
             if (errors.length > 0) setErrors(errors => [...errors, name]);
             else setErrors([name]);
         else if (errors?.indexOf(name) > -1)
             resetError(name);
     }
-
 
     // Reset validation error from specific form field 
     const resetError = (name) => {
@@ -265,7 +277,6 @@ export default function Form(props) {
         setShowPassword(false);
         setConfirmSubmit(false);
         setPassType(true);
-        setUsersList([]);
         setPreviewList([]);
         if (!save) setResponse(null);
         if (reset) {
@@ -283,7 +294,7 @@ export default function Form(props) {
         // Validate form
         if (!variousPassword) {
             let arrErrors = [];
-            formList.forEach(x => { if (form[x.name].length < 8) arrErrors.push(x.name) })
+            formList.forEach(x => { if (form[x.name].length < 6) arrErrors.push(x.name) })
             if (arrErrors.length > 0) {
                 setErrors(arrErrors);
                 return;
@@ -333,6 +344,35 @@ export default function Form(props) {
 
     return (
         <div className='collapse-wrapper'>
+
+            {/* Confirm credentials to set password */}
+            {credentials ? null : <div className='confirm-wrapper' style={{ background: "#FFF" }}>
+                <div className='confirm-block'>
+                    <form onSubmit={confirmCredential}>
+                    <TextField
+                        label="Admin lösenord"
+                        type="password"
+                        required
+                        className='input-block'
+                        name="adminPassword"
+                        value={adminPassword}
+                        inputProps={{
+                            minLength: 6,
+                            autoComplete: adminPassword,
+                            form: { autoComplete: 'off', }
+                        }}
+                        // className={(n.regex && regexError) ? "error" : ""}
+                        // error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}               
+                        placeholder="Din admin lösenord här ..."
+                        disabled={load}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                    />
+                    <Button variant='contained' disabled={load || adminPassword.length < 6} type="submit">
+                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Jag bekräftar mina behörigheter"}
+                    </Button>                        
+                    </form>
+                </div>
+            </div>}
 
             {/* Confirm actions block */}
             {confirmSubmit ? <div className='confirm-wrapper'>
@@ -430,7 +470,6 @@ export default function Form(props) {
                     {formList.length > 0 ? formList.map((n, i) => (
                         <FormControl key={i} className="pr-inputs">
                             <TextField
-                                id="outlined-basic"
                                 label={n.label}
                                 name={n.name}
                                 type={showPassword ? "text" : "password"}
@@ -439,7 +478,7 @@ export default function Form(props) {
                                 value={form[n.name] || ""}
                                 inputProps={{
                                     maxLength: 20,
-                                    minLength: 8,
+                                    minLength: 6,
                                     autoComplete: formList[n.name],
                                     form: { autoComplete: 'off', }
                                 }}
@@ -493,7 +532,7 @@ export default function Form(props) {
                         <Button variant="contained"
                             className='submit-btn'
                             color="primary"
-                            disabled={load || usersList.length === 0}
+                            disabled={load || previewList.length === 0}
                             onClick={() => refModal.current.click()}>
                             Granska
                         </Button> : null}
@@ -510,7 +549,8 @@ export default function Form(props) {
                 {/* Preview the list of generated passwords */}
                 <ModalHelpTexts
                     arr={previewList}
-                    cls={" none"} title={title + " " + users[0].office + " " + users[0].department}
+                    cls={" none"}
+                    title={`${title} <span class='typography-span'>${users[0].office + " " + users[0].department}</span>`}
                     button={true}
                     inverseFunction={() => refSubmit.current.click()}
                     ref={refModal} />
