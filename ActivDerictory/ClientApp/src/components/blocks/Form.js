@@ -43,6 +43,7 @@ export default function Form(props) {
     const [ready, setReady] = useState([]);
     const [previewList, setPreviewList] = useState([]);
     const [credentials, setCredentials] = useState(sessionStorage.getItem("credentials") === "ok");
+    const [credentialError, setCredentialError] = useState(false);
     const [adminPassword, setAdminPassword] = useState("");
 
     const dslGenerate = !strongPassword && !ready;
@@ -348,28 +349,30 @@ export default function Form(props) {
             {/* Confirm credentials to set password */}
             {credentials ? null : <div className='confirm-wrapper' style={{ background: "#FFF" }}>
                 <div className='confirm-block'>
+
+                    {/* Response message */}
+                    {credentialError ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
+
                     <form onSubmit={confirmCredential}>
-                    <TextField
-                        label="Admin lösenord"
-                        type="password"
-                        required
-                        className='input-block'
-                        name="adminPassword"
-                        value={adminPassword}
-                        inputProps={{
-                            minLength: 6,
-                            autoComplete: adminPassword,
-                            form: { autoComplete: 'off', }
-                        }}
-                        // className={(n.regex && regexError) ? "error" : ""}
-                        // error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}               
-                        placeholder="Din admin lösenord här ..."
-                        disabled={load}
-                        onChange={(e) => setAdminPassword(e.target.value)}
-                    />
-                    <Button variant='contained' disabled={load || adminPassword.length < 6} type="submit">
-                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Jag bekräftar mina behörigheter"}
-                    </Button>                        
+                        <TextField
+                            label="Admin lösenord"
+                            type="password"
+                            required
+                            className='input-block'
+                            name="adminPassword"
+                            value={adminPassword}
+                            inputProps={{
+                                minLength: 6,
+                                autoComplete: adminPassword,
+                                form: { autoComplete: 'off', }
+                            }}
+                            placeholder="Din admin lösenord här ..."
+                            disabled={load}
+                            onChange={(e) => setAdminPassword(e.target.value)}
+                        />
+                        <Button variant='contained' disabled={load || adminPassword.length < 6} type="submit">
+                            {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Jag bekräftar mina behörigheter"}
+                        </Button>
                     </form>
                 </div>
             </div>}
