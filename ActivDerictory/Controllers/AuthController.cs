@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
         if (user != null && _provider.MembershipCheck(name))
         {
             var token = CreateJwtToken(user);
-            AccessCredintails.Username = name;
+            AccessCredentials.Username = name;
             return new JsonResult(new
             {
                 access = true,
@@ -62,7 +62,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public ActionResult SetPassword(string password)
     {
-        AccessCredintails.Password = password;
+        AccessCredentials.Password = password;
 
         return Ok();
     }
@@ -84,8 +84,8 @@ public class AuthController : ControllerBase
             if (_provider.MembershipCheck(model.Username))
             {
                 var token = CreateJwtToken(_provider.FindUserByName(model.Username));
-                AccessCredintails.Username = model.Username;
-                AccessCredintails.Password = model.Password;
+                AccessCredentials.Username = model.Username;
+                AccessCredentials.Password = model.Password;
                 return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomst behörighet har bekräftats." }); // Your access has been confirmed.
             }
         }
@@ -130,7 +130,7 @@ public class AuthController : ControllerBase
 }
 
 
-public static class AccessCredintails
+public static class AccessCredentials
 {
     public static string Username { get; set; }
     public static string Password { get; set; }

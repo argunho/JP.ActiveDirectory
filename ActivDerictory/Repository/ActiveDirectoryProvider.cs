@@ -100,7 +100,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
 
 
     public PrincipalContext PContext(UserViewModel model) =>
-        new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredintails.Username, AccessCredintails.Password);
+        new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredentials.Username, AccessCredentials.Password);
 
     #endregion
 }
