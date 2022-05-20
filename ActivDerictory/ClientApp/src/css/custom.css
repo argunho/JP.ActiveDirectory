@@ -302,6 +302,12 @@ input::placeholder {
   cursor: no-drop !important;
 }
 
+.none {
+  visibility: hidden;
+  z-index: -1;
+  display: none;
+}
+
 .dropdown-div {
   overflow: hidden;
   max-height: 0;
@@ -315,6 +321,7 @@ input::placeholder {
 
 .dropdown-div.dropdown-open {
   max-height: 1000px;
+  overflow: visible;
 }
 
 .dropdown-interior-div {
@@ -456,6 +463,10 @@ button {
   margin-top: 0 !important;
 }
 
+.tooltip-margin {
+  margin-top: 10px !important;
+}
+
 .tooltip-error {
   background-color: #d32f2f !important;
 }
@@ -501,23 +512,8 @@ button {
 }
 
 /* Modal */
-.modal-wrapper {
-  position: relative;
-  transition: all 0.5s ease-in-out;
-  align-content: center;
-  line-height: 100vh;
-}
-
-.modal-wrapper-bg {
-  background-color: rgba(75, 75, 75, 0.281);
-}
-
-.modal-window {
-  width: 95%;
-  max-width: 600px;
-  padding: 10px;
-  color: #fff;
-  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-  position: absolute;
+.modal-wrapper > .MuiDialog-container > div {
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: auto !important;
 }

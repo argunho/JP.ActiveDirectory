@@ -47,7 +47,6 @@ namespace ActiveDirectory.Controllers
                             Department = user.Department
                         });
                     }
-                    group.Dispose();
                 }
                 else
                 {
@@ -58,7 +57,7 @@ namespace ActiveDirectory.Controllers
                             warning = true,
                             msg = $"Användaren {name} hittades inte. Deta kan bli så att användaren {name} tillhör " +
                                         $"inte studentgruppen eller felstavat namn/användarnamn. " +
-                                        $"Var vänlig, kontrollera namn/användarnam."
+                                        $"Var vänlig, kontrollera namn/användarnamn."
                         });
 
                     var user = _provider.FindUserByExtensionProperty(member.Name);
@@ -75,6 +74,8 @@ namespace ActiveDirectory.Controllers
                         });
                     }
                 }
+
+                group.Dispose();
 
                 if (users.Count > 0)
                     return new JsonResult(new { users = users.OrderBy(x => x.Name) });

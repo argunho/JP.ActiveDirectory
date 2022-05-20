@@ -10,13 +10,10 @@ public class UserViewModel
     public string OldPassword { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
-    public string? AdminPassword { get; set; }
-
-    [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = string.Empty;
 
-    public List<string> Users { get; set; } = new List<string>();
+    public List<UserViewModel> Users { get; set; } = new List<UserViewModel>();
 }

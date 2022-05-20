@@ -245,9 +245,9 @@ export class Search extends Component {
             clsStudents, isActive, isOpen, isNoOptions } = this.state;
 
         // List of text fields
-        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Exakt namn och efternamn eller anvädarnamn här ..." : "", autoOpen: false }]
-            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Exakt klassbeteckning här ...", autoOpen: false },
-            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Exakt skolnamn här ..", autoOpen: true }];
+        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Skriv exakt fullständigt namn eller anvädarnamn här ..." : "", autoOpen: false }]
+            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Skriv exakt klassbeteckning här ...", autoOpen: false },
+            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Skriv exakt skolnamn här ..", autoOpen: true }];
 
 
         return (

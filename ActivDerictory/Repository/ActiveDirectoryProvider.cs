@@ -99,15 +99,8 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
         new PrincipalContext(ContextType.Domain, domain, defaultOU);
 
 
-    public PrincipalContext PContext(UserViewModel model)
-    {
-        var adminName = AccessCredintails.Username;
-        if (model.AdminPassword == null || model.AdminPassword.Length == 0)
-            model.AdminPassword = AccessCredintails.Password;
-        else
-            AccessCredintails.Password = model.AdminPassword;
+    public PrincipalContext PContext(UserViewModel model) =>
+        new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredintails.Username, AccessCredintails.Password);
 
-        return new PrincipalContext(ContextType.Domain, domain, defaultOU, adminName, model.AdminPassword);
-    }
     #endregion
 }

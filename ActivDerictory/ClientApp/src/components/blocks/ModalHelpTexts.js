@@ -19,16 +19,26 @@ function PaperComponent(props) {
     );
 }
 
-export default function ModalHelpTexts({ arr, position }) {
+function ModalHelpTexts({ 
+    arr, 
+    cls = "", 
+    button = false, 
+    title = "Förklaring av sökparametrar",  
+    inverseFunction }, 
+    ref) {
+        
     const [open, setOpen] = React.useState(false);
+
+    const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
 
     return (
         <>
             <FormControlLabel
-                className={'help-btn' + (position ? " situated-btn" : "")}
+                className={'help-btn' + cls}
                 control={<Checkbox size='small'
                     color="primary"
                     checked={open}
+                    ref={ref}
                     icon={<HelpOutline />}
                     checkedIcon={<LiveHelpOutlined />}
                     onClick={() => setOpen(true)}
@@ -39,22 +49,34 @@ export default function ModalHelpTexts({ arr, position }) {
                 open={open}
                 onClose={() => setOpen(false)}
                 PaperComponent={PaperComponent}
-                aria-labelledby="draggable-dialog-title">
-                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title"> Förklaring av sökparametrar </DialogTitle>
+                aria-labelledby="draggable-dialog-title"
+                className='modal-wrapper'>
+                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">{title}</DialogTitle>
                 <DialogContent>
                     {arr.map((a, i) => (<div key={i} className="modal-tips">
                         <AlertTitle style={{ fontWeight: 600 }}>
-                            <span style={{ color: (a?.color ? a.color : "#000") }}>{a.label}</span>
+                            <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
                         </AlertTitle>
-                        <div dangerouslySetInnerHTML={{ __html: a.tip }}></div>
+                        <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
                     </div>))}
                 </DialogContent>
                 <DialogActions>
+                    {button ?
+                        <Button variant="outlined"
+                            className='submit-btn'
+                            color="primary"
+                            onClick={() => inverseFunction()}>
+                            Verkställ</Button>
+                        : null}
                     <Button variant='outlined' color="error" autoFocus onClick={() => setOpen(false)}>
                         <Close />
                     </Button>
                 </DialogActions>
             </Dialog>
+
         </>
     );
 }
+
+const refModal = React.forwardRef(ModalHelpTexts);
+export default refModal;

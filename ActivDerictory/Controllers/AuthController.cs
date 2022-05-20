@@ -1,8 +1,10 @@
 ﻿using ActiveDirectory.Interface;
 using ActiveDirectory.Models;
 using ActiveDirectory.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.DirectoryServices.AccountManagement;
@@ -55,6 +57,15 @@ public class AuthController : ControllerBase
 
         return new JsonResult(new { access = false, alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); //Failed! You do not have permission to edit a student's password
     }
+
+    [HttpPut("{password}")]
+    [Authorize]
+    public ActionResult SetPassword(string password)
+    {
+        AccessCredintails.Password = password;
+
+        return Ok();
+    }
     #endregion
 
     #region POST
@@ -85,7 +96,6 @@ public class AuthController : ControllerBase
 
         return new JsonResult(new { alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); // Failed! You do not have permission to edit a student's password
     }
-
     #endregion
 
     #region Helpers
