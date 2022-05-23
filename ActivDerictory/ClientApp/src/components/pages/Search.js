@@ -11,6 +11,21 @@ import {
 import Result from '../blocks/Result'
 import { capitalize } from '@mui/material'
 
+// const sOption = sessionStorage.getItem("sOption");
+// const clsSearch = (sOption === "members");
+
+// const [formKeys, setFormKeys] = useState(["inp01", "inp02"]);
+// const [users, setUsers] = useState(JSON.parse(sessionStorage.getItem("users")) || []);
+// const [inProgress, setInProgress] = useState(false);
+// const [isResult, setIsResult] = useState(false);
+// const [searchOption, setSearchOption] = useState(sOption || "users");
+// const [choiceList, setChoiceList] = useState(
+//     { label: "Match", match: true },
+//     { label: "Exakt", match: false }
+// )
+// const [clsStudents, setClsStudents] = useState(clsSearch);
+// const [match, setMatch]
+
 export class Search extends Component {
     static displayName = Search.name;
 
@@ -89,6 +104,7 @@ export class Search extends Component {
 
     // Handle a change of text fields and radio input value
     valueChangeHandler = (e, open) => {
+        console.log("changed )>" + this.state[e.target.name])
         if (!e.target) return;
         const inp = e.target;
         const inpRadio = (inp.type === "radio");
@@ -158,7 +174,14 @@ export class Search extends Component {
 
     // Recognize Enter press to submit search form
     handleKeyDown = (e) => {
-        if (e.key === 'Enter') this.getSearchResult.bind(this);
+        console.log(e.target.name)
+        console.log(e.target.value)
+        if (e.key === 'Enter') {
+            this.setState({
+                [e.target.name]: e.target.value
+            })
+            this.getSearchResult.bind(this);
+        }
     }
 
     // Return schools list
@@ -262,11 +285,11 @@ export class Search extends Component {
                             disableClearable
                             className={s.clsName || 'search-input'}
                             options={this.schools}
-                            getOptionLabel={(option) => option.label}
+                            getOptionLabel={(option) => option.label || ""}
                             autoHighlight
                             open={s.autoOpen && isOpen && !isNoOptions}
                             inputValue={this.state[s.name]}
-                            onChange={(e, option) => this.setState({ [s.name]: option.value })}
+                            onChange={(e, option) => (e.key === "Enter") ? this.handleKeyDown : this.setState({ [s.name]: option.value })}
                             onBlur={() => this.setState({ isOpen: false })}
                             onClose={() => this.setState({ isOpen: false })}
                             onFocus={() => this.setState({ isOpen: (s.autoOpen && !isNoOptions) })}
@@ -282,6 +305,7 @@ export class Search extends Component {
                                         maxLength: 30,
                                         minLength: 2
                                     }}
+                                    value={this.state[s.name]}
                                     disabled={inProgress}
                                     placeholder={s.placeholder}
                                     onKeyDown={this.handleKeyDown}
