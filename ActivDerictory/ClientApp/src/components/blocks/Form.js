@@ -214,7 +214,7 @@ export default function Form(props) {
 
                 password = strongPassword ? returnGeneratedPassword() : capitalize(password);
 
-                if (regex.test.apply(password)) {
+                if (regex.test(password)) {
                     usersArray.push({
                         name: users[i].name,
                         displayName: users[i].displayName,

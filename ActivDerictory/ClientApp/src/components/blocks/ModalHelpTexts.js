@@ -25,7 +25,7 @@ function ModalHelpTexts({ arr, cls = "", button = false,
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
-    
+
     const clickHandle = () => {
         inverseFunction();
         setOpen(false);
@@ -66,11 +66,17 @@ function ModalHelpTexts({ arr, cls = "", button = false,
                 </DialogContent>
                 <DialogActions>
                     {button ?
-                        <Button variant="outlined"
-                            className='submit-btn'
-                            color="primary"
-                            onClick={() => clickHandle()}>
-                            Verkställ</Button>
+                        <>
+                            <Button variant="outlined" autoFocus
+                                color="primary"
+                                onClick={() => clickHandle()}>
+                                Verkställ & Spara som PDF</Button>
+                            <Button variant="outlined"
+                                className='submit-btn'
+                                color="primary"
+                                onClick={() => clickHandle()}>
+                                Verkställ</Button>
+                        </>
                         : null}
                     <Button variant='outlined' color="error" autoFocus onClick={() => setOpen(false)}>
                         <Close />
