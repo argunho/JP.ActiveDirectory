@@ -13,11 +13,8 @@ import { capitalize } from '@mui/material'
 import words from './../../json/words.json';
 import cities from 'cities.json';
 import colors from 'color-name-list';
-
-const _token = sessionStorage.getItem("token");
-const _config = {
-    headers: { 'Authorization': `Bearer ${_token}` }
-};
+import Error from './Response';
+import Response from './Response';
 
 export default function Form(props) {
     const { title, api, buttonText, name, multiple, users } = props;
@@ -45,6 +42,7 @@ export default function Form(props) {
     const [credentials, setCredentials] = useState(sessionStorage.getItem("credentials") === "ok");
     const [credentialError, setCredentialError] = useState(false);
     const [adminPassword, setAdminPassword] = useState("");
+    const [error, setError] = useState(null);
 
     const dslGenerate = !strongPassword && !ready;
 
@@ -60,13 +58,12 @@ export default function Form(props) {
                 "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
                 "<pre>* Minst en siffra</pre>" +
                 "<pre>* Minst ett specialtecken</pre>" +
-                "<pre>* Minst 6 & Max 20 karaktär i längd</pre>"
+                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
         },
         { label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa lösenord</pre>" }
     ]
 
     const passwordKeys = [
-        { label: "Elevens namn", value: "users" },
         { label: "Länder", value: "countries" },
         { label: "Alla städer/tätort", value: "cities" },
         { label: "Svenska städer/tätort", value: "svCities" },
@@ -84,7 +81,7 @@ export default function Form(props) {
     const refModal = useRef(null);
 
     // Regex to validate password
-    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{6,20}$/;
+    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
     const eng = /^[a-zA-Z]$/;
 
     useEffect(() => {
@@ -114,7 +111,33 @@ export default function Form(props) {
     // Confirm credential
     const confirmCredential = e => {
         e.preventDefault();
-        axios.get("auth/credential/" + adminPassword, _config);
+        setLoad(true);
+
+        const _token = sessionStorage.getItem("token");
+        const _config = {
+            headers: { 'Authorization': `Bearer ${_token}` }
+        };
+
+        axios.get("auth/credential/" + adminPassword, _config).then(res => {
+            setLoad(false);
+            if (res.data.success) {
+                sessionStorage.setItem("credentials", "ok");
+                setCredentials(true);
+            } else {
+                setResponse({
+                    alert: "warning",
+                    msg: res.data.msg
+                })
+                setCredentialError(true);
+            }
+
+        }, error => {
+            // Handle of error
+            setLoad(false);
+            setCredentialError(true);
+            if (error.response.status === 401) noAccess();
+            else setError(true);
+        })
     }
 
     // Set password type
@@ -134,7 +157,7 @@ export default function Form(props) {
         setPreviewList([]);
         const keyword = passwordKeys.find(x => x.label === e.target.value).value;
         let wList = words[keyword] || [];
-        if (wList.length === 0 && keyword !== "users") {
+        if (wList.length === 0) {
             if (keyword === "cities") wList = cities;
             else if (keyword === "colors") wList = colors;
             else wList = cities.filter(x => x.country === "SE");
@@ -153,10 +176,10 @@ export default function Form(props) {
     // Handle change of form value
     const valueChangeHandler = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
-        setResponse(null);
+        responseReset();
         if (form.confirmPassword) checkConfirm(e.target);
 
-        if (e.target.value.length >= 6 && errors?.indexOf(e.target.name) > -1)
+        if (e.target.value.length >= 8 && errors?.indexOf(e.target.name) > -1)
             resetError(e.target.name);
 
         resetForm(false);
@@ -192,19 +215,22 @@ export default function Form(props) {
 
                 password = strongPassword ? returnGeneratedPassword() : capitalize(password);
 
-                usersArray.push({
-                    name: users[i].name,
-                    displayName: users[i].displayName,
-                    office: users[i].office,
-                    department: users[i].department,
-                    password: password
-                })
+                if (regex.test.apply(password)) {
+                    usersArray.push({
+                        name: users[i].name,
+                        displayName: users[i].displayName,
+                        office: users[i].office,
+                        department: users[i].department,
+                        password: password
+                    })
 
-                setPreviewList(previewList => [...previewList, {
-                    displayName: users[i].displayName,
-                    password: `<p style='margin-bottom:20px;text-indent:15px'> 
+                    setPreviewList(previewList => [...previewList, {
+                        displayName: users[i].displayName,
+                        password: `<p style='margin-bottom:20px;text-indent:15px'> 
                                 Lösenord: <span style='color:#c00;font-weight:600;letter-spacing:0.5px'>${password}</span></p>`
-                }]);
+                    }]);
+                } else
+                    i -= 1;
             }
 
             setForm({ ...form, list: usersArray })
@@ -271,6 +297,29 @@ export default function Form(props) {
         }, 500)
     }
 
+    // No access
+    const noAccess = () => {
+        setResponse({
+            msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
+            alert: "error"
+        })
+        setTimeout(() => { history.push("/"); }, 5000);
+    }
+
+    // Response alert
+    const alert = (visible) => {
+        if (!visible) return null;
+
+        return <Response error={error} response={response} reset={() => responseReset()} />
+    }
+
+    // Response reset
+    const responseReset = () => {
+        setResponse(null);
+        setError(null);
+        setCredentialError(false);
+    }
+
     // Reset form
     const resetForm = (reset, save = false) => {
         setRegexError(false);
@@ -279,7 +328,7 @@ export default function Form(props) {
         setConfirmSubmit(false);
         setPassType(true);
         setPreviewList([]);
-        if (!save) setResponse(null);
+        if (!save) responseReset();
         if (reset) {
             setNoConfirm(false);
             setForm(defaultForm);
@@ -291,6 +340,12 @@ export default function Form(props) {
     // Submit form
     const submitForm = e => {
         e.preventDefault();
+
+        const _token = sessionStorage.getItem("token");
+        const _config = {
+            headers: { 'Authorization': `Bearer ${_token}` }
+        };
+
 
         // Validate form
         if (!variousPassword) {
@@ -331,15 +386,9 @@ export default function Form(props) {
             }
         }, error => {
             // Handle of error
-            if (error.response.status === 401) {
-                setResponse({
-                    msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
-                    alert: "error"
-                })
-                setLoad(false);
-                setTimeout(() => { history.push("/"); }, 3000)
-            } else
-                console.error("Error => " + error.response)
+            setLoad(false);
+            if (error.response.status === 401) noAccess();
+            else setError(true);
         })
     }
 
@@ -351,7 +400,7 @@ export default function Form(props) {
                 <div className='confirm-block'>
 
                     {/* Response message */}
-                    {credentialError ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
+                    {alert(credentialError)}
 
                     <form onSubmit={confirmCredential}>
                         <TextField
@@ -362,7 +411,7 @@ export default function Form(props) {
                             name="adminPassword"
                             value={adminPassword}
                             inputProps={{
-                                minLength: 6,
+                                minLength: 8,
                                 autoComplete: adminPassword,
                                 form: { autoComplete: 'off', }
                             }}
@@ -370,8 +419,11 @@ export default function Form(props) {
                             disabled={load}
                             onChange={(e) => setAdminPassword(e.target.value)}
                         />
-                        <Button variant='contained' disabled={load || adminPassword.length < 6} type="submit">
-                            {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Jag bekräftar mina behörigheter"}
+                        <Button
+                            variant='contained'
+                            disabled={load || adminPassword.length < 8}
+                            type="submit">
+                            Jag bekräftar mina behörigheter
                         </Button>
                     </form>
                 </div>
@@ -463,7 +515,7 @@ export default function Form(props) {
             </div> : null}
 
             {/* Response message */}
-            {response ? <Alert className='alert' severity={response?.alert}>{response?.msg}</Alert> : null}
+            {alert(!credentialError && response)}
 
             {/* Password form */}
             <form className='user-view-form' onSubmit={submitForm}>
@@ -481,7 +533,7 @@ export default function Form(props) {
                                 value={form[n.name] || ""}
                                 inputProps={{
                                     maxLength: 20,
-                                    minLength: 6,
+                                    minLength: 8,
                                     autoComplete: formList[n.name],
                                     form: { autoComplete: 'off', }
                                 }}

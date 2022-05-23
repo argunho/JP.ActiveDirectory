@@ -48,20 +48,54 @@ public class AuthController : ControllerBase
                 access = true,
                 alert = "success",
                 token = token,
-                msg = "Din åtkomst behörighet har bekräftats."
+                msg = "Din åtkomstbehörighet har bekräftats."
             });//Success! Your access has been confirmed.
         }
 
         return new JsonResult(new { access = false, alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); //Failed! You do not have permission to edit a student's password
     }
 
-    [HttpPut("credential/{password}")]
+    [HttpGet("credential/{password}")]
     [Authorize]
-    public ActionResult SetPassword(string password)
+    public JsonResult SetFullCredential(string password)
     {
-        AccessCredentials.Password = password;
+        if(AccessCredentials.Fixing != null)
+        {
+            var time = DateTime.Now.Ticks - AccessCredentials.Fixing?.AddMinutes(30).Ticks;
+            if (time < 0)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    msg = $"Du har redan gjort 4 försök att logga in och för att undvika ditt konto blockering, bör du vänta {time?.ToString("HH:mm:ss")}"
+                });
+            }
+        }
+        var errorMessage = "Felaktig lösenord.";
 
-        return Ok();
+        AccessCredentials.Fixing = null;
+        try
+        {
+            if (_provider.AccessValidation(AccessCredentials.Username, password))
+            {
+                AccessCredentials.Password = password;
+                AccessCredentials.Attempt = 0;
+                return new JsonResult(new { success = true });
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Fel: " + ex?.InnerException?.Message ?? ex.Message;
+        }
+
+        AccessCredentials.Attempt += 1;
+        if (AccessCredentials.Attempt == 3)
+        {
+            AccessCredentials.Attempt = 0;
+            AccessCredentials.Fixing = DateTime.Now;
+        }
+
+        return new JsonResult(new { success = false, msg = errorMessage});
     }
     #endregion
 
@@ -83,7 +117,7 @@ public class AuthController : ControllerBase
                 var token = CreateJwtToken(_provider.FindUserByName(model.Username));
                 AccessCredentials.Username = model.Username;
                 AccessCredentials.Password = model.Password;
-                return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomst behörighet har bekräftats." }); // Your access has been confirmed.
+                return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
             }
         }
         catch (Exception ex)
@@ -129,6 +163,8 @@ public class AuthController : ControllerBase
 
 public static class AccessCredentials
 {
-    public static string Username { get; set; }
-    public static string Password { get; set; }
+    public static string? Username { get; set; }
+    public static string? Password { get; set; }
+    public static int Attempt { get; set; }
+    public static Nullable<DateTime> Fixing { get; set; }
 }

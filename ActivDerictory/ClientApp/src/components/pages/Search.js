@@ -104,7 +104,6 @@ export class Search extends Component {
 
     // Handle a change of text fields and radio input value
     valueChangeHandler = (e, open) => {
-        console.log("changed )>" + this.state[e.target.name])
         if (!e.target) return;
         const inp = e.target;
         const inpRadio = (inp.type === "radio");
@@ -174,12 +173,8 @@ export class Search extends Component {
 
     // Recognize Enter press to submit search form
     handleKeyDown = (e) => {
-        console.log(e.target.name)
-        console.log(e.target.value)
         if (e.key === 'Enter') {
-            this.setState({
-                [e.target.name]: e.target.value
-            })
+            this.setState({ [e.target.name]: e.target.value });
             this.getSearchResult.bind(this);
         }
     }
@@ -244,19 +239,19 @@ export class Search extends Component {
             // If something is wrong, view error message in browser console
             if (errorMsg) console.error("Error => " + errorMsg)
         }, error => {
-            // Error handle
-            if (error.response.status === 401) {
+            // Error handle 
+            this.setState({  inProgress: false })
+            if (error.response.status === 401) {   
                 this.setState({
                     msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
                     alert: "error",
-                    isResult: true,
-                    inProgress: false
+                    isResult: true
                 })
                 setTimeout(() => {
                     this.props.history.push("/");
                 }, 3000)
             } else
-                console.error("Error => " + error.response)
+                console.error("Error => " + error.response)   
         });
     }
 

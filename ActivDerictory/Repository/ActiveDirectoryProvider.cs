@@ -22,32 +22,28 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
     public GroupPrincipal FindGroupName(string name)
         => GroupPrincipal.FindByIdentity(PContext(), name);
 
-    public List<Principal> GetUserSecurityGroups(string name)
-    {
-        var userPrincipal = FindUserByName(name);
-        if (userPrincipal == null)
-            throw new InvalidOperationException("Användare finns inte.");// User does not exist.
-
-        return userPrincipal.GetAuthorizationGroups().ToList();
-    }
-
     public bool AccessValidation(string? name, string? password = null)
         => PContext().ValidateCredentials(name, password);
 
     // Check user's membership in a specific group in which members have access  to change student password 
     public bool MembershipCheck(string username, string groupname = "Password Reset Students-EDU")
     {
-        List<Principal> groups = GetUserSecurityGroups(username);
+        var userPrincipal = FindUserByName(username);
+        if (userPrincipal == null) // User does not exist.
+            return false;
+
+        List<Principal> groups = userPrincipal.GetAuthorizationGroups().ToList();
+
         return groups.Find(x => x.Name == groupname) != null;
     }
- 
+
     public PrincipalContext GetContext() => PContext();
 
     public string ResetPassword(UserViewModel model)
     {
         try
         {
-            using (var context = PContext(model))
+            using (var context = PContexAccessCheck())
             {
                 using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
                 {
@@ -69,7 +65,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
 
     public string UnlockUser(UserViewModel model)
     {
-        using (var context = PContext(model))
+        using (var context = PContexAccessCheck())
         {
             using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
             {
@@ -92,6 +88,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
         }
         return string.Empty;
     }
+
     #endregion
 
     #region Helpers
@@ -99,8 +96,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
         new PrincipalContext(ContextType.Domain, domain, defaultOU);
 
 
-    public PrincipalContext PContext(UserViewModel model) =>
-        new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredentials.Username, AccessCredentials.Password);
-
+    public PrincipalContext PContexAccessCheck() 
+        => new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredentials.Username, AccessCredentials.Password);
     #endregion
 }

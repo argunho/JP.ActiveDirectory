@@ -368,7 +368,7 @@ input::placeholder {
   border-radius: 5px !important;
 }
 
-.MuiPaper-root {
+.MuiPaper-root:not(.alert) {
   padding: 20px 15px !important;
 }
 
