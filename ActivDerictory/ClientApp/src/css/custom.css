@@ -338,28 +338,6 @@ input::placeholder {
   color: #686868 !important
 }
 
-.list-wrapper {
-  border: 1px solid #bdbdbd;
-  padding: 10px 5px;
-  font-size: 12px !important;
-  color: #000 !important;
-  position: fixed;
-  top: 20px;
-  z-index: 3000;
-  background-color: #fff;
-}
-
-.list-wrapper > p {
-  font-weight: 600;
-  margin-bottom: 3px;
-  padding: 5px 3px !important;
-}
-
-.list-wrapper > p:hover {
-  background: #ededed;
-  cursor: pointer;
-}
-
 .modal-tips {
   width: 100% !important;
   margin: 3px auto 0 auto !important;

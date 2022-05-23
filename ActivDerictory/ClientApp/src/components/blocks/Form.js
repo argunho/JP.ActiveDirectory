@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import {
-    Alert, Button, Checkbox, CircularProgress,
+    Button, Checkbox, CircularProgress,
     FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, Select, TextField, Tooltip
 } from '@mui/material';
 import { ClearOutlined } from '@mui/icons-material';
@@ -13,11 +13,10 @@ import { capitalize } from '@mui/material'
 import words from './../../json/words.json';
 import cities from 'cities.json';
 import colors from 'color-name-list';
-import Error from './Response';
 import Response from './Response';
 
 export default function Form(props) {
-    const { title, api, buttonText, name, multiple, users } = props;
+    const { title, api, buttonText, name, multiple, users = [] } = props;
     const defaultForm = {
         name: name, list: [],
         password: "", confirmPassword: ""
@@ -602,13 +601,13 @@ export default function Form(props) {
                 </div>
 
                 {/* Preview the list of generated passwords */}
-                <ModalHelpTexts
+                {multiple && users.length > 0 ? <ModalHelpTexts
                     arr={previewList}
                     cls={" none"}
-                    title={`${title} <span class='typography-span'>${users[0].office + " " + users[0].department}</span>`}
+                    title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
                     button={true}
                     inverseFunction={() => refSubmit.current.click()}
-                    ref={refModal} />
+                    ref={refModal} /> : null}
             </form>
         </div>
     )

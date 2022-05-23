@@ -19,18 +19,13 @@ function PaperComponent(props) {
     );
 }
 
-function ModalHelpTexts({
-    arr,
-    cls = "",
-    button = false,
-    title = "Förklaring av sökparametrar",
-    inverseFunction },
-    ref) {
+function ModalHelpTexts({ arr, cls = "", button = false,
+    title = "Förklaring av sökparametrar", inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
-
+    
     const clickHandle = () => {
         inverseFunction();
         setOpen(false);

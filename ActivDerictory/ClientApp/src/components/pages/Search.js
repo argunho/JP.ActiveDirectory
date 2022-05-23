@@ -11,21 +11,6 @@ import {
 import Result from '../blocks/Result'
 import { capitalize } from '@mui/material'
 
-// const sOption = sessionStorage.getItem("sOption");
-// const clsSearch = (sOption === "members");
-
-// const [formKeys, setFormKeys] = useState(["inp01", "inp02"]);
-// const [users, setUsers] = useState(JSON.parse(sessionStorage.getItem("users")) || []);
-// const [inProgress, setInProgress] = useState(false);
-// const [isResult, setIsResult] = useState(false);
-// const [searchOption, setSearchOption] = useState(sOption || "users");
-// const [choiceList, setChoiceList] = useState(
-//     { label: "Match", match: true },
-//     { label: "Exakt", match: false }
-// )
-// const [clsStudents, setClsStudents] = useState(clsSearch);
-// const [match, setMatch]
-
 export class Search extends Component {
     static displayName = Search.name;
 
@@ -35,8 +20,8 @@ export class Search extends Component {
         const sOption = sessionStorage.getItem("sOption");
         const clsSearch = (sOption === "members");
         this.state = {
-            keyword: "",
-            extraKeyword: "",
+            inputKey: "",
+            extraInputkey: "",
             users: JSON.parse(sessionStorage.getItem("users")) || [],
             inProgress: false,
             isResult: false,
@@ -49,7 +34,6 @@ export class Search extends Component {
             match: true,
             warning: false,
             isCapitalize: clsSearch,
-            isActive: false,
             isOpen: false,
             isNoOptions: false,
             msg: "",
@@ -79,13 +63,13 @@ export class Search extends Component {
 
         // Help texts
         this.helpTexts = [
-            { label: "Änvändare", value: "user", tip: "Det här alternativet är till för att söka efter en specifik användare. Välj rätt sökalternativ nedan för att få den förväntande resultat." },
-            { label: "Klass elever", value: "members", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn." },
-            { label: "Versal", value: "isCapitalize", tip: "Matchning med Namn/Efternamn/Användarnamn vilka börjar med samma Versal." },
-            { label: "Match", value: "match", tip: "Matchningen av det angivna sökord bland alla elevers Namn/Efternamn/Användarnamn vilka innehåller angiven sökord." },
-            { label: "Exakt", value: "exact", tip: "Matchning med exakt stavat Namn/Efternamn/Användarnamn." },
-            { label: "Tips", value: "tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen." },
-            { label: "Resultat", value: "", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", color: "#c00" }
+            { label: "Änvändare", tip: "Det här alternativet är till för att söka efter en specifik användare. Välj rätt sökalternativ nedan för att få den förväntande resultat.", value: "user", },
+            { label: "Klass elever", tip: "Det här alternativet är till för att söka efter alla elever i en specifik klass med klass- och skolnamn.", value: "members" },
+            { label: "Versal", tip: "Matchning med Namn/Efternamn/Användarnamn vilka börjar med samma Versal.", value: "isCapitalize" },
+            { label: "Match", tip: "Matchningen av det angivna sökord bland alla elevers Namn/Efternamn/Användarnamn vilka innehåller angiven sökord.", value: "match" },
+            { label: "Exakt", tip: "Matchning med exakt stavat Namn/Efternamn/Användarnamn.", value: "exact" },
+            { label: "Tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen.", value: "tips" },
+            { label: "Resultat", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", value: "", color: "#c00" }
         ]
     }
 
@@ -107,7 +91,6 @@ export class Search extends Component {
         if (!e.target) return;
         const inp = e.target;
         const inpRadio = (inp.type === "radio");
-
         this.setState({
             [inp.name]: inpRadio ? inp.value === "true"
                 : (this.state.isCapitalize ? capitalize(inp.value) : inp.value),
@@ -115,19 +98,18 @@ export class Search extends Component {
             users: [],
             warning: false,
             isNoOptions: (open) ? this.schools.filter(x => x.value.includes(inp.value)).length === 0 : false,
-            isActive: (this.state.keyword || this.state.extraKeyword).length > 0,
             isCapitalize: (inpRadio && inp.value !== "true") ? false : this.state.isCapitalize
         })
-
         // Capitalize i js
         // str.charAt(0).toUpperCase() + str.slice(1)
     }
 
     // Handle a change of checkbox input value
     checkboxHandle = (capitalized) => {
-        const { keyword } = this.state
+        const { inputKey } = this.state
+
         this.setState({
-            keyword: capitalized ? capitalize(keyword) : keyword.toLowerCase(),
+            inputKey: capitalized ? capitalize(inputKey) : inputKey.toLowerCase(),
             isCapitalize: capitalized,
             isResult: false,
             users: [],
@@ -145,6 +127,8 @@ export class Search extends Component {
     setSearchParameter = value => {
         this.setState({
             sOption: value,
+            inputKey: "",
+            extraInputKey: "",
             users: [],
             isResult: false,
             match: this.state.clsStudents,
@@ -179,21 +163,6 @@ export class Search extends Component {
         }
     }
 
-    // Return schools list
-    schoolsList() {
-        // All schools list in Alvesta kommun
-        const schools = ["Mohedaskolan (Moheda)", "Grönkullaskolan (Alvesta)",
-            "Hagaskolan (Alvesta)",
-            "Prästängsskolan (Alvesta)",
-            "Hjortsbergaskolan (Hjortsberga)",
-            "Capellaskolan (Alvesta)", "Vislandaskolan (Vislanda)", "Skatelövskolan (Grimslöv)"
-        ]
-
-        return <div className='list-wrapper'>{schools.map((school, ind) => (
-            <p>{school}</p>
-        ))}</div>
-    }
-
     // Function - submit form
     async getSearchResult(e) {
         e.preventDefault();
@@ -210,16 +179,16 @@ export class Search extends Component {
         this.setState({ inProgress: true, users: [], isResult: false });
 
         // State parameters
-        const { keyword, match, isCapitalize, sOption, extraKeyword, clsStudents } = this.state;
+        const { inputKey, match, isCapitalize, sOption, extraInputkey, clsStudents } = this.state;
 
         // Return if form is invalid
-        if (keyword.length < 2) return;
+        if (inputKey.length < 2) return;
 
         // API parameters by chosen searching alternative
-        const params = (!clsStudents) ? match + "/" + isCapitalize : extraKeyword;
+        const params = (!clsStudents) ? match + "/" + isCapitalize : extraInputkey;
 
         // API request
-        await axios.get("search/" + sOption + "/" + keyword + "/" + params, _config).then(res => {
+        await axios.get("search/" + sOption + "/" + inputKey + "/" + params, _config).then(res => {
             // Response
             const { warning, msg, users, errorMsg, alert } = res.data;
             // Update state parameters
@@ -228,8 +197,8 @@ export class Search extends Component {
                     users: users || [],
                     inProgress: false,
                     isResult: true,
-                    keyword: users?.length > 0 ? "" : keyword,
-                    extraKeyword: users?.length > 0 ? "" : extraKeyword,
+                    inputKey: users?.length > 0 ? "" : inputKey,
+                    extraInputkey: users?.length > 0 ? "" : extraInputkey,
                     warning: warning,
                     msg: msg,
                     alert: (alert) ? alert : this.state.alert
@@ -260,12 +229,14 @@ export class Search extends Component {
         const { users, inProgress,
             isResult, choiceList, match, msg, warning,
             alert, isCapitalize, sOption, showTips,
-            clsStudents, isActive, isOpen, isNoOptions } = this.state;
+            clsStudents, isOpen, isNoOptions } = this.state;
 
         // List of text fields
-        const sFormParams = !clsStudents ? [{ name: "keyword", label: "Namn", placeholder: (!match) ? "Skriv exakt fullständigt namn eller anvädarnamn här ..." : "", autoOpen: false }]
-            : [{ name: "keyword", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Skriv exakt klassbeteckning här ...", autoOpen: false },
-            { name: "extraKeyword", label: "Skolnamn", clsName: "search-second-input", placeholder: "Skriv exakt skolnamn här ..", autoOpen: true }];
+        const sFormParams = !clsStudents ? [{ name: "inputKey", label: "Namn", placeholder: (!match) ? "Skriv exakt fullständigt namn eller anvädarnamn här ..." : "", autoOpen: false }]
+            : [{ name: "inputKey", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Skriv exakt klassbeteckning här ...", autoOpen: false },
+            { name: "extraInputkey", label: "Skolnamn", clsName: "search-second-input", placeholder: "Skriv exakt skolnamn här ..", autoOpen: true }];
+
+        const isActive = (this.state.inputKey || this.state.extraInputkey).length > 0;
 
 
         return (
@@ -317,7 +288,7 @@ export class Search extends Component {
                         color="error"
                         className="search-reset"
                         disabled={inProgress}
-                        onClick={() => this.setState({ keyword: "", extraKeyword: "", isOpen: false })}>
+                        onClick={() => this.setState({ inputKey: "", extraInputkey: "", isOpen: false })}>
                         <SearchOffSharp />
                     </Button> : null}
 
