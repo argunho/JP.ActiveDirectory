@@ -445,8 +445,9 @@ button {
   font-size: 12px !important;
 }
 
-.submit-btn {
-  width: 100px !important;
+.button-btn {
+  width: max-content;
+  min-width: 100px !important;
   height: 38px;
 }
 

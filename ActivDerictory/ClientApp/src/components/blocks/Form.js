@@ -584,7 +584,7 @@ export default function Form(props) {
                     {/* Submit/Preview form */}
                     {variousPassword ?
                         <Button variant="contained"
-                            className='submit-btn'
+                            className='button-btn'
                             color="primary"
                             disabled={load || previewList.length === 0}
                             onClick={() => refModal.current.click()}>
@@ -593,7 +593,7 @@ export default function Form(props) {
 
                     <Button variant="outlined"
                         ref={refSubmit}
-                        className={'submit-btn' + (variousPassword ? " none" : "")}
+                        className={'button-btn' + (variousPassword ? " none" : "")}
                         color="primary"
                         type='submit'
                         disabled={load || (!variousPassword && (noConfirm || regexError))}>

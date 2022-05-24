@@ -77,11 +77,12 @@ function ModalHelpTexts({ arr, cls = "", button = false,
                             <Button 
                             variant="text"
                                 color="inherit"
+                                className='button-btn'
                                 onClick={() => saveApply()}>
                                 Spara & Verkställ
                             </Button>
                             <Button variant="outlined"
-                                className='submit-btn'
+                                className='button-btn'
                                 color="primary"
                                 onClick={() => clickHandle()}>
                                 Verkställ</Button>

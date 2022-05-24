@@ -96,7 +96,7 @@ export class Login extends Component {
                 ))}
 
                 <Button variant="outlined"
-                    className='submit-btn'
+                    className='button-btn'
                     color="primary"
                     type="submit"
                     title="Logga in"
