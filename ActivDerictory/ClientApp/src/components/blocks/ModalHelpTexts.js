@@ -20,13 +20,18 @@ function PaperComponent(props) {
 }
 
 function ModalHelpTexts({ arr, cls = "", button = false,
-    title = "Förklaring av sökparametrar", inverseFunction }, ref) {
+    title = "Förklaring av sökparametrar", inverseFunction, modalClass = "modal-tips" }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
 
     const clickHandle = () => {
+        inverseFunction();
+        setOpen(false);
+    }
+
+    const saveApply = () => {
         inverseFunction();
         setOpen(false);
     }
@@ -56,21 +61,25 @@ function ModalHelpTexts({ arr, cls = "", button = false,
                     id="draggable-dialog-title"
                     dangerouslySetInnerHTML={{ __html: title }}>
                 </DialogTitle>
-                <DialogContent>
-                    {arr.map((a, i) => (<div key={i} className="modal-tips">
-                        <AlertTitle style={{ fontWeight: 600 }}>
-                            <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
-                        </AlertTitle>
-                        <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
-                    </div>))}
+                <DialogContent style={{marginBottom: "25px"}}>
+                    {arr.map((a, i) => (
+                        <div key={i} className={modalClass}>
+                            <AlertTitle style={{ fontWeight: 600 }}>
+                                <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
+                            </AlertTitle>
+                            <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
+                        </div>
+                    ))}
                 </DialogContent>
                 <DialogActions>
                     {button ?
                         <>
-                            <Button variant="outlined" autoFocus
-                                color="primary"
-                                onClick={() => clickHandle()}>
-                                Verkställ & Spara som PDF</Button>
+                            <Button 
+                            variant="text"
+                                color="inherit"
+                                onClick={() => saveApply()}>
+                                Spara & Verkställ
+                            </Button>
                             <Button variant="outlined"
                                 className='submit-btn'
                                 color="primary"

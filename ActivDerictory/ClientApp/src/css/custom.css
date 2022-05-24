@@ -338,7 +338,8 @@ input::placeholder {
   color: #686868 !important
 }
 
-.modal-tips {
+.modal-tips,
+.modal-block {
   width: 100% !important;
   margin: 3px auto 0 auto !important;
   font-size: 12px !important;
@@ -346,11 +347,20 @@ input::placeholder {
   border-radius: 5px !important;
 }
 
+.modal-block {
+  width: calc(50% - 10px) !important;
+  margin: 3px 2.5px !important;
+  float: left;
+  border: 1px solid #c2c0c0;
+  padding: 20px !important;
+}
+
 .MuiPaper-root:not(.alert) {
   padding: 20px 15px !important;
 }
 
-.modal-tips > div {
+.modal-tips > div,
+.modal-block > div {
   color: rgba(0, 0, 0, 0.9) !important;
 }
 

@@ -517,10 +517,10 @@ export default function Form(props) {
             {alert(!credentialError && response)}
 
             {/* Password form */}
+            
             <form className='user-view-form' onSubmit={submitForm}>
-
                 {/* Passwords inputs */}
-                <div className={`inputs-wrapper dropdown-div${(!variousPassword ? " dropdown-open" : "")}`}>
+                {!variousPassword ?<div className={`inputs-wrapper dropdown-div${(!variousPassword ? " dropdown-open" : "")}`}>
                     {formList.length > 0 ? formList.map((n, i) => (
                         <FormControl key={i} className="pr-inputs">
                             <TextField
@@ -544,7 +544,7 @@ export default function Form(props) {
                                 onBlur={() => validateField(n.name)}
                             />
                         </FormControl>)) : null}
-                </div>
+                </div> : null}
 
                 <div className='buttons-wrapper'>
                     {/* Change the password input type */}
@@ -601,13 +601,15 @@ export default function Form(props) {
                 </div>
 
                 {/* Preview the list of generated passwords */}
-                {multiple && users.length > 0 ? <ModalHelpTexts
-                    arr={previewList}
-                    cls={" none"}
-                    title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
-                    button={true}
-                    inverseFunction={() => refSubmit.current.click()}
-                    ref={refModal} /> : null}
+                {multiple && users.length > 0
+                    ? <ModalHelpTexts
+                        arr={previewList}
+                        cls={" none"}
+                        title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
+                        button={true}
+                        inverseFunction={() => refSubmit.current.click()}
+                        modalClass={"modal-block"}
+                        ref={refModal} /> : null}
             </form>
         </div>
     )
