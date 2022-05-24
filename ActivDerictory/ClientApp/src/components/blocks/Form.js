@@ -606,6 +606,7 @@ export default function Form(props) {
                         arr={previewList}
                         cls={" none"}
                         title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
+                        list={users}
                         button={true}
                         inverseFunction={() => refSubmit.current.click()}
                         modalClass={"modal-block"}
