@@ -1,77 +1,67 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Button } from '@mui/material';
+import { jsPDF } from "jspdf";
+
+export default function PDFConverter({ name, subTitle, content }) {
+    const regex = /(<([^>]+)>)/ig;
+
+    const saveApply = () => {
+        const doc = new jsPDF('p', 'pt', 'a4');
+
+        const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
+
+        // doc.setFontSize(15);
+        // doc.text(name, 15, 5);
+        //     if (defHeight >= pageHeight)
+        //         doc.addPage();
+        // for(let i;i < content.length;i++){
+        //     doc.setFontSize(14);
+        //     doc.text(content[i].displayName, 15, 70 + (15*i));
+        //     // doc.setFontSize(12);
+        //     // doc.html(c.password);
+        // }
 
 
-// Create styles
-const styles = StyleSheet.create({
-    page: {
-        flexDirection: 'row',
-        backgroundColor: '#E4E4E4',
-        paddingTop: 35,
-        paddingBottom: 65,
-        paddingHorizontal: 35
-    },
-    header: {
-        fontSize: 12,
-        marginBottom: 20,
-        textAlign: "center",
-        color: "#C8C8C8"
-    },
-    title: {
-        fontSize: 24,
-        textAlign: "center"
-    },
-    text: {
-        margin: 12,
-        fontSize: 14,
-        textAlign: "justify",
-        fontFamily: "Times-Roman"
-    },
-    section: {
-        margin: 10,
-        padding: 10,
-        flexGrow: 1
-    },
-    pagination: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: 30,
-        fontSize: 12, color: "#C8C8C8"
+        doc.setFont("Times-Roman");
+        doc.setFontSize(20);
+        doc.text(name, 15, 50);
+
+        doc.setFontSize(10)
+        doc.setTextColor(12, 130, 51);
+        doc.text(subTitle, pageWidth - 80, 10);
+
+        let position = 90;
+        for (let i = 0; i < content.length; i++) {
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text(content[i].displayName, 25, position);
+            if (position > pageHeight) {
+                doc.addPage();
+                position = 15;
+            }
+            doc.setFontSize(9);
+            doc.setTextColor(53, 53, 53);
+
+            const pass = content[i].password.replace(regex, '').replaceAll(" ", "");
+            doc.text(pass, 35, position + 5)
+            if (position > pageHeight) {
+                doc.addPage();
+                position = 15;
+            }
+            position += 40;
+        }
+
+        doc.save(name + " " + subTitle + ".pdf");
     }
-});
-
-function PDFDocument(props) {
-    const keys = props?.content.length > 0 ? Object.keys(props.content[0]) : [];
 
     return (
-        <Document>
-            <Page size="A4" style={styles.page}>
-                <View style={styles.section}>
-                    <Text style={styles.header} fixed dangerouslySetInnerHTML={{ _html: props?.title }}></Text>
-                    {props?.content.map((c, i) => (
-                        <div key={i} className={props.contentClass}>
-                            <p style={{ fontWeight: 600 }}>
-                                <span style={{ color: (c?.color ? c.color : "#000") }}>{c[keys[0]]}</span>
-                            </p>
-                            <div dangerouslySetInnerHTML={{ __html: c[keys[1]] }}></div>
-                        </div>
-                    ))}
-                </View>
-                <Text style={styles.pagination}
-                    render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}>
-                </Text>
-            </Page>
-        </Document>
+        <Button
+            variant="text"
+            color="inherit"
+            className='button-btn'
+            onClick={() => saveApply()}>
+            Spara & Verkställ
+        </Button>
     )
 }
-
-// export default function PDFButtonLink(props) {
-//     return (
-//         <PDFDownloadLink document={<PDFDocument {...props} />} fileName="FORM">
-//             {({ loading }) => (loading ? 'Obs' : "Save & Verkställ")}
-//         </PDFDownloadLink>
-//     )
-// }
-
-export default PDFDocument;
