@@ -76,6 +76,7 @@ function ModalHelpTexts({ arr, users, cls = "", button = false,
                                 name={title}
                                 names={["Namn", "Lösenord"]}
                                 list={users}
+                                submit={() => clickHandle()}
                             />
                             <Button variant="outlined"
                                 className='button-btn'

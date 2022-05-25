@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable'
 
-export default function PDFConverter({ name, names, list }) {
+export default function PDFConverter({ name, names, list, submit }) {
     const regex = /(<([^>]+)>)/ig;
     const keys = list.length > 0 ? Object.keys(list[0]) : [];
 
@@ -21,7 +21,11 @@ export default function PDFConverter({ name, names, list }) {
             html: "#list"
         });
 
+        setTimeout(() => {
         doc.save(name.replaceAll(regex,"") + ".pdf");
+        }, 100)
+
+        submit();
         //     // Convert HTML to PDF in JavaScript
         //     const pdfContent = document.querySelector('#content');
         //     doc.html(pdfContent, {
@@ -71,9 +75,7 @@ export default function PDFConverter({ name, names, list }) {
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        {names.map((n, i) => (
-                            <th scope="col" key={i}>{n}</th>
-                        ))}
+                        {names.map((n, i) => (  <th scope="col" key={i}>{n}</th> ))}
                     </tr>
                 </thead>
                 <tbody>

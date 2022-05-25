@@ -320,6 +320,11 @@ export default function Form(props) {
         setCredentialError(false);
     }
 
+    // Handle keydown
+    const handleKeydown = (e) => {
+        if (e.key === 'Enter') confirmCredential(e);
+    }
+
     // Reset form
     const resetForm = (reset, save = false) => {
         setRegexError(false);
@@ -417,6 +422,7 @@ export default function Form(props) {
                             }}
                             placeholder="Din admin lösenord här ..."
                             disabled={load}
+                            onKeyDown={() => handleKeydown()}
                             onChange={(e) => setAdminPassword(e.target.value)}
                         />
                         <Button
