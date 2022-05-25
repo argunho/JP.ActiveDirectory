@@ -20,7 +20,7 @@ function PaperComponent(props) {
     );
 }
 
-function ModalHelpTexts({ arr, list, cls = "", button = false,
+function ModalHelpTexts({ arr, users, cls = "", button = false,
     title = "Förklaring av sökparametrar", modalClass = "modal-tips", inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
@@ -28,11 +28,6 @@ function ModalHelpTexts({ arr, list, cls = "", button = false,
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
 
     const clickHandle = () => {
-        inverseFunction();
-        setOpen(false);
-    }
-
-    const saveApply = () => {
         inverseFunction();
         setOpen(false);
     }
@@ -56,13 +51,14 @@ function ModalHelpTexts({ arr, list, cls = "", button = false,
                 onClose={() => setOpen(false)}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
-                className='modal-wrapper'>
+                className='modal-wrapper' id="content">
+
                 <DialogTitle
                     style={{ cursor: 'move' }}
                     id="draggable-dialog-title"
                     dangerouslySetInnerHTML={{ __html: title }}>
                 </DialogTitle>
-                <DialogContent style={{ marginBottom: "25px", width: "100%" }} id="content">
+                <DialogContent style={{ marginBottom: "25px" }} className="row">
                     {arr.map((a, i) => (
                         <div key={i} className={modalClass}>
                             <AlertTitle style={{ fontWeight: 600 }}>
@@ -72,10 +68,15 @@ function ModalHelpTexts({ arr, list, cls = "", button = false,
                         </div>
                     ))}
                 </DialogContent>
-                <DialogActions>
+
+                <DialogActions style={{ position: "relative", overflow: "hidden" }}>
                     {button ?
                         <>
-                            <PDFConverter name={`Nya lösenord till ${list.length} elever`} subTitle={list[0]?.office + " " + list[0]?.department} content={arr} />
+                            <PDFConverter
+                                name={title}
+                                names={["Namn", "Lösenord"]}
+                                list={users}
+                            />
                             <Button variant="outlined"
                                 className='button-btn'
                                 color="primary"

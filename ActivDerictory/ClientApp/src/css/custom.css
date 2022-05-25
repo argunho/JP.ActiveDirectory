@@ -507,6 +507,10 @@ button {
 }
 
 /* Modal */
+.modal-wrapper {
+  overflow: hidden;
+}
+
 .modal-wrapper > .MuiDialog-container > div {
   width: 100% !important;
   max-width: 800px !important;
@@ -517,4 +521,19 @@ button {
   display: block !important;
   margin: 15px 0 !important;
   width: max-content !important;
+}
+
+.hidden-content {
+  display: none;
+  height: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+@media all {
+	.page-break	{ display: none; }
+}
+
+@media print {
+	.page-break	{ display: block; page-break-before: always; }
 }

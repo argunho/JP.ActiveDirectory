@@ -225,8 +225,9 @@ export default function Form(props) {
 
                     setPreviewList(previewList => [...previewList, {
                         displayName: users[i].displayName,
-                        password: `<p style='margin-bottom:20px;text-indent:15px'> 
-                                Lösenord: <span style='color:#c00;font-weight:600;letter-spacing:0.5px'>${password}</span></p>`
+                        passwordHtml: `<p style='margin-bottom:20px;text-indent:15px'> 
+                                Lösenord: <span style='color:#c00;font-weight:600;letter-spacing:0.5px'>${password}</span></p>`,
+                        password: password                        
                     }]);
                 } else
                     i -= 1;
@@ -606,7 +607,7 @@ export default function Form(props) {
                         arr={previewList}
                         cls={" none"}
                         title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
-                        list={users}
+                        users={previewList}
                         button={true}
                         inverseFunction={() => refSubmit.current.click()}
                         modalClass={"modal-block"}
