@@ -8,7 +8,7 @@ import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
 import { AlertTitle, Checkbox, FormControlLabel } from '@mui/material';
 import { Close, HelpOutline, LiveHelpOutlined } from '@mui/icons-material';
-import PDFConverter from "./PDFConverter";
+// import PDFConverter from "./PDFConverter";
 
 function PaperComponent(props) {
     return (
@@ -20,15 +20,16 @@ function PaperComponent(props) {
     );
 }
 
-function ModalHelpTexts({ arr, users, cls = "", button = false,
-    title = "Förklaring av sökparametrar", modalClass = "modal-tips", inverseFunction }, ref) {
+function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
+    title = "Förklaring av sökparametrar", modalClass = "modal-tips", 
+    inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
 
-    const clickHandle = () => {
-        inverseFunction();
+    const clickHandle = (save) => {
+        inverseFunction(save);
         setOpen(false);
     }
 
@@ -70,18 +71,18 @@ function ModalHelpTexts({ arr, users, cls = "", button = false,
                 </DialogContent>
 
                 <DialogActions style={{ position: "relative", overflow: "hidden" }}>
-                    {button ?
-                        <>
-                            <PDFConverter
-                                name={title}
-                                names={["Namn", "Lösenord"]}
-                                list={users}
-                                submit={() => clickHandle()}
-                            />
+                    {submit ?
+                        <>                   
                             <Button variant="outlined"
                                 className='button-btn'
                                 color="primary"
-                                onClick={() => clickHandle()}>
+                                onClick={() => clickHandle(true)}>
+                                Spara & Verkställ</Button>
+
+                            <Button variant="outlined"
+                                className='button-btn'
+                                color="primary"
+                                onClick={() => clickHandle(false)}>
                                 Verkställ</Button>
                         </>
                         : null}

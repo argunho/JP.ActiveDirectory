@@ -1,31 +1,33 @@
-import React from 'react';
-import { Button } from '@mui/material';
+import React, { useEffect } from 'react';
+// import { Button } from '@mui/material';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable'
 
-export default function PDFConverter({ name, names, list, submit }) {
+export default function PDFConverter({ name, names, list, reset, savePdf }) {
     const regex = /(<([^>]+)>)/ig;
     const keys = list.length > 0 ? Object.keys(list[0]) : [];
+
+    useEffect(() => {
+        if (savePdf) saveApply();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savePdf])
 
     const saveApply = () => {
         // const doc = new jsPDF('l', 'mm', [800, 801]);        
         const doc = new jsPDF('p', 'pt', 'a4');
         doc.setFontSize(20);
-        doc.text(name.replaceAll(regex,""), 40, 50);
+        doc.text(name.replaceAll(regex, ""), 40, 50);
 
         doc.autoTable({
             margin: { top: 70 },
             headStyles: { fillColor: [31, 114, 47], cellPadding: 12 },
             bodyStyles: { cellPadding: 11 },
-            columnStyles: { 2: {textColor: [208,66,66]} },
+            columnStyles: { 2: { textColor: [208, 66, 66] } },
             html: "#list"
         });
-
-        setTimeout(() => {
-        doc.save(name.replaceAll(regex,"") + ".pdf");
-        }, 100)
-
-        submit();
+            
+        doc.save(name.replaceAll(regex, "") + ".pdf");
+        reset();
         //     // Convert HTML to PDF in JavaScript
         //     const pdfContent = document.querySelector('#content');
         //     doc.html(pdfContent, {
@@ -69,34 +71,36 @@ export default function PDFConverter({ name, names, list, submit }) {
     }
 
     return (
-        <>
-            {/* Table to print */}
-            <table className="table hidden-content" id="list">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        {names.map((n, i) => (  <th scope="col" key={i}>{n}</th> ))}
+        <table className="table hidden-content" id="list">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    {names.map((n, i) => (<th scope="col" key={i}>{n}</th>))}
+                </tr>
+            </thead>
+            <tbody>
+                {list.map((l, ind) => (
+                    <tr key={ind}>
+                        <th scope="row">{ind + 1}</th>
+                        <td>{l[keys[0]]}</td>
+                        <td>{l[keys[2]]}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {list.map((l, ind) => (
-                        <tr key={ind}>
-                            <th scope="row">{ind + 1}</th>
-                            <td>{l[keys[0]]}</td>
-                            <td>{l[keys[2]]}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                ))}
+            </tbody>
+        </table>
+    )
+}
 
-            {/* Click button to download pdf */}
-            <Button
+// <>
+{/* Table to print */ }
+
+
+{/* Click button to download pdf */ }
+{/* <Button
                 variant="text"
                 color="inherit"
                 className='button-btn'
                 onClick={() => saveApply()}>
                 Spara & Verkställ
             </Button>
-        </>
-    )
-}
+        </> */}

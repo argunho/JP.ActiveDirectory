@@ -296,6 +296,10 @@ input::placeholder {
   margin: 10px auto 25px auto !important;
 }
 
+.collapse-wrapper .alert {
+  width: 95% !important;
+}
+
 .disabled,
 .disabled:hover {
   opacity: 0.3 !important;
@@ -380,9 +384,9 @@ pre {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0, 0.3);
+  background: rgba(0,0,0, 0.1);
   transition: all 0.5s ease-in;
-  z-index: 3000;
+  z-index: 1000;
   display: flex;
   justify-content: center;
 }
@@ -421,7 +425,7 @@ pre {
 
 .buttons-wrapper > button {
   display: inline;
-  margin: 0 10px;
+  margin-left: 20px;
 }
 
 form .buttons-wrapper {
@@ -504,6 +508,20 @@ button {
   border: 1px solid #bdbdbd;
   margin: 10px 0;
   position: relative;
+  min-height: 250px;
+  max-height: 1000px;
+  transition: all 0.9s ease-in-out;
+}
+
+.curtain-block {
+  position: absolute;
+  display: block;
+  z-index: 5000;
+  left: 0;
+  top: 0;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
 }
 
 /* Modal */
