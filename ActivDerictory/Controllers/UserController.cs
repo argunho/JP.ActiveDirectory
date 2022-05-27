@@ -1,5 +1,6 @@
 ﻿using ActiveDirectory.Interface;
 using ActiveDirectory.Models;
+using ActiveDirectory.Repositories;
 using ActiveDirectory.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace ActiveDirectory.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+    //[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IActiveDirectoryProvider _provider;
@@ -18,7 +20,6 @@ public class UserController : ControllerBase
 
     #region GET
     [HttpGet("{name}")]
-    [Authorize]
     public JsonResult GetUser(string name)
     {
         var user = _provider.FindUserByExtensionProperty(name);
@@ -38,7 +39,6 @@ public class UserController : ControllerBase
 
     #region POST
     [HttpPost("resetPassword")]
-    [Authorize]
     public JsonResult ResetPasword(UserViewModel model)
     {
         var warning = ReturnWarningsMessage(model);
@@ -49,7 +49,6 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("setPasswords")]
-    [Authorize]
     public JsonResult SetMultiplePaswords(UserViewModel model)
     {
         var warning = ReturnWarningsMessage(model);
@@ -63,7 +62,6 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("unlock")]
-    [Authorize]
     public JsonResult UnlockUser(UserViewModel model)
     {
         var message = _provider.UnlockUser(model);
@@ -72,10 +70,31 @@ public class UserController : ControllerBase
 
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); // Success! User unlocked successfully!
     }
+
+    [HttpGet("mail/{recipient}/{title}/{content}")]
+    public JsonResult SendEmail(string recipient, string title, string content, string mail, string password)
+    {
+        var send = false;
+        try
+        {
+            MailRepository ms = new MailRepository();
+
+            string template = MailRepository.Templates["mail"];
+
+            template = (template.Replace("{content}", content));
+
+           send = ms.SendMail(recipient, title, template, mail, password);
+        }
+        catch (Exception e)
+        {
+        }
+
+        return new JsonResult(new { result = send });
+    }
     #endregion
-    
+
     #region Helpers
-    public JsonResult ReturnWarningsMessage(UserViewModel model)
+    public JsonResult? ReturnWarningsMessage(UserViewModel model)
     {
         if (!ModelState.IsValid)
             return new JsonResult(new { alert = "warning", msg = "Felaktigt eller ofullständigt ifyllda formulär" }); // Forms filled out incorrectly

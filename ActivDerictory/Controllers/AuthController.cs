@@ -168,3 +168,8 @@ public static class AccessCredentials
     public static int Attempt { get; set; }
     public static Nullable<DateTime> Fixing { get; set; }
 }
+
+public static class EmailCredentials {
+    public static string? Email { get; set; }
+    public static string? Password { get; set; }
+}
