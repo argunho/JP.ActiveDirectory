@@ -46,6 +46,8 @@ export default function Form(props) {
     const [error, setError] = useState(null);
     const [confirmSavePdf, setConfirmSavePdf] = useState(false);
     const [savePdf, setSavePdf] = useState(false);
+    const [savedPdf, setSavedPdf] = useState(null);
+    const [sendEmail, setSendEmail] = useState(true);
 
     const dslGenerate = !strongPassword && !ready;
 
@@ -113,6 +115,12 @@ export default function Form(props) {
         setPreviewList([]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [randomNumber])
+
+    useEffect(() => {
+        if (savedPdf != null && savePdf)
+            sendEmailWidthFile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savedPdf, sendEmail])
 
     // Confirm credential
     const confirmCredential = e => {
@@ -335,7 +343,7 @@ export default function Form(props) {
 
     // Handle keydown
     const handleKeydown = (e) => {
-        if (e.Key === 'Enter') confirmCredential(e);
+        if (e?.key === 'Enter') confirmCredential(e);
     }
 
     // Reset form
@@ -359,7 +367,7 @@ export default function Form(props) {
     }
 
     // Submit form
-    const submitForm = e => {
+    const submitForm = async (e) => {
         e.preventDefault();
 
         const _token = sessionStorage.getItem("token");
@@ -393,28 +401,52 @@ export default function Form(props) {
         } else
             setConfirmSubmit(false);
 
-        setSavePdf(confirmSavePdf);
         if (variousPassword)
             setPreview(!preview);
 
         setLoad(true);
 
         // Request
-        axios.post("user/" + api, form, _config).then(res => {
+        await axios.post("user/" + api, form, _config).then(res => {
             setResponse(res.data);
             setLoad(false);
             if (res.data?.success) {
-                setTimeout(() => {
-                    resetForm(true, true);
+                setSavePdf(confirmSavePdf);
+                    setTimeout(() => {
+                        resetForm(true, true);
 
-                    if (res.data?.unlocked)
-                        props.refreshUserData();
-                }, 3000)
+                        if (res.data?.unlocked)
+                            props.refreshUserData();
+                    }, 5000)
             }
         }, error => {
             // Handle of error
             resetForm(false);
             setLoad(false);
+            if (error?.response.status === 401) noAccess();
+            else setError(true);
+        })
+    }
+
+    // Send email to current user with saved pdf document
+    const sendEmailWidthFile = async () => {
+
+        const _token = sessionStorage.getItem("token");
+        const _config = {
+            headers: { 'Authorization': `Bearer ${_token}` }
+        };
+
+        const info = users[0];
+        const title = `Lösenord till ${info?.office} ${info?.department} elever`;
+
+        const data = new FormData();
+        data.append('attachedFile', savedPdf);
+
+        await axios.post(`user/mail/${title}`, data, _config).then(res => {
+            if (res.data?.success)
+                setResponse(res.data);
+        }, error => {
+            // Handle of error
             if (error?.response.status === 401) noAccess();
             else setError(true);
         })
@@ -452,7 +484,7 @@ export default function Form(props) {
                                 }}
                                 placeholder="Din admin lösenord här ..."
                                 disabled={load}
-                                onKeyDown={() => handleKeydown()}
+                                onKeyDown={(e) => handleKeydown(e)}
                                 onChange={(e) => setAdminPassword(e.target.value)}
                             />
                             <Button
@@ -644,8 +676,8 @@ export default function Form(props) {
                         name={title}
                         names={["Namn", "Lösenord"]}
                         list={previewList}
-                        reset={() => setSavePdf(false)}
-                        savePdf={savePdf} /> : null}
+                        savedPdf={(pdf) => setSavedPdf(pdf)}
+                    /> : null}
                 </>}
         </div>
     )

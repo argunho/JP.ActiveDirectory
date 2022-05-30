@@ -3,7 +3,9 @@ using ActiveDirectory.Models;
 using ActiveDirectory.Repositories;
 using ActiveDirectory.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace ActiveDirectory.Controllers;
 
@@ -71,22 +73,24 @@ public class UserController : ControllerBase
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); // Success! User unlocked successfully!
     }
 
-    [HttpGet("mail/{recipient}/{title}/{content}")]
-    public JsonResult SendEmail(string recipient, string title, string content, string mail, string password)
+    [HttpPost("mail/{title}")]
+    public JsonResult SendEmail(string title, IFormFile attachedFile)
     {
         var send = false;
         try
         {
             MailRepository ms = new MailRepository();
+            var mail = AccessCredentials.Email;
 
             string template = MailRepository.Templates["mail"];
 
-            template = (template.Replace("{content}", content));
+            template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun"));
 
-           send = ms.SendMail(recipient, title, template, mail, password);
+           send = ms.SendMail(mail, title, template, mail, AccessCredentials.Password, attachedFile);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            return new JsonResult(new { success = send, msg = "Fel: => " + ex.Message});
         }
 
         return new JsonResult(new { result = send });

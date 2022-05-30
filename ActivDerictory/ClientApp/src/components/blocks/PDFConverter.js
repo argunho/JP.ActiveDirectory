@@ -3,14 +3,14 @@ import React, { useEffect } from 'react';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable'
 
-export default function PDFConverter({ name, names, list, reset, savePdf }) {
+export default function PDFConverter({ name, names, list, savedPdf }) {
     const regex = /(<([^>]+)>)/ig;
     const keys = list.length > 0 ? Object.keys(list[0]) : [];
 
     useEffect(() => {
-        if (savePdf) saveApply();
+        saveApply();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savePdf])
+    }, [])
 
     const saveApply = () => {
         // const doc = new jsPDF('l', 'mm', [800, 801]);        
@@ -25,9 +25,11 @@ export default function PDFConverter({ name, names, list, reset, savePdf }) {
             columnStyles: { 2: { textColor: [208, 66, 66] } },
             html: "#list"
         });
-            
+        
+        const output = doc.output('blob');
+        savedPdf(output);
         doc.save(name.replaceAll(regex, "") + ".pdf");
-        reset();
+
         //     // Convert HTML to PDF in JavaScript
         //     const pdfContent = document.querySelector('#content');
         //     doc.html(pdfContent, {
@@ -90,17 +92,3 @@ export default function PDFConverter({ name, names, list, reset, savePdf }) {
         </table>
     )
 }
-
-// <>
-{/* Table to print */ }
-
-
-{/* Click button to download pdf */ }
-{/* <Button
-                variant="text"
-                color="inherit"
-                className='button-btn'
-                onClick={() => saveApply()}>
-                Spara & Verkställ
-            </Button>
-        </> */}

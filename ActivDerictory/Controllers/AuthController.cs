@@ -43,6 +43,7 @@ public class AuthController : ControllerBase
         {
             var token = CreateJwtToken(user);
             AccessCredentials.Username = name;
+            AccessCredentials.Email = user.EmailAddress;
             return new JsonResult(new
             {
                 access = true,
@@ -114,9 +115,11 @@ public class AuthController : ControllerBase
 
             if (_provider.MembershipCheck(model.Username))
             {
-                var token = CreateJwtToken(_provider.FindUserByName(model.Username));
+                var user = _provider.FindUserByName(model.Username);
+                var token = CreateJwtToken(user);
                 AccessCredentials.Username = model.Username;
                 AccessCredentials.Password = model.Password;
+                AccessCredentials.Email = user.EmailAddress;
                 return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
             }
         }
@@ -164,12 +167,8 @@ public class AuthController : ControllerBase
 public static class AccessCredentials
 {
     public static string? Username { get; set; }
+    public static string? Email { get; set; }
     public static string? Password { get; set; }
     public static int Attempt { get; set; }
     public static Nullable<DateTime> Fixing { get; set; }
-}
-
-public static class EmailCredentials {
-    public static string? Email { get; set; }
-    public static string? Password { get; set; }
 }

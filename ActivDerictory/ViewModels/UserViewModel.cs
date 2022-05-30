@@ -15,5 +15,7 @@ public class UserViewModel
     [DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = string.Empty;
 
+    public bool SendEmail { get; set; }
+
     public List<UserViewModel> Users { get; set; } = new List<UserViewModel>();
 }
