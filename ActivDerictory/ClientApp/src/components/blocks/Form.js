@@ -437,12 +437,12 @@ export default function Form(props) {
         };
 
         const info = users[0];
-        const title = `Lösenord till ${info?.office} ${info?.department} elever`;
+        const str = `${info?.office} ${info?.department}`;
 
         const data = new FormData();
         data.append('attachedFile', savedPdf);
 
-        await axios.post(`user/mail/${title}`, data, _config).then(res => {
+        await axios.post(`user/mail/${str}`, data, _config).then(res => {
             if (res.data?.success)
                 setResponse(res.data);
         }, error => {

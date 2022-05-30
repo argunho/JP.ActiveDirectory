@@ -73,8 +73,8 @@ public class UserController : ControllerBase
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); // Success! User unlocked successfully!
     }
 
-    [HttpPost("mail/{title}")]
-    public JsonResult SendEmail(string title, IFormFile attachedFile)
+    [HttpPost("mail/{str}")]
+    public JsonResult SendEmail(string str, IFormFile attachedFile)
     {
         var send = false;
         try
@@ -86,7 +86,7 @@ public class UserController : ControllerBase
             //var logo = @"wwwroot/alvestakommun.png";
             //template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun").Replace("{logo}", logo));
 
-           send = ms.SendMail(mail, title, title, attachedFile);
+           send = ms.SendMail(mail, "Lista över nya lösenord", "Här bifogas PDF document filenn med nya lösenord till " + str + " class elever", attachedFile);
         }
         catch (Exception ex)
         {
