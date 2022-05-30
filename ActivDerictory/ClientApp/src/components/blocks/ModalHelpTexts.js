@@ -6,8 +6,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
-import { AlertTitle, Checkbox, FormControlLabel } from '@mui/material';
-import { Close, HelpOutline, LiveHelpOutlined } from '@mui/icons-material';
+import { AlertTitle, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import { Close, HelpOutline, LiveHelpOutlined, Print } from '@mui/icons-material';
+import ReactToPrint, { useReactToPrint } from 'react-to-print';
 // import PDFConverter from "./PDFConverter";
 
 function PaperComponent(props) {
@@ -21,17 +22,22 @@ function PaperComponent(props) {
 }
 
 function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
-    title = "Förklaring av sökparametrar", modalClass = "modal-tips", 
+    title = "Förklaring av sökparametrar", modalClass = "modal-tips",
     inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
+    const refPrint = React.useRef(null);
 
     const clickHandle = (save) => {
         inverseFunction(save);
         setOpen(false);
     }
+
+    const handlePrint = useReactToPrint({
+        content: () => refPrint.current,
+      });
 
     return (
         <>
@@ -52,7 +58,8 @@ function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
                 onClose={() => setOpen(false)}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
-                className='modal-wrapper' id="content">
+                className='modal-wrapper print-page' id="content"
+                ref={refPrint}>
 
                 <DialogTitle
                     style={{ cursor: 'move' }}
@@ -70,10 +77,12 @@ function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
                     ))}
                 </DialogContent>
 
-                <DialogActions style={{ position: "relative", overflow: "hidden" }}>
+                <DialogActions style={{ position: "relative", overflow: "hidden" }} className="no-print">
                     {submit ?
-                        <>                   
-                            <Button variant="outlined"
+                        <>
+                            <IconButton onClick={handlePrint}>  <Print /> </IconButton>
+
+                            <Button variant="text"
                                 className='button-btn'
                                 color="primary"
                                 onClick={() => clickHandle(true)}>

@@ -549,9 +549,20 @@ button {
 }
 
 @media all {
-	.page-break	{ display: none; }
+	/* .page-break	{ display: none; } */
 }
 
 @media print {
 	.page-break	{ display: block; page-break-before: always; }
+
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .print-page {
+    overflow: visible !important;
+    height: max-content !important;
+    display: block; 
+    page-break-before: always;
+  }
 }

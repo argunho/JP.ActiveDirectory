@@ -82,11 +82,11 @@ public class UserController : ControllerBase
             MailRepository ms = new MailRepository();
             var mail = AccessCredentials.Email;
 
-            string template = MailRepository.Templates["mail"];
+            //string template = MailRepository.Templates["mail"];
+            //var logo = @"wwwroot/alvestakommun.png";
+            //template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun").Replace("{logo}", logo));
 
-            template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun"));
-
-           send = ms.SendMail(mail, title, template, mail, AccessCredentials.Password, attachedFile);
+           send = ms.SendMail(mail, title, title, attachedFile);
         }
         catch (Exception ex)
         {
