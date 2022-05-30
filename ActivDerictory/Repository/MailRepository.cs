@@ -12,7 +12,7 @@ public class MailRepository
 {
     // Template params
     public static string mailHtml = "<!DOCTYPE html><html><body>" +
-                                    "<div style=\"width:98%;display:block;border:1px solid #D8D8D8;margin:auto;background:#FFFFFF;font-family:Tahoma;\">" +
+                                    "<div style=\"width:98%;display:block;margin:auto;background:#FFFFFF;font-family:Tahoma;\">" +
                                         "<div style=\"display:block;width:auto;height:max-content;padding:25px 0;overflow:hidden\">" +
                                              "<img style=\"width:70px;margin:30px\" src='https://www.alvesta.se/assets/images/framework/Alvesta.svg' alt='Alvesta Kommun'/>" +
                                         "</div>" +
