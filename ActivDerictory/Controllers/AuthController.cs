@@ -38,12 +38,12 @@ public class AuthController : ControllerBase
         }
 
         var user = _provider.FindUserByName(name);
-
+        var userTest = UserCredentials.Password;
         if (user != null && _provider.MembershipCheck(name))
         {
             var token = CreateJwtToken(user);
-            AccessCredentials.Username = name;
-            AccessCredentials.Email = user.EmailAddress;
+            UserCredentials.Username = name;
+            UserCredentials.Email = user.EmailAddress;
             return new JsonResult(new
             {
                 access = true,
@@ -60,9 +60,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public JsonResult SetFullCredential(string password)
     {
-        if(AccessCredentials.Fixing != null)
+        if(UserCredentials.Fixing != null)
         {
-            var time = DateTime.Now.Ticks - AccessCredentials.Fixing?.AddMinutes(30).Ticks;
+            var time = DateTime.Now.Ticks - UserCredentials.Fixing?.AddMinutes(30).Ticks;
             if (time < 0)
             {
                 return new JsonResult(new
@@ -74,13 +74,13 @@ public class AuthController : ControllerBase
         }
         var errorMessage = "Felaktig lösenord.";
 
-        AccessCredentials.Fixing = null;
+        UserCredentials.Fixing = null;
         try
         {
-            if (_provider.AccessValidation(AccessCredentials.Username, password))
+            if (_provider.AccessValidation(UserCredentials.Username, password))
             {
-                AccessCredentials.Password = password;
-                AccessCredentials.Attempt = 0;
+                UserCredentials.Password = password;
+                UserCredentials.Attempt = 0;
                 return new JsonResult(new { success = true });
             }
         }
@@ -89,11 +89,11 @@ public class AuthController : ControllerBase
             errorMessage = "Fel: " + ex?.InnerException?.Message ?? ex.Message;
         }
 
-        AccessCredentials.Attempt += 1;
-        if (AccessCredentials.Attempt == 3)
+        UserCredentials.Attempt += 1;
+        if (UserCredentials.Attempt == 3)
         {
-            AccessCredentials.Attempt = 0;
-            AccessCredentials.Fixing = DateTime.Now;
+            UserCredentials.Attempt = 0;
+            UserCredentials.Fixing = DateTime.Now;
         }
 
         return new JsonResult(new { success = false, msg = errorMessage});
@@ -117,9 +117,10 @@ public class AuthController : ControllerBase
             {
                 var user = _provider.FindUserByName(model.Username);
                 var token = CreateJwtToken(user);
-                AccessCredentials.Username = model.Username;
-                AccessCredentials.Password = model.Password;
-                AccessCredentials.Email = user.EmailAddress;
+                UserCredentials.Username = model.Username;
+                UserCredentials.Password = model.Password;
+                UserCredentials.Email = user.EmailAddress;
+                UserCredentials.FullName = user.DisplayName;
                 return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
             }
         }
@@ -164,9 +165,10 @@ public class AuthController : ControllerBase
 }
 
 
-public static class AccessCredentials
+public static class UserCredentials
 {
     public static string? Username { get; set; }
+    public static string? FullName { get; set; }
     public static string? Email { get; set; }
     public static string? Password { get; set; }
     public static int Attempt { get; set; }

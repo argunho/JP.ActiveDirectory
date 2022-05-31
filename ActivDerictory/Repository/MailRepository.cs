@@ -43,8 +43,8 @@ public class MailRepository
             _smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
 
             NetworkCredential credential = new NetworkCredential();
-            credential.UserName = AccessCredentials.Email;
-            credential.Password = AccessCredentials.Password;
+            credential.UserName = UserCredentials.Email;
+            credential.Password = UserCredentials.Password;
             _smtp.UseDefaultCredentials = false;
             _smtp.Credentials = credential;
 

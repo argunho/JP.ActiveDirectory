@@ -80,13 +80,9 @@ public class UserController : ControllerBase
         try
         {
             MailRepository ms = new MailRepository();
-            var mail = AccessCredentials.Email;
-
-            //string template = MailRepository.Templates["mail"];
-            //var logo = @"wwwroot/alvestakommun.png";
-            //template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun").Replace("{logo}", logo));
-
-           send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", "Här bifogas PDF document filen med nya lösenord till " + str + " elever", attachedFile);
+            var mail = UserCredentials.Email;
+            send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
+                        $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till " + str + " elever", attachedFile);
         }
         catch (Exception ex)
         {

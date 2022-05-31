@@ -97,6 +97,6 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
 
 
     public PrincipalContext PContexAccessCheck() 
-        => new PrincipalContext(ContextType.Domain, domain, defaultOU, AccessCredentials.Username, AccessCredentials.Password);
+        => new PrincipalContext(ContextType.Domain, domain, defaultOU, UserCredentials.Username, UserCredentials.Password);
     #endregion
 }

@@ -8,8 +8,7 @@ import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
 import { AlertTitle, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Close, HelpOutline, LiveHelpOutlined, Print } from '@mui/icons-material';
-import ReactToPrint, { useReactToPrint } from 'react-to-print';
-// import PDFConverter from "./PDFConverter";
+
 
 function PaperComponent(props) {
     return (
@@ -34,10 +33,6 @@ function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
         inverseFunction(save);
         setOpen(false);
     }
-
-    const handlePrint = useReactToPrint({
-        content: () => refPrint.current,
-      });
 
     return (
         <>
@@ -80,8 +75,6 @@ function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
                 <DialogActions style={{ position: "relative", overflow: "hidden" }} className="no-print">
                     {submit ?
                         <>
-                            <IconButton onClick={handlePrint}>  <Print /> </IconButton>
-
                             <Button variant="text"
                                 className='button-btn'
                                 color="primary"
