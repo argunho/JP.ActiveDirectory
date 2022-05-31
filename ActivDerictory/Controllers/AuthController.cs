@@ -38,11 +38,11 @@ public class AuthController : ControllerBase
         }
 
         var user = _provider.FindUserByName(name);
-        var userTest = UserCredentials.Password;
         if (user != null && _provider.MembershipCheck(name))
         {
             var token = CreateJwtToken(user);
             UserCredentials.Username = name;
+            UserCredentials.FullName = user.DisplayName;
             UserCredentials.Email = user.EmailAddress;
             return new JsonResult(new
             {
