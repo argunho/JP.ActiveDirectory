@@ -33,7 +33,7 @@ namespace ActiveDirectory.Controllers
                 if (match)
                 {
                     var members = group.GetMembers(true).Where(x => (!capitalize
-                            ? (x.Name.ToLower().Contains(name) || x.DisplayName.ToLower().Contains(name))
+                            ? (x.Name.ToLower().Contains(name.ToLower()) || x.DisplayName.ToLower().Contains(name.ToLower()))
                             : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
 
                     foreach (Principal p in members)

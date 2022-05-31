@@ -86,7 +86,7 @@ public class UserController : ControllerBase
             //var logo = @"wwwroot/alvestakommun.png";
             //template = (template.Replace("{content}", title).Replace("{footer}", "Alvesta Kommun").Replace("{logo}", logo));
 
-           send = ms.SendMail(mail, "Lista över nya lösenord", "Här bifogas PDF document filen med nya lösenord till " + str + " skolklass elever", attachedFile);
+           send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", "Här bifogas PDF document filen med nya lösenord till " + str + " elever", attachedFile);
         }
         catch (Exception ex)
         {
