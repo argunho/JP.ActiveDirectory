@@ -67,7 +67,7 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                         name={title}
                         names={["Namn", "Lösenord"]} list={arr} />
                         : arr.map((a, i) => (
-                            <div key={i} className="modal-content">
+                            <div key={i} className="modal_content">
                                 <AlertTitle style={{ fontWeight: 600 }}>
                                     <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
                                 </AlertTitle>

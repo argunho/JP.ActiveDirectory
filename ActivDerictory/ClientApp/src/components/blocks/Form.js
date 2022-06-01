@@ -47,6 +47,7 @@ export default function Form(props) {
     const [confirmSavePdf, setConfirmSavePdf] = useState(false);
     const [savePdf, setSavePdf] = useState(false);
     const [savedPdf, setSavedPdf] = useState(null);
+    const [randomPasswordWord, setRandomPasswordWord] = useState(null);
 
     const dslGenerate = !strongPassword && !ready;
 
@@ -78,7 +79,7 @@ export default function Form(props) {
 
     const passwordKeys = [
         { label: "Länder", value: "countries" },
-        { label: "Alla städer/tätort", value: "cities" },
+        { label: "Alla städer/tätort",  value: "cities" },
         { label: "Svenska städer/tätort", value: "svCities" },
         { label: "Färg", value: "colors" },
         { label: "Blommor", value: "flowers" },
@@ -126,6 +127,13 @@ export default function Form(props) {
             sendEmailWidthFile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedPdf])
+
+    useEffect(() => {
+        if(wordsList.length > 0){
+            const random = wordsList[Math.floor(Math.random() * wordsList.length)];
+            setRandomPasswordWord(capitalize(random?.name || random || "Password"));
+        }
+    }, [wordsList])
 
     // Confirm credential
     const confirmCredential = async (e) => {
@@ -220,8 +228,7 @@ export default function Form(props) {
                         password += users[i]?.displayName.slice(0, users[i].displayName.indexOf(" "));
 
                     if (!eng.test(password))
-                        password = password.toLowerCase().replaceAll("á", "a").replaceAll("ä", "a").replaceAll("å", "a")
-                            .replaceAll("æ", "a").replaceAll("ö", "o").replaceAll("ø", "o");
+                        password = replaceLetters(password);
 
                     password += (Math.random() * (randomNumber - min) + min).toFixed(0);
                     password += chars[Math.floor(Math.random() * chars.length)];
@@ -266,6 +273,12 @@ export default function Form(props) {
         }
 
         return _password;
+    }
+
+    // Replace all non-english letters
+    const replaceLetters = (word) => {
+        return word.toLowerCase().replaceAll("á", "a").replaceAll("ä", "a").replaceAll("å", "a")
+        .replaceAll("æ", "a").replaceAll("ö", "o").replaceAll("ø", "o");
     }
 
     // Return random characters to generate password
@@ -557,14 +570,16 @@ export default function Form(props) {
                                 {ready ?
                                     <div className="last-options">
                                         <FormLabel className="label-small">Lösenords alternativ (antal siffror i lösenord)</FormLabel>
-                                        {[{ label: "Password012_", value: 1000 }, { label: "Password01_", value: 100 }, { label: "Password0_", value: 10 }].map((p, index) => (
+                                        {[{ label: "012_", value: 1000 }, 
+                                            { label: "01_", value: 100 }, 
+                                            { label: "0_", value: 10 }].map((p, index) => (
                                             <FormControlLabel
                                                 key={index}
                                                 control={<Radio
                                                     size='small'
                                                     checked={p.value === randomNumber}
                                                     color="info" />}
-                                                label={p.label}
+                                                label={randomPasswordWord + p.label}
                                                 name="digits"
                                                 onChange={() => setRandomNumber(p.value)} />
                                         ))}</div>
