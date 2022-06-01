@@ -12,8 +12,8 @@ namespace ActiveDirectory.Repositories;
 public class MailRepository
 {
     // Template params
-    public static string mailHtml = "<div style=\"width:98%;display:block;margin:auto;background-color:#FFFFFF;font-family:Tahoma;border-bottom:2px solid #198938\">" +
-                                        "<div style=\"width:100%;display:block;background:#FFF\">" +
+    public static string mailHtml = "<div style=\"width:98%;display:block;margin:auto;background-color:#FFFFFF;font-family:Tahoma\">" +
+                                        "<div style=\"width:100%;display:block;background:#FFF;border-bottom:2px solid #198938\">" +
                                             "<img src=\"data:image/png;base64,{logo}\" alt='Alvesta Kommun' width='150' height='75' style=\"display: block;margin: 30pt\"/></div>" +
                                         "<div style=\"width:auto;padding:35px 25px;font-size:'14px';display:block;\"><br/><br/>{content}</div>" +
                                         "<div style=\"width:96%;margin:20px 1%;display:block;padding:25px 1%;text-align:center;line-height:25px;font-size:16px;border-top:1px solid #D8D8D8;display:flex;justify-content:center;\">" +
