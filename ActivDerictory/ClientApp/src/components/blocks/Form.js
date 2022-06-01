@@ -52,7 +52,7 @@ export default function Form(props) {
     const dslGenerate = !strongPassword && !ready;
 
     const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
-   
+
     const _token = sessionStorage.getItem("token");
     const _config = {
         headers: { 'Authorization': `Bearer ${_token}` }
@@ -65,11 +65,12 @@ export default function Form(props) {
 
     const helpTexts = [
         {
-            label: "Lösenord ska innehålla (gäller inte admin lösenord)", tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
-                "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
-                "<pre>* Minst en siffra</pre>" +
-                "<pre>* Minst ett specialtecken</pre>" +
-                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
+            label: "Lösenord ska innehålla", 
+            tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
+                 "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
+                 "<pre>* Minst en siffra</pre>" +
+                 "<pre>* Minst ett specialtecken</pre>" +
+                 "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
         }
     ]
 
@@ -79,7 +80,7 @@ export default function Form(props) {
 
     const passwordKeys = [
         { label: "Länder", value: "countries" },
-        { label: "Alla städer/tätort",  value: "cities" },
+        { label: "Alla städer/tätort", value: "cities" },
         { label: "Svenska städer/tätort", value: "svCities" },
         { label: "Färg", value: "colors" },
         { label: "Blommor", value: "flowers" },
@@ -96,7 +97,7 @@ export default function Form(props) {
 
     // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
-    const eng = /^[a-zA-Z]$/;
+    const eng = (/^[A-Za-z]+$/);
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -125,14 +126,21 @@ export default function Form(props) {
     useEffect(() => {
         if (savedPdf != null && savePdf)
             sendEmailWidthFile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedPdf])
 
     useEffect(() => {
-        if(wordsList.length > 0){
-            const random = wordsList[Math.floor(Math.random() * wordsList.length)];
-            setRandomPasswordWord(capitalize(random?.name || random || "Password"));
+        if (wordsList.length > 0) {
+            const list = wordsList.filter(x => (x.name !== undefined) ? x?.name.length > 5 : x.length > 5);
+            const random = list[Math.floor(Math.random() * list.length)];
+            let str = (random?.name || random);
+
+            if (!eng.test(replaceLetters(str)))
+                str = "Password";
+
+            setRandomPasswordWord(capitalize(str));
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wordsList])
 
     // Confirm credential
@@ -169,7 +177,6 @@ export default function Form(props) {
             setReady(false);
             setRandomNumber(1000);
             setSelectedCategory("");
-            // setPreviewList([]);
         }
         setStrongPassword(value);
     }
@@ -187,7 +194,6 @@ export default function Form(props) {
             wList = wList.filter(x => x.name.indexOf(" ") === -1 && x.name.length < 10);
         } else if (wList.length > 0)
             wList = wList.filter(x => x.indexOf(" ") === -1 && x.length < 10);
-
 
         setWordsList(wList);
         setReady(true);
@@ -220,6 +226,7 @@ export default function Form(props) {
             let min = (randomNumber / 10);
             for (let i = 0; i < users.length; i++) {
                 let password = ""
+                let broken = false;
                 if (!strongPassword) {
                     if (wordsList.length > 0) {
                         const random = wordsList[Math.floor(Math.random() * wordsList.length)];
@@ -230,13 +237,16 @@ export default function Form(props) {
                     if (!eng.test(password))
                         password = replaceLetters(password);
 
-                    password += (Math.random() * (randomNumber - min) + min).toFixed(0);
-                    password += chars[Math.floor(Math.random() * chars.length)];
+                    if (eng.test(password)) {
+                        password += (Math.random() * (randomNumber - min) + min).toFixed(0);
+                        password += chars[Math.floor(Math.random() * chars.length)];
+                    } else
+                        broken = true;
                 }
 
                 password = strongPassword ? returnGeneratedPassword() : capitalize(password);
 
-                if (regex.test(password)) {
+                if (regex.test(password) && !broken) {
                     usersArray.push({
                         name: users[i].name,
                         displayName: users[i].displayName,
@@ -275,7 +285,7 @@ export default function Form(props) {
         return _password;
     }
 
-    // Replace all non-english letters
+    // Replace no-english letters
     const replaceLetters = (word) => {
         return word.toLowerCase().replaceAll("á", "a").replaceAll("ä", "a").replaceAll("å", "a")
         .replaceAll("æ", "a").replaceAll("ö", "o").replaceAll("ø", "o");
@@ -420,12 +430,12 @@ export default function Form(props) {
             setLoad(false);
             if (res.data?.success) {
                 setSavePdf(confirmSavePdf);
-                    setTimeout(() => {
-                        resetForm(true, true);
+                setTimeout(() => {
+                    resetForm(true, true);
 
-                        if (res.data?.unlocked)
-                            props.refreshUserData();
-                    }, 5000)
+                    if (res.data?.unlocked)
+                        props.refreshUserData();
+                }, 5000)
             }
         }, error => {
             // Handle of error
@@ -510,7 +520,7 @@ export default function Form(props) {
                     </div> : null}
 
                     {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={helpTexts} />
+                    <ModalHelpTexts arr={helpTexts} title="Lösenordskrav"/>
 
                     {/* Title */}
                     <p className='form-title'>{title}</p>
@@ -570,9 +580,9 @@ export default function Form(props) {
                                 {ready ?
                                     <div className="last-options">
                                         <FormLabel className="label-small">Lösenords alternativ (antal siffror i lösenord)</FormLabel>
-                                        {[{ label: "012_", value: 1000 }, 
-                                            { label: "01_", value: 100 }, 
-                                            { label: "0_", value: 10 }].map((p, index) => (
+                                        {[{ label: "012_", value: 1000 },
+                                        { label: "01_", value: 100 },
+                                        { label: "0_", value: 10 }].map((p, index) => (
                                             <FormControlLabel
                                                 key={index}
                                                 control={<Radio

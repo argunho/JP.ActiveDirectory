@@ -22,7 +22,7 @@ function PaperComponent(props) {
 }
 
 function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit = false,
-    title = "Förklaring av sökparametrar", inverseFunction }, ref) {
+    title, inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
