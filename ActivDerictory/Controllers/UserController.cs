@@ -82,7 +82,7 @@ public class UserController : ControllerBase
             MailRepository ms = new MailRepository();
             var mail = UserCredentials.Email;
             send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
-                        $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till " + str + " elever", attachedFile);
+                        $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.", attachedFile);
         }
         catch (Exception ex)
         {

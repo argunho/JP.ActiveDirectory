@@ -6,8 +6,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
-import { AlertTitle, Checkbox, FormControlLabel, IconButton } from '@mui/material';
-import { Close, HelpOutline, LiveHelpOutlined, Print } from '@mui/icons-material';
+import { AlertTitle, Checkbox, FormControlLabel } from '@mui/material';
+import { Close, HelpOutline, LiveHelpOutlined } from '@mui/icons-material';
+import Table from './Table';
 
 
 function PaperComponent(props) {
@@ -20,9 +21,8 @@ function PaperComponent(props) {
     );
 }
 
-function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
-    title = "Förklaring av sökparametrar", modalClass = "modal-tips",
-    inverseFunction }, ref) {
+function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit = false,
+    title = "Förklaring av sökparametrar", inverseFunction }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
@@ -61,19 +61,23 @@ function ModalHelpTexts({ arr, cls = " situated-btn", submit = false,
                     id="draggable-dialog-title"
                     dangerouslySetInnerHTML={{ __html: title }}>
                 </DialogTitle>
-                <DialogContent style={{ marginBottom: "25px" }} className="row">
-                    {arr.map((a, i) => (
-                        <div key={i} className={modalClass}>
-                            <AlertTitle style={{ fontWeight: 600 }}>
-                                <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
-                            </AlertTitle>
-                            <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
-                        </div>
-                    ))}
+
+                <DialogContent style={{ marginBottom: "25px" }}>
+                    {isTable ? <Table
+                        name={title}
+                        names={["Namn", "Lösenord"]} list={arr} />
+                        : arr.map((a, i) => (
+                            <div key={i} className="modal-content">
+                                <AlertTitle style={{ fontWeight: 600 }}>
+                                    <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
+                                </AlertTitle>
+                                <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
+                            </div>
+                        ))}
                 </DialogContent>
 
                 <DialogActions style={{ position: "relative", overflow: "hidden" }} className="no-print">
-                    {submit ?
+                    {isSubmit ?
                         <>
                             <Button variant="text"
                                 className='button-btn'

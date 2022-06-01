@@ -47,10 +47,15 @@ export default function Form(props) {
     const [confirmSavePdf, setConfirmSavePdf] = useState(false);
     const [savePdf, setSavePdf] = useState(false);
     const [savedPdf, setSavedPdf] = useState(null);
-    const [sendEmail, setSendEmail] = useState(true);
 
     const dslGenerate = !strongPassword && !ready;
 
+    const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
+   
+    const _token = sessionStorage.getItem("token");
+    const _config = {
+        headers: { 'Authorization': `Bearer ${_token}` }
+    };
 
     const formList = [
         { name: "password", label: "Lösenord", placeholder: "", regex: true },
@@ -120,19 +125,14 @@ export default function Form(props) {
         if (savedPdf != null && savePdf)
             sendEmailWidthFile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedPdf, sendEmail])
+    }, [savedPdf])
 
     // Confirm credential
-    const confirmCredential = e => {
+    const confirmCredential = async (e) => {
         e.preventDefault();
         setLoad(true);
 
-        const _token = sessionStorage.getItem("token");
-        const _config = {
-            headers: { 'Authorization': `Bearer ${_token}` }
-        };
-
-        axios.get("auth/credential/" + adminPassword, _config).then(res => {
+        await axios.get("auth/credential/" + adminPassword, _config).then(res => {
             setLoad(false);
             if (res.data.success) {
                 sessionStorage.setItem("credentials", "ok");
@@ -370,11 +370,6 @@ export default function Form(props) {
     const submitForm = async (e) => {
         e.preventDefault();
 
-        const _token = sessionStorage.getItem("token");
-        const _config = {
-            headers: { 'Authorization': `Bearer ${_token}` }
-        };
-
         // Validate form
         if (!variousPassword) {
             let arrErrors = [];
@@ -431,18 +426,11 @@ export default function Form(props) {
     // Send email to current user with saved pdf document
     const sendEmailWidthFile = async () => {
 
-        const _token = sessionStorage.getItem("token");
-        const _config = {
-            headers: { 'Authorization': `Bearer ${_token}` }
-        };
-
-        const info = users[0];
-        const str = `${info?.office} ${info?.department}`;
-
+        const inf = location.split(" ");
         const data = new FormData();
         data.append('attachedFile', savedPdf);
 
-        await axios.post(`user/mail/${str}`, data, _config).then(res => {
+        await axios.post(`user/mail/${inf[1]} ${inf[0]}`, data, _config).then(res => {
             if (res.data?.success)
                 setResponse(res.data);
         }, error => {
@@ -664,16 +652,17 @@ export default function Form(props) {
                             ? <ModalHelpTexts
                                 arr={previewList}
                                 cls={" none"}
-                                title={`${title} <span class='typography-span'>${users[0]?.office + " " + users[0]?.department}</span>`}
-                                submit={true}
+                                title={`${title} <span class='typography-span'>${location}</span>`}
+                                isTable={true}
+                                isSubmit={true}
                                 inverseFunction={(save) => (save ? saveApply() : refSubmit.current.click())}
-                                modalClass={"modal-block"}
                                 ref={refModal} /> : null}
                     </form>
 
                     {/* Save document to pdf */}
                     {savePdf ? <PDFConverter
                         name={title}
+                        subTitle={location}
                         names={["Namn", "Lösenord"]}
                         list={previewList}
                         savedPdf={(pdf) => setSavedPdf(pdf)}

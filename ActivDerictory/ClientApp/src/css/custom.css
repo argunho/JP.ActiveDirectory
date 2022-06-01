@@ -52,12 +52,13 @@ body {
   width: 30% !important;
 }
 
-.nav-wrapper {
+.nav-wrapper, .styled-thead {
   width: 100%;
   background: #1f722f;
   position: relative;
   z-index: 0;
   height: 65px;
+  color: #FFF;
 }
 
 .nav-wrapper ul {
@@ -342,38 +343,6 @@ input::placeholder {
   color: #686868 !important
 }
 
-.modal-tips,
-.modal-block {
-  width: 100% !important;
-  margin: 3px auto 0 auto !important;
-  font-size: 12px !important;
-  padding: 3px 10px 0 10px !important;
-  border-radius: 5px !important;
-}
-
-.modal-block {
-  width: calc(50% - 10px) !important;
-  margin: 3px 2.5px !important;
-  float: left;
-  border: 1px solid #c2c0c0;
-  padding: 20px !important;
-}
-
-.MuiPaper-root:not(.alert) {
-  padding: 20px 15px !important;
-}
-
-.modal-tips > div,
-.modal-block > div {
-  color: rgba(0, 0, 0, 0.9) !important;
-}
-
-pre {
-  margin-bottom: 0 !important;
-  font-size: 14px !important;
-  white-space: pre-line !important;
-}
-
 .error {
   color: #d32f2f !important;
 }
@@ -541,6 +510,36 @@ button {
   width: max-content !important;
 }
 
+.modal-content {
+  width: 100% !important;
+  margin: 3px auto 0 auto !important;
+  font-size: 12px !important;
+  padding: 3px 10px 0 10px !important;
+  border-radius: 5px !important;
+}
+
+.MuiPaper-root:not(.alert) {
+  padding: 20px 15px !important;
+}
+
+.modal-content > div {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+pre {
+  margin-bottom: 0 !important;
+  font-size: 14px !important;
+  white-space: pre-line !important;
+}
+
+.styled-thead {
+  vertical-align: middle !important;
+}
+
+.th:first {
+  text-align: center !important;
+}
+
 .hidden-content {
   display: none;
   height: 0;
@@ -559,6 +558,7 @@ button {
     display: none !important;
     visibility: hidden !important;
   }
+  
   .print-page {
     overflow: visible !important;
     height: max-content !important;
