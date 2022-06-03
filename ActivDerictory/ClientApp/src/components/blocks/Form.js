@@ -65,12 +65,12 @@ export default function Form(props) {
 
     const helpTexts = [
         {
-            label: "Lösenord ska innehålla", 
+            label: "Lösenord ska innehålla",
             tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
-                 "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
-                 "<pre>* Minst en siffra</pre>" +
-                 "<pre>* Minst ett specialtecken</pre>" +
-                 "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
+                "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
+                "<pre>* Minst en siffra</pre>" +
+                "<pre>* Minst ett specialtecken</pre>" +
+                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
         }
     ]
 
@@ -214,7 +214,9 @@ export default function Form(props) {
     }
 
     // Generate new password
-    const generatePassword = () => {
+    const generatePassword = (regenerate = false) => {
+        setPreview(regenerate);
+        setPreviewList([]);
         if (strongPassword && !variousPassword) {
             resetForm(false);
             const generatedPassword = returnGeneratedPassword();
@@ -288,7 +290,7 @@ export default function Form(props) {
     // Replace no-english letters
     const replaceLetters = (word) => {
         return word.toLowerCase().replaceAll("á", "a").replaceAll("ä", "a").replaceAll("å", "a")
-        .replaceAll("æ", "a").replaceAll("ö", "o").replaceAll("ø", "o");
+            .replaceAll("æ", "a").replaceAll("ö", "o").replaceAll("ø", "o");
     }
 
     // Return random characters to generate password
@@ -376,6 +378,7 @@ export default function Form(props) {
         setShowPassword(false);
         setConfirmSubmit(false);
         setPassType(true);
+        setPreview(false);
         if (!savePdf)
             setPreviewList([]);
         if (!save) responseReset();
@@ -415,6 +418,7 @@ export default function Form(props) {
 
         if (!confirmed) {
             setConfirmSubmit(true);
+            setPreview(true);
             return;
         } else
             setConfirmSubmit(false);
@@ -475,7 +479,7 @@ export default function Form(props) {
                     <div className='confirm-block'>
 
                         {/* Modal  window with help texts */}
-                        <ModalHelpTexts arr={helpTextCredentialAccess} title="Varför behövs admins lösenord?" />
+                        <ModalHelpTexts arr={helpTextCredentialAccess} isTitle="Varför behövs admins lösenord?" />
 
                         {/* Response message */}
                         {alert(credentialError)}
@@ -520,7 +524,7 @@ export default function Form(props) {
                     </div> : null}
 
                     {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={helpTexts} title="Lösenordskrav"/>
+                    <ModalHelpTexts arr={helpTexts} isTitle="Lösenordskrav" />
 
                     {/* Title */}
                     <p className='form-title'>{title}</p>
@@ -650,20 +654,22 @@ export default function Form(props) {
                                         size="small"
                                         className="generate-password"
                                         onClick={() => generatePassword()}
-                                        disabled={load || dslGenerate}>Generera lösenord</Button>
+                                        disabled={load || dslGenerate}>
+                                             Generera {previewList.length > 0 ? "andra " : ""} lösenord
+                                        </Button>
                                 </span>
                             </Tooltip>
 
                             {/* Reset button */}
-                            <Button variant="text"
+                            <Button variant="contained"
                                 color="error"
                                 type="button"
                                 disabled={load || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
                                 onClick={() => resetForm(true)}
                             ><ClearOutlined /></Button>
 
-                            {/* Submit/Preview form */}
-                            <Button variant={variousPassword ? "contained" : "outlined"}
+                            {/* Submit/Preview form {variousPassword ? "contained" : "outlined"} */}
+                            <Button variant="contained"
                                 ref={refSubmit}
                                 className='button-btn'
                                 color="primary"
@@ -677,9 +683,11 @@ export default function Form(props) {
                             ? <ModalHelpTexts
                                 arr={previewList}
                                 cls={" none"}
-                                title={`${title} <span class='typography-span'>${location}</span>`}
+                                isTitle={`${title} <span class='typography-span'>${location}</span>`}
                                 isTable={true}
                                 isSubmit={true}
+                                setPreview={() => setPreview(false)}
+                                regeneratePassword={() => generatePassword(true)}
                                 inverseFunction={(save) => (save ? saveApply() : refSubmit.current.click())}
                                 ref={refModal} /> : null}
                     </form>

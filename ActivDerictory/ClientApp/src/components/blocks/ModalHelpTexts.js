@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
 import { AlertTitle, Checkbox, FormControlLabel } from '@mui/material';
-import { Close, HelpOutline, LiveHelpOutlined } from '@mui/icons-material';
+import { Close, HelpOutline, LiveHelpOutlined, Refresh } from '@mui/icons-material';
 import Table from './Table';
 
 
@@ -22,12 +22,18 @@ function PaperComponent(props) {
 }
 
 function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit = false,
-    title, inverseFunction }, ref) {
+    isTitle, inverseFunction, setPreview, regeneratePassword }, ref) {
 
     const [open, setOpen] = React.useState(false);
 
     const keys = arr.length > 0 ? Object.keys(arr[0]) : [];
     const refPrint = React.useRef(null);
+
+    React.useEffect(() => {
+        if (!open && isSubmit)
+            setPreview(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
 
     const clickHandle = (save) => {
         inverseFunction(save);
@@ -59,12 +65,12 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                 <DialogTitle
                     style={{ cursor: 'move' }}
                     id="draggable-dialog-title"
-                    dangerouslySetInnerHTML={{ __html: title }}>
+                    dangerouslySetInnerHTML={{ __html: isTitle }}>
                 </DialogTitle>
 
                 <DialogContent style={{ marginBottom: "25px" }}>
                     {isTable ? <Table
-                        name={title}
+                        name={isTitle}
                         names={["Namn", "Lösenord"]} list={arr} />
                         : arr.map((a, i) => (
                             <div key={i} className="modal_content">
@@ -90,9 +96,14 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                                 color="primary"
                                 onClick={() => clickHandle(false)}>
                                 Verkställ</Button>
+
+                            <Button variant="contained"
+                                color="info" onClick={() => regeneratePassword(true)}>
+                                <Refresh />
+                            </Button>
                         </>
                         : null}
-                    <Button variant='outlined' color="error" autoFocus onClick={() => setOpen(false)}>
+                    <Button variant='contained' color="error" autoFocus onClick={() => setOpen(false)}>
                         <Close />
                     </Button>
                 </DialogActions>

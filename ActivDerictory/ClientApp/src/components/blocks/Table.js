@@ -17,7 +17,7 @@ export default function Table({names, list, cls = ""}) {
             <tr key={ind}>
                 <th scope="row" style={{textAlign: "center"}}>{ind + 1}</th>
                 <td>{l[keys[0]]}</td>
-                <td style={{color: "#c00"}}>{l[keys[2]]}</td>
+                <td style={{color: "#c00", width: "35%"}}>{l[keys[2]]}</td>
             </tr>
         ))}
     </tbody>

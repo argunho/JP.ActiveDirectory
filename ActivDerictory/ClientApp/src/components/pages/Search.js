@@ -306,7 +306,7 @@ export class Search extends Component {
                 <div className="checkbox-radio-wrapper" >
 
                     {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={this.helpTexts} cls="" title="Förklaring av sökparametrar"/>
+                    <ModalHelpTexts arr={this.helpTexts} cls="" isTitle="Förklaring av sökparametrar"/>
 
                     {/* Switchable box */}
                     <FormControlLabel className='switch-btn'
