@@ -11,7 +11,7 @@ namespace ActiveDirectory.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-    //[Authorize]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IActiveDirectoryProvider _provider;
@@ -21,7 +21,7 @@ public class UserController : ControllerBase
     }
 
     #region GET
-    [HttpGet("{name}")]
+    [HttpGet("{name}")] // Get user information by username
     public JsonResult GetUser(string name)
     {
         var user = _provider.FindUserByExtensionProperty(name);
@@ -40,37 +40,42 @@ public class UserController : ControllerBase
     #endregion
 
     #region POST
-    [HttpPost("resetPassword")]
+    [HttpPost("resetPassword")] // Reset one student password
     public JsonResult ResetPasword(UserViewModel model)
     {
+        // Check model is valid or not and return warning is true or false
         var warning = ReturnWarningsMessage(model);
         if (warning != null)
             return warning;
 
+        // Set password to one student
        return ReturnResultMessage(_provider.ResetPassword(model));
     }
 
-    [HttpPost("setPasswords")]
+    [HttpPost("setPasswords")] // Set password to class students
     public JsonResult SetMultiplePaswords(UserViewModel model)
     {
+        // Check model is valid or not and return warning is true or false
         var warning = ReturnWarningsMessage(model);
         if (warning != null)
             return warning;
         string message = string.Empty;
-        //foreach (var user in model.Users)
-        //    message += _provider.ResetPassword(user);
+
+        // Set password to class students
+        foreach (var user in model.Users)
+            message += _provider.ResetPassword(user);
 
         return ReturnResultMessage(message);
     }
 
-    [HttpPost("unlock")]
+    [HttpPost("unlock")] // Unlock user
     public JsonResult UnlockUser(UserViewModel model)
     {
         var message = _provider.UnlockUser(model);
         if (message.Length > 0)
             return new JsonResult(new { alert = "warning", msg = message });
 
-        return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); // Success! User unlocked successfully!
+        return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); 
     }
 
     [HttpPost("mail/{str}")]

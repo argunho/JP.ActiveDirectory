@@ -25,21 +25,22 @@ public class AuthController : ControllerBase
     }
 
     #region GET
-    // Validate user access first with Windows authentication username
+    // Validate user access first with Windows authentication username when user started application
     [HttpGet]
     public JsonResult AccessValidation()
     {
-        var name = Environment.UserName;
-        if (name == null)
+        var name = Environment.UserName; // Get windows username
+        if (name == null) // If failed to get username, try other way to get windows username
         {
             var currentUser = WindowsIdentity.GetCurrent();
             if (currentUser != null)
                 name = currentUser?.Name.ToString().Split('\\')[1];
         }
 
-        var user = _provider.FindUserByName(name);
-        if (user != null && _provider.MembershipCheck(name))
+        var user = _provider.FindUserByName(name); // Get user from Active Directory
+        if (user != null && _provider.MembershipCheck(name)) // Check user's membership
         {
+            // If user is found, create Jwt Token to get all other information and to get access to other functions
             var token = CreateJwtToken(user);
             UserCredentials.Username = name;
             UserCredentials.FullName = user.DisplayName;
@@ -50,19 +51,23 @@ public class AuthController : ControllerBase
                 alert = "success",
                 token = token,
                 msg = "Din åtkomstbehörighet har bekräftats."
-            });//Success! Your access has been confirmed.
+            });
         }
 
         return new JsonResult(new { access = false, alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); //Failed! You do not have permission to edit a student's password
     }
 
+    // Save admin password
     [HttpGet("credential/{password}")]
     [Authorize]
     public JsonResult SetFullCredential(string password)
     {
-        if(UserCredentials.Fixing != null)
+        // Unclock time after 4 incorrect passwords
+        if (UserCredentials.BlockTime != null)
         {
-            var time = DateTime.Now.Ticks - UserCredentials.Fixing?.AddMinutes(30).Ticks;
+            // Current time - Block time to know is user unlocked or not
+            var time = DateTime.Now.Ticks - UserCredentials.BlockTime?.AddMinutes(30).Ticks;
+            // If the user until unlocked
             if (time < 0)
             {
                 return new JsonResult(new
@@ -74,7 +79,8 @@ public class AuthController : ControllerBase
         }
         var errorMessage = "Felaktig lösenord.";
 
-        UserCredentials.Fixing = null;
+        // If the user is not locked, validate user's password
+        UserCredentials.BlockTime = null;
         try
         {
             if (_provider.AccessValidation(UserCredentials.Username, password))
@@ -89,11 +95,12 @@ public class AuthController : ControllerBase
             errorMessage = "Fel: " + ex?.InnerException?.Message ?? ex.Message;
         }
 
+        // If the user tried to put in a wrong password, save this like +1 a wrong attempt and the max is 4 attempts
         UserCredentials.Attempt += 1;
         if (UserCredentials.Attempt == 3)
         {
             UserCredentials.Attempt = 0;
-            UserCredentials.Fixing = DateTime.Now;
+            UserCredentials.BlockTime = DateTime.Now;
         }
 
         return new JsonResult(new { success = false, msg = errorMessage});
@@ -109,6 +116,7 @@ public class AuthController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Felaktigt eller ofullständigt ifyllda formulär" }); //Forms filled out incorrectly
         try
         {
+            // Validate username and password
             var isAutheticated = _provider.AccessValidation(model.Username, model.Password);
             if (!isAutheticated)
                 return new JsonResult(new { alert = "error", msg = "Felaktig användarnamn eller lösenord." }); //Incorrect username or password"
@@ -116,6 +124,7 @@ public class AuthController : ControllerBase
             if (_provider.MembershipCheck(model.Username))
             {
                 var user = _provider.FindUserByName(model.Username);
+                // If user is found, create Jwt Token to get all other information and to get access to other functions
                 var token = CreateJwtToken(user);
                 UserCredentials.Username = model.Username;
                 UserCredentials.Password = model.Password;
@@ -172,5 +181,5 @@ public static class UserCredentials
     public static string? Email { get; set; }
     public static string? Password { get; set; }
     public static int Attempt { get; set; }
-    public static Nullable<DateTime> Fixing { get; set; }
+    public static Nullable<DateTime> BlockTime { get; set; }
 }
