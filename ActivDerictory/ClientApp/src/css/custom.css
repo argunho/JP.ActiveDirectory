@@ -274,8 +274,6 @@ body {
   background-color: #faebd7;
   margin-left: 10px;
   font-size: 12px;
-  display: block;
-width: max-content;
 }
 
 /* Form */
@@ -683,6 +681,8 @@ pre {
   .typography-span {
     margin-left: 0;
     padding: 3px 5px;
+    display: block;
+    width: max-content;
   }
 }
 
@@ -718,6 +718,6 @@ pre {
     padding: 15px 8px !important;
   }
   .modal-buttons-wrapper > button {
-    font-size: 3vw !important
+    font-size: 3vw !important;
   }
 }
