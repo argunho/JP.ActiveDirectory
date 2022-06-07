@@ -53,6 +53,7 @@ export default function Form(props) {
 
     const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
 
+    // Jwt token to connect server
     const _token = sessionStorage.getItem("token");
     const _config = {
         headers: { 'Authorization': `Bearer ${_token}` }
