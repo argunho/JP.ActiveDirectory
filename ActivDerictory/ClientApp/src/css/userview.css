@@ -1,6 +1,5 @@
 .user-view-form {
-  width: 95%;
-  margin: -5px auto 30px auto;
+  margin: 10px auto 30px auto;
 }
 
 .form-actions {
@@ -14,12 +13,13 @@
 .select-list {
   margin: 20px 0 !important;
   display: block !important;
-  width: 300px;
+  width: 100%;
+  max-width: 415px;
 }
 
 .select-list > div {
   height: 50px !important;
-  width: 300px;
+  width: 100%;
   font-size: 12px !important;
   letter-spacing: 0.5px;
   font-weight: 600;

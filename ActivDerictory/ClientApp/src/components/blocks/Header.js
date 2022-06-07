@@ -30,7 +30,7 @@ export default function Header({ isAuthorized }) {
         <header>
             <div className="logo-wrapper container">
                 <a className="logo" href="https://alvesta.se" target="_blank" rel='noreferrer'>
-                    <img alt="Alvesta" src={logo} />
+                    <img alt="Alvesta Kommun" src={logo} />
                 </a>
             </div>
             <nav className="nav-wrapper">

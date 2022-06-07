@@ -20,8 +20,8 @@ export class Search extends Component {
         const sOption = sessionStorage.getItem("sOption");
         const clsSearch = (sOption === "members");
         this.state = {
-            inputKey: "",
-            extraInputkey: "",
+            input: "",
+            additionInput: "",
             users: JSON.parse(sessionStorage.getItem("users")) || [],
             inProgress: false,
             isResult: false,
@@ -106,10 +106,10 @@ export class Search extends Component {
 
     // Handle a change of checkbox input value
     checkboxHandle = (capitalized) => {
-        const { inputKey } = this.state
+        const { input } = this.state
 
         this.setState({
-            inputKey: capitalized ? capitalize(inputKey) : inputKey.toLowerCase(),
+            input: capitalized ? capitalize(input) : input.toLowerCase(),
             isCapitalize: capitalized,
             isResult: false,
             users: [],
@@ -127,8 +127,8 @@ export class Search extends Component {
     setSearchParameter = value => {
         this.setState({
             sOption: value,
-            inputKey: "",
-            extraInputKey: "",
+            input: "",
+            additionInput: "",
             users: [],
             isResult: false,
             match: this.state.clsStudents,
@@ -179,16 +179,16 @@ export class Search extends Component {
         this.setState({ inProgress: true, users: [], isResult: false });
 
         // State parameters
-        const { inputKey, match, isCapitalize, sOption, extraInputkey, clsStudents } = this.state;
+        const { input, match, isCapitalize, sOption, additionInput, clsStudents } = this.state;
 
         // Return if form is invalid
-        if (inputKey.length < 2) return;
+        if (input.length < 2) return;
 
         // API parameters by chosen searching alternative
-        const params = (!clsStudents) ? match + "/" + isCapitalize : extraInputkey;
+        const params = (!clsStudents) ? match + "/" + isCapitalize : additionInput;
 
         // API request
-        await axios.get("search/" + sOption + "/" + inputKey + "/" + params, _config).then(res => {
+        await axios.get("search/" + sOption + "/" + input + "/" + params, _config).then(res => {
             // Response
             const { warning, msg, users, errorMsg, alert } = res.data;
             // Update state parameters
@@ -197,8 +197,8 @@ export class Search extends Component {
                     users: users || [],
                     inProgress: false,
                     isResult: true,
-                    inputKey: users?.length > 0 ? "" : inputKey,
-                    extraInputkey: users?.length > 0 ? "" : extraInputkey,
+                    input: users?.length > 0 ? "" : input,
+                    additionInput: users?.length > 0 ? "" : additionInput,
                     warning: warning,
                     msg: msg,
                     alert: (alert) ? alert : this.state.alert
@@ -232,11 +232,11 @@ export class Search extends Component {
             clsStudents, isOpen, isNoOptions } = this.state;
 
         // List of text fields
-        const sFormParams = !clsStudents ? [{ name: "inputKey", label: "Namn", placeholder: (!match) ? "Skriv exakt fullständigt namn eller anvädarnamn här ..." : "", autoOpen: false }]
-            : [{ name: "inputKey", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Skriv exakt klassbeteckning här ...", autoOpen: false },
-            { name: "extraInputkey", label: "Skolnamn", clsName: "search-second-input", placeholder: "Skriv exakt skolnamn här ..", autoOpen: true }];
+        const sFormParams = !clsStudents ? [{ name: "input", label: "Namn", placeholder: (!match) ? "Skriv exakt fullständigt namn eller anvädarnamn här ..." : "", autoOpen: false }]
+            : [{ name: "input", label: "Klassbeteckning", clsName: "search-first-input", placeholder: "Skriv exakt klassbeteckning här ...", autoOpen: false },
+            { name: "additionInput", label: "Skolnamn", clsName: "search-second-input", placeholder: "Skriv exakt skolnamn här ..", autoOpen: true }];
 
-        const isActive = (this.state.inputKey || this.state.extraInputkey).length > 0;
+        const isActive = (this.state.input || this.state.additionInput).length > 0;
 
 
         return (
@@ -282,24 +282,24 @@ export class Search extends Component {
                         />
                     ))}
 
-                    {/* Reset form - button */}
-                    {isActive ? <Button
-                        variant="text"
-                        color="error"
-                        className="search-reset"
-                        disabled={inProgress}
-                        onClick={() => this.setState({ inputKey: "", extraInputkey: "", isOpen: false })}>
-                        <SearchOffSharp />
-                    </Button> : null}
-
                     {/* Submit form - button */}
                     <Button
                         variant={isActive ? "contained" : "outlined"}
                         color={isActive ? "primary" : "inherit"}
-                        className="search-button"
+                        className="search-button search-button-mobile"
                         type="submit"
                         disabled={!isActive || inProgress}>
                         <SearchSharp /></Button>
+
+                    {/* Reset form - button */}
+                    {isActive ? <Button
+                        variant="text"
+                        color="error"
+                        className="search-reset search-button-mobile"
+                        disabled={inProgress}
+                        onClick={() => this.setState({ input: "", additionInput: "", isOpen: false })}>
+                        <SearchOffSharp />
+                    </Button> : null}
                 </form >
 
                 {/* The search parameters to choice */}
@@ -316,10 +316,8 @@ export class Search extends Component {
                         label="Tips" />
 
                     {/* Radio buttons to choice one of search alternatives */}
-                    <FormControl style={{ display: "inline-block" }}>
-                        <RadioGroup row
-                            name="row-radio-buttons-group">
-
+                    <FormControl className='checkbox-block-mobile' style={{ display: "inline-block" }}>
+                        <RadioGroup row name="row-radio-buttons-group">
                             {/* Loop of radio input choices */}
                             {this.sOptions.map((p, index) => (
                                 <Tooltip key={index} arrow disableHoverListener={!showTips} title={this.returnToolTipByKeyword(p.label)}
@@ -336,7 +334,7 @@ export class Search extends Component {
                                 </Tooltip>
                             ))}
                         </RadioGroup>
-                    </FormControl >
+                    </FormControl>
 
                     {/* Checkbox and radio with search parameters to choose for user search */}
                     <FormControl style={{ display: "block" }}>
