@@ -11,34 +11,36 @@ namespace ActiveDirectory.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class SearchController : ControllerBase
     {
-        private readonly IActiveDirectoryProvider _provider;
-        public SearchController(IActiveDirectoryProvider activeDirectory)
+        private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
+        public SearchController(IActiveDirectoryProvider provider)
         {
-            _provider = activeDirectory;
+            _provider = provider;
         }
 
         #region GET
-
-        [HttpGet("user/{name}/{match:bool}/{capitalize:bool}")]
-        [Authorize]
+        [HttpGet("user/{name}/{match:bool}/{capitalize:bool}")] // Search one user
         public JsonResult FindUser(string name, bool match = false, bool capitalize = false)
         {
-            List<User> users = new List<User>();
+            List<User> users = new List<User>(); // Empty list of user object
             try
             {
-                var group = _provider.FindGroupName("Students");
+                var group = _provider.FindGroupName("Students"); // Get group by name "Students"
 
-                if (match)
+                if (match) // If search is by keywords matching
                 {
+                    // Get all members into Students group that matching with search keywords
                     var members = group.GetMembers(true).Where(x => (!capitalize
                             ? (x.Name.ToLower().Contains(name.ToLower()) || x.DisplayName.ToLower().Contains(name.ToLower()))
                             : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
 
+                    // Loopin of all members
                     foreach (Principal p in members)
                     {
-                        var user = _provider.FindUserByExtensionProperty(p.Name);
+                        var user = _provider.FindUserByExtensionProperty(p.Name); // Find users with extension property 
+                        // Add user to this empty list of users 
                         users.Add(new User
                         {
                             Name = user.Name,
@@ -50,8 +52,10 @@ namespace ActiveDirectory.Controllers
                 }
                 else
                 {
+                    // Check if the one for whom the search is in the group of students   
                     var member = group.GetMembers(true).FirstOrDefault(x => x.Name == name || x.DisplayName == name);
-                    if (member == null) // Return if user not found.
+
+                    if (member == null) // Return if member not found by name
                         return new JsonResult(new
                         {
                             warning = true,
@@ -60,7 +64,7 @@ namespace ActiveDirectory.Controllers
                                         $"Var vänlig, kontrollera namn/användarnamn."
                         });
 
-                    var user = _provider.FindUserByExtensionProperty(member.Name);
+                    var user = _provider.FindUserByExtensionProperty(member.Name); // Find users with extension property 
                     //_provider.MembershipCheck(name, "Students");
 
                     if (user != null)
@@ -77,10 +81,10 @@ namespace ActiveDirectory.Controllers
 
                 group.Dispose();
 
-                if (users.Count > 0)
+                if (users.Count > 0) // If search got no results
                     return new JsonResult(new { users = users.OrderBy(x => x.Name) });
 
-                return new JsonResult(new { msg = "Inga användarkonto hittades." });//No user was found
+                return new JsonResult(new { msg = "Inga användarkonto hittades." });
             }
             catch (Exception ex)
             {
@@ -88,24 +92,25 @@ namespace ActiveDirectory.Controllers
             }
         }
 
-        [HttpGet("members/{department}/{office}")]
-        [Authorize]
+        [HttpGet("members/{department}/{office}")] // Search class students by class and school name
         public async Task<JsonResult> FindClassMembers(string department, string office)
         {
             try
             {
-                List<User> users = new List<User>();
-                var context = _provider.GetContext();
+                List<User> users = new List<User>(); // Empty list of users
+                var context = _provider.GetContext(); // Get active derictory context
 
-                using (UserPrincipalExtension searchDepartment = new UserPrincipalExtension(context) { Department = String.Format("*{0}*", department) })
+                // Methods to find the class students
+                using (UserPrincipalExtension searchDepartment = new UserPrincipalExtension(context) { Department = String.Format("*{0}*", department) }) // Using a user extension class whose job it is to extend user options.
                 using (PrincipalSearcher searcherDepartment = new PrincipalSearcher(searchDepartment))
                 using (Task<PrincipalSearchResult<Principal>> taskDepartment = Task.Run<PrincipalSearchResult<Principal>>(() => searcherDepartment.FindAll()))
                 {
+                    // Looping all members to search by department
                     foreach (UserPrincipalExtension member in (await taskDepartment))
                     {
                         using (member)
                         {
-                            if (member.Office.ToLower() == office.ToLower())
+                            if (member.Office.ToLower() == office.ToLower()) // If member has same office
                             {
                                 users.Add(new User
                                 {
@@ -134,7 +139,10 @@ namespace ActiveDirectory.Controllers
         #endregion
 
         #region Helpers
-        public JsonResult Error(string msg) => new JsonResult(new { alert = "error", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", errorMsg = msg }); // Sommething went wrong.
+        // Return message if sommething went wrong.
+        public JsonResult Error(string msg) => new JsonResult(
+            new { alert = "error", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", 
+                errorMsg = msg }); 
         #endregion
     }
 }

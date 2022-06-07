@@ -16,11 +16,11 @@ namespace ActiveDirectory.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IActiveDirectoryProvider _provider;
-    private readonly IConfiguration _config;
-    public AuthController(IActiveDirectoryProvider activeDirectory, IConfiguration config)
+    private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
+    private readonly IConfiguration _config; // Implementation of configuration file => ActiveDerictory/appsettings.json
+    public AuthController(IActiveDirectoryProvider provider, IConfiguration config)
     {
-        _provider = activeDirectory;
+        _provider = provider;
         _config = config;
     }
 

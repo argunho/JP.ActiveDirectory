@@ -3,9 +3,7 @@ using ActiveDirectory.Models;
 using ActiveDirectory.Repositories;
 using ActiveDirectory.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace ActiveDirectory.Controllers;
 
@@ -14,10 +12,11 @@ namespace ActiveDirectory.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    private readonly IActiveDirectoryProvider _provider;
-    public UserController(IActiveDirectoryProvider activeDirectory)
+    
+    private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
+    public UserController(IActiveDirectoryProvider provider)
     {
-        _provider = activeDirectory;
+        _provider = provider;
     }
 
     #region GET
@@ -78,13 +77,13 @@ public class UserController : ControllerBase
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); 
     }
 
-    [HttpPost("mail/{str}")]
+    [HttpPost("mail/{str}")] // Send mail to admin
     public JsonResult SendEmail(string str, IFormFile attachedFile)
     {
         var send = false;
         try
         {
-            MailRepository ms = new MailRepository();
+            MailRepository ms = new MailRepository(); // Implementation of MailRepository class where email content is structured and SMTP connection with credentials
             var mail = UserCredentials.Email;
             send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
                         $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.", attachedFile);
@@ -99,6 +98,7 @@ public class UserController : ControllerBase
     #endregion
 
     #region Helpers
+    // Help method to structure a warning message
     public JsonResult? ReturnWarningsMessage(UserViewModel model)
     {
         if (!ModelState.IsValid)
@@ -111,6 +111,7 @@ public class UserController : ControllerBase
         return null;
     }
 
+    // Help method to structure a result message
     public JsonResult ReturnResultMessage(string? message)
     {
         if (message?.Length > 0)
