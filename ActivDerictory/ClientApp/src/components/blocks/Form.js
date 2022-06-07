@@ -51,6 +51,7 @@ export default function Form(props) {
 
     const dslGenerate = !strongPassword && !ready;
 
+    // Student school and class
     const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
 
     // Jwt token to connect server
@@ -59,11 +60,13 @@ export default function Form(props) {
         headers: { 'Authorization': `Bearer ${_token}` }
     };
 
+    // Form inputs
     const formList = [
         { name: "password", label: "Lösenord", placeholder: "", regex: true },
         { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }
     ]
 
+    // Help texts
     const helpTexts = [
         {
             label: "Lösenord ska innehålla",
@@ -79,6 +82,7 @@ export default function Form(props) {
         { label: "Admin Lösenord", tip: "<pre>* Admins lösenord krävs om användaren är auktoriserad med Windows-data för att bekräfta auktorisering för att låsa upp användarkonto eller återställa/redigera elevs lösenord</pre>" }
     ]
 
+    // List of password's alternative
     const passwordKeys = [
         { label: "Länder", value: "countries" },
         { label: "Alla städer/tätort", value: "cities" },
@@ -93,6 +97,8 @@ export default function Form(props) {
     ]
 
     const history = useHistory();
+
+    // To manipulate elements like js getElementById
     const refSubmit = useRef(null);
     const refModal = useRef(null);
 
