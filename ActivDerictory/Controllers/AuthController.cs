@@ -174,7 +174,7 @@ public class AuthController : ControllerBase
 }
 
 
-public static class UserCredentials
+public static class UserCredentials // Class to save and use admin credentials
 {
     public static string? Username { get; set; }
     public static string? FullName { get; set; }

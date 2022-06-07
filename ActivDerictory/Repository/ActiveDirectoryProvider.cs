@@ -6,7 +6,7 @@ using System.DirectoryServices.AccountManagement;
 
 namespace ActiveDirectory.Repository;
 
-public class ActiveDirectoryProvider : IActiveDirectoryProvider
+public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class inherit an interface and this class is a provider to use interface methods into another controller
 {
     private string domain = "alvesta";
     private string defaultOU = "DC=alvesta,DC=local";
@@ -14,16 +14,16 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
 
     #region Interface methods
     public UserPrincipal FindUserByName(string name)
-        => UserPrincipal.FindByIdentity(PContext(), name);
+        => UserPrincipal.FindByIdentity(PContext(), name); // Method to get a user from Active Dericotry
 
-    public UserPrincipalExtension FindUserByExtensionProperty(string name)
+    public UserPrincipalExtension FindUserByExtensionProperty(string name) // Method to get a user with extension parameters from Active Dericotry
         => UserPrincipalExtension.FindByIdentity(PContext(), name);
 
     public GroupPrincipal FindGroupName(string name)
-        => GroupPrincipal.FindByIdentity(PContext(), name);
+        => GroupPrincipal.FindByIdentity(PContext(), name); // Method to get a group by name
 
     public bool AccessValidation(string? name, string? password = null)
-        => PContext().ValidateCredentials(name, password);
+        => PContext().ValidateCredentials(name, password); // Method to authenticate a user
 
     // Check user's membership in a specific group in which members have access  to change student password 
     public bool MembershipCheck(string username, string groupname = "Password Reset Students-EDU")
@@ -39,7 +39,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
 
     public PrincipalContext GetContext() => PContext();
 
-    public string ResetPassword(UserViewModel model)
+    public string ResetPassword(UserViewModel model) // Method to reset user password
     {
         try
         {
@@ -63,7 +63,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
         return string.Empty;
     }
 
-    public string UnlockUser(UserViewModel model)
+    public string UnlockUser(UserViewModel model) // Method to unlock user
     {
         using (var context = PContexAccessCheck())
         {
@@ -88,15 +88,13 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider
         }
         return string.Empty;
     }
-
     #endregion
 
     #region Helpers
     public PrincipalContext PContext() =>
-        new PrincipalContext(ContextType.Domain, domain, defaultOU);
-
+        new PrincipalContext(ContextType.Domain, domain, defaultOU); // Context to build a connection to local host
 
     public PrincipalContext PContexAccessCheck() 
-        => new PrincipalContext(ContextType.Domain, domain, defaultOU, UserCredentials.Username, UserCredentials.Password);
+        => new PrincipalContext(ContextType.Domain, domain, defaultOU, UserCredentials.Username, UserCredentials.Password); // Context to build a connection with credentials to local host
     #endregion
 }
