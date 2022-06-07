@@ -34,21 +34,22 @@ export default function Header({ isAuthorized }) {
                 </a>
             </div>
             <nav className="nav-wrapper">
-                    <ul className='container'>
-                        <li>
-                            <Link className="link" to="/find-user">
-                                <HomeSharp />Unlock User
-                            </Link>
+                <ul className='container'>
+                    <li>
+                        <Link className="link" to="/find-user">
+                            <HomeSharp />Unlock User
+                        </Link>
+                    </li>
+                    {isAuthorized ?
+                        // Button to logout
+                        <li className='displayName'>
+                            <p className='link'>{displayName}</p>
+                            <Button variant='outlined' size="large" className='logout-btn' onClick={() => logout()}>
+                                <Logout />&nbsp;&nbsp;<span>Logga ut</span>
+                            </Button>
                         </li>
-                        {isAuthorized ?
-                            <li className='displayName'>
-                                <p className='link'>{displayName}</p>
-                                <Button variant='outlined' size="large" className='logout-btn' onClick={() => logout()}>
-                                    <Logout />&nbsp;&nbsp;<span>Logga ut</span>
-                                </Button>
-                            </li>
-                            : null}
-                    </ul>
+                        : null}
+                </ul>
             </nav>
         </header>
     )
