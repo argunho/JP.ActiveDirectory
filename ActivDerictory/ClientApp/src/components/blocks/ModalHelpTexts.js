@@ -82,7 +82,7 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                         ))}
                 </DialogContent>
 
-                <DialogActions style={{ position: "relative", overflow: "hidden" }} className="no-print">
+                <DialogActions className="no-print modal-buttons-wrapper">
                     {isSubmit ?
                         <>
                             <Button variant="text"
@@ -97,7 +97,7 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                                 onClick={() => clickHandle(false)}>
                                 Verkställ</Button>
 
-                            <Button variant="contained"
+                            <Button variant="contained" className="mobile-hidden"
                                 color="info" onClick={() => regeneratePassword(true)}>
                                 <Refresh />
                             </Button>

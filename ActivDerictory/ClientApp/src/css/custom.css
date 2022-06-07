@@ -274,6 +274,8 @@ body {
   background-color: #faebd7;
   margin-left: 10px;
   font-size: 12px;
+  display: block;
+width: max-content;
 }
 
 /* Form */
@@ -315,7 +317,7 @@ input::placeholder {
 }
 
 .dropdown-div {
-  overflow: hidden;
+  overflow: hidden !important;
   max-height: 0;
   padding: 0;
   margin: 0;
@@ -507,7 +509,7 @@ button {
 }
 
 .modal-wrapper > .MuiDialog-container > div {
-  width: 100% !important;
+  width: 98% !important;
   max-width: 800px !important;
   margin: auto !important;
 }
@@ -532,6 +534,11 @@ button {
 
 .modal_content > div {
   color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.modal-buttons-wrapper {
+  position: "relative" !important;
+  overflow: "hidden" !important;
 }
 
 pre {
@@ -635,7 +642,8 @@ pre {
     padding-left: 8px !important;
   }
   .displayName > p,
-  .switch-btn {
+  .switch-btn,
+  .mobile-hidden {
     display: none !important;
     visibility: hidden !important;
     z-index: -1 !important;
@@ -672,6 +680,10 @@ pre {
   .collapse-wrapper {
     padding: 10px 5px !important;
   }
+  .typography-span {
+    margin-left: 0;
+    padding: 3px 5px;
+  }
 }
 
 @media (max-width: 385px) {
@@ -699,5 +711,13 @@ pre {
   }
   .last-options > label {
     font-size: 3.5vw !important;
+  }
+  .modal-wrapper > .MuiDialog-container > div,
+  .modal-wrapper > .MuiDialog-container > div > h2,
+  .modal-wrapper > .MuiDialog-container > div > div {
+    padding: 15px 8px !important;
+  }
+  .modal-buttons-wrapper > button {
+    font-size: 3vw !important
   }
 }
