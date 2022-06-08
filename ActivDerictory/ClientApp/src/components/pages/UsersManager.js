@@ -8,7 +8,7 @@ export default class UsersManager extends Component {
     constructor(props) {
         super(props);
         const { cls, school } = this.props.match.params;
-        this.users = JSON.parse(sessionStorage.getItem("selectedUsers"));
+        this.users = JSON.parse(sessionStorage.getItem("selectedUsers")) || [];
 
         this.state = {
             cls: {
@@ -21,6 +21,7 @@ export default class UsersManager extends Component {
 
     componentDidMount() {
         const token = sessionStorage.getItem("token");
+        console.log(token)
         if (token == null || token === undefined)
             this.props.history.push("/");
     }

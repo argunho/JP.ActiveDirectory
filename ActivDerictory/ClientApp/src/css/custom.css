@@ -402,7 +402,6 @@ input::placeholder {
 .buttons-interior-wrapper {
   width: auto;
   display: inline-block;
-  margin-left: -20px;
 }
 
 form .buttons-wrapper {

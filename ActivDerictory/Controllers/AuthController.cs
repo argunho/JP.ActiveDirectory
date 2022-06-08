@@ -29,32 +29,50 @@ public class AuthController : ControllerBase
     [HttpGet]
     public JsonResult AccessValidation()
     {
-        var name = Environment.UserName; // Get windows username
-        if (name == null) // If failed to get username, try other way to get windows username
+        var name = "";
+        var errorMessage = "";
+        try
         {
-            var currentUser = WindowsIdentity.GetCurrent();
-            if (currentUser != null)
-                name = currentUser?.Name.ToString().Split('\\')[1];
-        }
-
-        var user = _provider.FindUserByName(name); // Get user from Active Directory
-        if (user != null && _provider.MembershipCheck(name)) // Check user's membership
-        {
-            // If user is found, create Jwt Token to get all other information and to get access to other functions
-            var token = CreateJwtToken(user);
-            UserCredentials.Username = name;
-            UserCredentials.FullName = user.DisplayName;
-            UserCredentials.Email = user.EmailAddress;
-            return new JsonResult(new
+            name = Environment.UserName; // Get windows username
+            if (name == null) // If failed to get username, try other way to get windows username
             {
-                access = true,
-                alert = "success",
-                token = token,
-                msg = "Din åtkomstbehörighet har bekräftats."
-            });
+                var currentUser = WindowsIdentity.GetCurrent();
+                if (currentUser != null)
+                    name = currentUser?.Name.ToString().Split('\\')[1];
+            }
+
+            if (name?.Length > 0)
+            {
+                var user = _provider.FindUserByName(name); // Get user from Active Directory
+                if (user != null && _provider.MembershipCheck(name)) // Check user's membership
+                {
+                    // If user is found, create Jwt Token to get all other information and to get access to other functions
+                    var token = CreateJwtToken(user);
+                    UserCredentials.Username = name;
+                    UserCredentials.FullName = user.DisplayName;
+                    UserCredentials.Email = user.EmailAddress;
+                    return new JsonResult(new
+                    {
+                        access = true,
+                        alert = "success",
+                        token = token,
+                        msg = "Din åtkomstbehörighet har bekräftats."
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
         }
 
-        return new JsonResult(new { access = false, alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); //Failed! You do not have permission to edit a student's password
+        return new JsonResult(new
+        {
+            access = false,
+            alert = "warning",
+            msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord",
+            errorMessage = errorMessage
+        });
     }
 
     // Save admin password
@@ -62,21 +80,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public JsonResult SetFullCredential(string password)
     {
-        // Unclock time after 4 incorrect passwords
-        if (UserCredentials.BlockTime != null)
-        {
-            // Current time - Block time to know is user unlocked or not
-            var time = DateTime.Now.Ticks - UserCredentials.BlockTime?.AddMinutes(30).Ticks;
-            // If the user until unlocked
-            if (time < 0)
-            {
-                return new JsonResult(new
-                {
-                    success = false,
-                    msg = $"Du har redan gjort 4 försök att logga in och för att undvika ditt konto blockering, bör du vänta {time?.ToString("HH:mm:ss")}"
-                });
-            }
-        }
+        ProtectAccount();
         var errorMessage = "Felaktig lösenord.";
 
         // If the user is not locked, validate user's password
@@ -103,7 +107,7 @@ public class AuthController : ControllerBase
             UserCredentials.BlockTime = DateTime.Now;
         }
 
-        return new JsonResult(new { success = false, msg = errorMessage});
+        return new JsonResult(new { success = false, msg = errorMessage });
     }
     #endregion
 
@@ -116,10 +120,21 @@ public class AuthController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Felaktigt eller ofullständigt ifyllda formulär" }); //Forms filled out incorrectly
         try
         {
+            ProtectAccount();
+
             // Validate username and password
             var isAutheticated = _provider.AccessValidation(model.Username, model.Password);
             if (!isAutheticated)
+            {
+                // If the user tried to put in a wrong password, save this like +1 a wrong attempt and the max is 4 attempts
+                UserCredentials.Attempt += 1;
+                if (UserCredentials.Attempt == 3)
+                {
+                    UserCredentials.Attempt = 0;
+                    UserCredentials.BlockTime = DateTime.Now;
+                }
                 return new JsonResult(new { alert = "error", msg = "Felaktig användarnamn eller lösenord." }); //Incorrect username or password"
+            }
 
             if (_provider.MembershipCheck(model.Username))
             {
@@ -169,6 +184,30 @@ public class AuthController : ControllerBase
         var token = encodeToken.WriteToken(securityToken);
 
         return token;
+    }
+    // Protection against account blocking after several attempts to enter incorrect data
+    public JsonResult? ProtectAccount()
+    {
+
+        // Check if the user is blocked from further attempts to enter incorrect data
+        // Unclock time after 4 incorrect passwords
+        if (UserCredentials.BlockTime != null)
+        {
+            // Current time - Block time to know is user unlocked or not
+            var time = DateTime.Now.Ticks - UserCredentials.BlockTime?.AddMinutes(30).Ticks;
+            // If the user until unlocked
+            if (time < 0)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    alert = "warning",
+                    msg = $"Du har redan gjort 4 försök att logga in och för att undvika ditt konto blockering, bör du vänta {time?.ToString("HH:mm:ss")}"
+                });
+            }
+        }
+
+        return null;
     }
     #endregion
 }

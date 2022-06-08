@@ -28,21 +28,27 @@ export class Home extends Component {
       this.props.history.push("/find-user");
     else if (login !== null && login !== undefined)
       this.props.history.push("/login");
-    else {
-      axios.get("auth").then(res => {
+    else
+      this.checkAccess()
+  }
 
-        this.setState({ load: false, response: res.data });
+  // Check user access with windows credentials
+  async checkAccess() {
+    await axios.get("auth").then(res => {
 
-        if (res.data?.access) {
-          sessionStorage.setItem("token", res.data?.token);
-          setTimeout(() => {
-            this.props.history.push("/find-user");
-          }, 2000)
-        }
-      }, error => {
-        console.error("Error => " + error);
-      })
-    }
+      this.setState({ load: false, response: res.data });
+
+      if (res.data?.access) {
+        sessionStorage.setItem("token", res.data?.token);
+        setTimeout(() => {
+          this.props.history.push("/find-user");
+        }, 2000)
+      } else
+        console.error("Error => " + res.data.errorMessage);
+
+    }, error => {
+      console.error("Error => " + error);
+    })
   }
 
   responseBlock(response) {
