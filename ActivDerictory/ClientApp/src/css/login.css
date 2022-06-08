@@ -2,12 +2,12 @@
   width: 85%;
   max-width: 400px;
   padding: 20px;
-  background-color: #FFF;
+  background-color: #fff;
   margin: 100px auto;
   align-content: center;
   text-align: center;
   display: block;
-  border: 1px solid #C4C4C4;
+  border: 1px solid #c4c4c4;
   overflow: hidden;
   border-radius: 3px;
 }
@@ -18,10 +18,14 @@
   color: rgb(70, 69, 69);
   text-transform: uppercase;
   font-size: 20px;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif !important;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif !important;
 }
 
-.login-form>div {
+.login-form .form-title {
+  margin-top: 15px !important;
+}
+
+.login-form > div {
   width: 100% !important;
   margin: 10px 0 !important;
 }
@@ -30,12 +34,12 @@
   float: right !important;
 }
 
-.login-form>button {
+.login-form > button {
   display: inline-block;
   margin: 10px 0 0 10px;
   overflow: hidden;
 }
 .login-form > button:disabled {
   background-color: transparent !important;
-  color: #C4C4C4 !important;
+  color: #c4c4c4 !important;
 }
