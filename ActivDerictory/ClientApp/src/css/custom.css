@@ -18,6 +18,7 @@ body {
   padding-bottom: 50px;
 }
 
+
 /* Home */
 .loading {
   margin-bottom: 30px;
@@ -37,6 +38,12 @@ body {
 }
 
 /*Header*/
+/* header {
+  background: url('./../images/keys.png');
+  background-position: right 8%;
+  background-repeat: no-repeat;
+  background-size: auto 60%;
+} */
 .logo-wrapper {
   display: block;
   width: 100%;
@@ -402,6 +409,7 @@ input::placeholder {
 .buttons-interior-wrapper {
   width: auto;
   display: inline-block;
+  margin-left: -20px;
 }
 
 form .buttons-wrapper {
@@ -666,6 +674,9 @@ pre {
   }
   .inputs-wrapper {
     display: block !important;
+  }
+  .inputs-wrapper .dropdown-open {
+    padding-top: 5px !important;
   }
   .pr-inputs {
     margin: 0 !important;

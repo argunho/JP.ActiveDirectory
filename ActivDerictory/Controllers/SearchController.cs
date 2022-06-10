@@ -25,13 +25,14 @@ namespace ActiveDirectory.Controllers
         public JsonResult FindUser(string name, bool match = false, bool capitalize = false)
         {
             List<User> users = new List<User>(); // Empty list of user object
+
             try
             {
-                var group = _provider.FindGroupName("Students"); // Get group by name "Students"
+                var group = _provider.FindGroupName(GroupNames.GroupToManage); // Get group by name
 
                 if (match) // If search is by keywords matching
                 {
-                    // Get all members into Students group that matching with search keywords
+                    // Get all members into "Group to manage" group that matching with search keywords
                     var members = group.GetMembers(true).Where(x => (!capitalize
                             ? (x.Name.ToLower().Contains(name.ToLower()) || x.DisplayName.ToLower().Contains(name.ToLower()))
                             : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
@@ -52,7 +53,7 @@ namespace ActiveDirectory.Controllers
                 }
                 else
                 {
-                    // Check if the one for whom the search is in the group of students   
+                    // Check if the one for whom the search is in the group of "Group to manage"  
                     var member = group.GetMembers(true).FirstOrDefault(x => x.Name == name || x.DisplayName == name);
 
                     if (member == null) // Return if member not found by name
@@ -65,7 +66,6 @@ namespace ActiveDirectory.Controllers
                         });
 
                     var user = _provider.FindUserByExtensionProperty(member.Name); // Find users with extension property 
-                    //_provider.MembershipCheck(name, "Students");
 
                     if (user != null)
                     {

@@ -11,7 +11,7 @@ public interface IActiveDirectoryProvider
     UserPrincipalExtension FindUserByExtensionProperty(string name);
     GroupPrincipal FindGroupName(string name);
     bool AccessValidation(string? name, string? password);
-    bool MembershipCheck(string? username, string? groupname = "Password Reset Students-EDU");
+    bool MembershipCheck(string? username, string? groupname);
     string ResetPassword(UserViewModel model);
     string UnlockUser(UserViewModel model);
     PrincipalContext GetContext();

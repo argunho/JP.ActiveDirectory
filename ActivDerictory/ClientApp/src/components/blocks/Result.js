@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
-export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult }) {
+export default function Result({ users, clsStudents, isVisibleTips, inProgress, isResponseMessage, isAlertBg, isResult, resetResult, cancelRequest }) {
 
     const refResult = useRef(null);
     const [selectedList, setSelectedList] = useState([]);
@@ -23,7 +23,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
     const ul = users.length;
     const sl = selectedList.length;
-    const selected = (ul === sl)
+    const selected = (ul === sl);
+
 
     useEffect(() => {
         refResult.current.scrollIntoView();
@@ -76,8 +77,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                 {/* Result info */}
                 <ListItemText
                     primary="Result"
-                    secondary={ul > 0 ? ("Hittades: " + ul + " användare")
-                        : "Ditt sökresultat kommer att visas här nedan"} />
+                    secondary={inProgress ? "Sökning pågår ..." : (ul > 0 ? ("Hittades: " + ul + " användare")
+                        : "Ditt sökresultat kommer att visas här nedan")} />
 
                 {clsStudents && ul > 0 ?
                     /* Hidden form to reset selected users password */
@@ -93,6 +94,11 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                             <Password />
                         </Button>
                     </Tooltip> : null}
+
+                {/* Cancel request */}
+                {inProgress ?
+                    <Button variant='contained' color="error" onClick={() => cancelRequest()}>Avbryt sökning</Button>
+                    : null}
 
                 {/* Button to reset search result */}
                 <Tooltip arrow
@@ -178,7 +184,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                 </List> : null}
 
             {/* Message if result is null */}
-            {(isResult && ul === 0) ? <Alert severity={isAlertBg}>{isResponseMessage}</Alert> : null}
+            {(isResult && ul === 0) ? <Alert className='alert' severity={isAlertBg}>{isResponseMessage}</Alert> : null}
         </div>
     )
 }

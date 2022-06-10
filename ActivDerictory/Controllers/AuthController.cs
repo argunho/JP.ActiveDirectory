@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.DirectoryServices.AccountManagement;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
+using ActiveDirectory.Extensions;
 
 namespace ActiveDirectory.Controllers;
 
@@ -18,10 +18,13 @@ public class AuthController : ControllerBase
 {
     private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
     private readonly IConfiguration _config; // Implementation of configuration file => ActiveDerictory/appsettings.json
-    public AuthController(IActiveDirectoryProvider provider, IConfiguration config)
+    //private readonly IHttpContextAccessor _contextAccessor;
+
+    public AuthController(IActiveDirectoryProvider provider, IConfiguration config)//IHttpContextAccessor httpContextAccessor
     {
         _provider = provider;
         _config = config;
+        //_contextAccessor = httpContextAccessor;
     }
 
     #region GET
@@ -29,11 +32,10 @@ public class AuthController : ControllerBase
     [HttpGet]
     public JsonResult AccessValidation()
     {
-        var name = "";
-        var errorMessage = "";
+        string? errorMessage = null;
         try
         {
-            name = Environment.UserName; // Get windows username
+            var name = Environment.UserName; // Get windows username;
             if (name == null) // If failed to get username, try other way to get windows username
             {
                 var currentUser = WindowsIdentity.GetCurrent();
@@ -43,14 +45,11 @@ public class AuthController : ControllerBase
 
             if (name?.Length > 0)
             {
-                var user = _provider.FindUserByName(name); // Get user from Active Directory
-                if (user != null && _provider.MembershipCheck(name)) // Check user's membership
+                var user = _provider.FindUserByExtensionProperty(name); // Get user from Active Directory
+                if (user != null && _provider.MembershipCheck(name, "Password Reset Students-EDU")) // Check user's membership
                 {
                     // If user is found, create Jwt Token to get all other information and to get access to other functions
                     var token = CreateJwtToken(user);
-                    UserCredentials.Username = name;
-                    UserCredentials.FullName = user.DisplayName;
-                    UserCredentials.Email = user.EmailAddress;
                     return new JsonResult(new
                     {
                         access = true,
@@ -71,7 +70,7 @@ public class AuthController : ControllerBase
             access = false,
             alert = "warning",
             msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord",
-            errorMessage = errorMessage
+            errorMessage = errorMessage ?? "Inga windows-uppgifter kunde identifieras."
         });
     }
 
@@ -136,15 +135,18 @@ public class AuthController : ControllerBase
                 return new JsonResult(new { alert = "error", msg = "Felaktig användarnamn eller lösenord." }); //Incorrect username or password"
             }
 
-            if (_provider.MembershipCheck(model.Username))
+            // Define and save a group in which members have the right to administer
+            GroupNames.GroupToManage = (model.Group == "Politician") ? "IntuneUser-Politiker" : model.Group;
+
+            // Define and save a group in which member/members will be managed in the current session
+            GroupNames.PasswordResetGroup = (model.Group == "Students") ? "Password Reset Students-EDU" : "";
+
+            // Check the logged user's right to administer
+            if (_provider.MembershipCheck(model.Username, GroupNames.PasswordResetGroup))
             {
-                var user = _provider.FindUserByName(model.Username);
+                var user = _provider.FindUserByExtensionProperty(model.Username);
                 // If user is found, create Jwt Token to get all other information and to get access to other functions
-                var token = CreateJwtToken(user);
-                UserCredentials.Username = model.Username;
-                UserCredentials.Password = model.Password;
-                UserCredentials.Email = user.EmailAddress;
-                UserCredentials.FullName = user.DisplayName;
+                var token = CreateJwtToken(user, model.Password);
                 return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
             }
         }
@@ -153,22 +155,28 @@ public class AuthController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", consoleMsg = ex.Message }); //Something went wrong, please try again later
         }
 
-        return new JsonResult(new { alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord" }); // Failed! You do not have permission to edit a student's password
+        var members = model.Group == "Students" ? "elevs" : "politikers";
+        return new JsonResult(new { alert = "warning", msg = $"Åtkomst nekad! Du har inte behörighet att redigera {members} lösenord" }); // Failed! You do not have permission to edit a student's password
     }
     #endregion
 
     #region Helpers
     // Create Jwt Token for authenticating
-    private string CreateJwtToken(Principal user)
+    private string CreateJwtToken(UserPrincipalExtension user, string? password = null)
     {
+        UserCredentials.Password = password;
+        UserCredentials.Email = user.EmailAddress;
+        UserCredentials.FullName = user.DisplayName;
+        UserCredentials.Username = user.Name;
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
         IdentityOptions opt = new IdentityOptions();
 
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.Name, user.Name));
-        claims.Add(new Claim("DisplayName", user.DisplayName));
-        claims.Add(new Claim("Description", user.Description));
+        claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
+        claims.Add(new Claim("GroupToManage", GroupNames.GroupToManage));
         //foreach (var r in roles)
         //    claim.Add(new Claim(opt.ClaimsIdentity.RoleClaimType, r));
 
@@ -185,10 +193,10 @@ public class AuthController : ControllerBase
 
         return token;
     }
+
     // Protection against account blocking after several attempts to enter incorrect data
     public JsonResult? ProtectAccount()
     {
-
         // Check if the user is blocked from further attempts to enter incorrect data
         // Unclock time after 4 incorrect passwords
         if (UserCredentials.BlockTime != null)
@@ -221,4 +229,10 @@ public static class UserCredentials // Class to save and use admin credentials
     public static string? Password { get; set; }
     public static int Attempt { get; set; }
     public static Nullable<DateTime> BlockTime { get; set; }
+}
+
+public static class GroupNames
+{
+    public static string? PasswordResetGroup { get; set; }
+    public static string? GroupToManage { get; set; }
 }

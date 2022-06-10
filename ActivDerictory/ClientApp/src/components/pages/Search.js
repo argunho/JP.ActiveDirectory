@@ -43,11 +43,15 @@ export class Search extends Component {
 
         this.checkboxHandle = this.checkboxHandle.bind(this);
 
+        this.source = axios.CancelToken.source();
+
         // Search options
-        this.sOptions = [
+        const sOptionsParams = [
             { label: "Änvändare", value: "user" },
             { label: "Klass elever", value: "members" }
         ]
+
+        this.sOptions = (sessionStorage.getItem("group") === "Students") ? sOptionsParams : sOptionsParams.slice(0,-1);
 
         // All schools list in Alvesta kommun
         this.schools = [
@@ -169,7 +173,8 @@ export class Search extends Component {
 
         // To authorize
         const _config = {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` },
+            cancelToken: this.source.token
         };
 
         sessionStorage.removeItem("selectedUsers");
@@ -182,7 +187,10 @@ export class Search extends Component {
         const { input, match, isCapitalize, sOption, additionInput, clsStudents } = this.state;
 
         // Return if form is invalid
-        if (input.length < 2) return;
+        if (input.length < 1){
+            this.setState({ inProgress: false });
+            return;
+        } 
 
         // API parameters by chosen searching alternative
         const params = (!clsStudents) ? match + "/" + isCapitalize : additionInput;
@@ -210,7 +218,8 @@ export class Search extends Component {
         }, error => {
             // Error handle 
             this.setState({  inProgress: false })
-            if (error.response.status === 401) {   
+
+            if (error?.response?.status === 401) {   
                 this.setState({
                     msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
                     alert: "error",
@@ -219,10 +228,20 @@ export class Search extends Component {
                 setTimeout(() => {
                     this.props.history.push("/");
                 }, 3000)
-            } else
+            } else if(error.code === "ERR_CANCELED"){
+                this.source = axios.CancelToken.source();
+                this.setState({
+                    msg: error.message,
+                    alert: "warning",
+                    isResult: true
+                })
+                setTimeout(() => {  this.resetResult(); }, 3000)
+            }else
                 console.error("Error => " + error.response)   
         });
     }
+
+
 
     render() {
         // State parameters
@@ -380,6 +399,7 @@ export class Search extends Component {
                     inProgress={inProgress}
                     isResponseMessage={msg}
                     isAlertBg={alert}
+                    cancelRequest={() => this.source.cancel("Pågående sökning har avbrutits ...")}
                     resetResult={this.resetResult.bind(this)}
                 />
 

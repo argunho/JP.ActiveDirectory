@@ -21,7 +21,6 @@ export default class UsersManager extends Component {
 
     componentDidMount() {
         const token = sessionStorage.getItem("token");
-        console.log(token)
         if (token == null || token === undefined)
             this.props.history.push("/");
     }

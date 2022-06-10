@@ -10,6 +10,11 @@
   border: 1px solid #c4c4c4;
   overflow: hidden;
   border-radius: 3px;
+  position: relative;
+  /* background: url('./../images/keys.png');
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  background-size: 15%; */
 }
 
 .form-title {
@@ -25,9 +30,31 @@
   margin-top: 15px !important;
 }
 
-.login-form > div {
+.login-form > div:not(.login-form-alert) {
   width: 100% !important;
   margin: 10px 0 !important;
+}
+
+.login-label {
+  width: 100%;
+  display: block;
+  clear: both;
+  text-align: left;
+  margin-bottom: 7px;
+  color: #666666;
+}
+
+.login-radio span {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif !important;
+  font-size: 12px !important;
+}
+
+.login-form-img {
+  width: 15%;
+  position: absolute;
+  top: 15px;
+  right: 0;
+  transform: rotate(85deg);
 }
 
 .login-form button {

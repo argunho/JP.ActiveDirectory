@@ -34,17 +34,21 @@ export class Home extends Component {
 
   // Check user access with windows credentials
   async checkAccess() {
+
     await axios.get("auth").then(res => {
 
-      this.setState({ load: false, response: res.data });
+      if(res.data.token !== undefined)
+        this.setState({ load: false, response: res.data });
 
       if (res.data?.access) {
         sessionStorage.setItem("token", res.data?.token);
         setTimeout(() => {
           this.props.history.push("/find-user");
         }, 2000)
-      } else
+      } else {
         console.error("Error => " + res.data.errorMessage);
+        this.props.history.push("/login");
+      }
 
     }, error => {
       console.error("Error => " + error);

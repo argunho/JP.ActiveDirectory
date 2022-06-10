@@ -9,6 +9,7 @@ import UsersManager from './components/pages/UsersManager';
 import { Search } from './components/pages/Search';
 
 import './css/custom.css'
+import NotFound from './components/pages/NotFound';
 
 class App extends Component {
   static displayName = App.name;
@@ -34,16 +35,16 @@ class App extends Component {
   }
 
   render() {
-    const { isAuthorized } = this.state;
+    // const { isAuthorized } = this.state;
     return (
       <Layout isAuthorized={this.state.isAuthorized}>
         <Switch>
-          <Route exact path='/' render={(props) => <Home {...props} isAuthorized={isAuthorized} />} />
-          <Route exact path='/login' component={Login} />
+          {/* <Route exact path='/' render={(props) => <Home {...props} isAuthorized={isAuthorized} />} /> */}
+          <Route exact path={['/', '/login']} component={Login} />
           <Route exact path='/find-user' component={Search} />
-          {/* <Route exact path={['/manage-users/:cls/:school', '/manage-user/:id' ]} component={UserManager} /> */}
           <Route exact path='/manage-user/:id' component={UserManager} />
           <Route exact path='/manage-users/:cls/:school' component={UsersManager} />
+          <Route component={NotFound} />
         </Switch>
       </Layout>
     );

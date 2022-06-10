@@ -26,7 +26,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
         => PContext().ValidateCredentials(name, password); // Method to authenticate a user
 
     // Check user's membership in a specific group in which members have access  to change student password 
-    public bool MembershipCheck(string username, string groupname = "Password Reset Students-EDU")
+    public bool MembershipCheck(string username, string groupname)
     {
         var userPrincipal = FindUserByName(username);
         if (userPrincipal == null) // User does not exist.
