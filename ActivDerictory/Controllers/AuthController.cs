@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", consoleMsg = ex.Message }); //Something went wrong, please try again later
+            return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", errorMsg = ex.Message ?? String.Empty }); //Something went wrong, please try again later
         }
     }
     #endregion
