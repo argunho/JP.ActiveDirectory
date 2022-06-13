@@ -155,7 +155,7 @@ public class AuthController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", consoleMsg = ex.Message }); //Something went wrong, please try again later
         }
 
-        var members = model.Group == "Students" ? "elevs" : "politikers";
+        var members = (model.Group == "Students") ? "elevs" : "politikers";
         return new JsonResult(new { alert = "warning", msg = $"Åtkomst nekad! Du har inte behörighet att redigera {members} lösenord" }); // Failed! You do not have permission to edit a student's password
     }
     #endregion

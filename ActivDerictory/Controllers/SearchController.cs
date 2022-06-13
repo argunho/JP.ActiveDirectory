@@ -45,7 +45,7 @@ namespace ActiveDirectory.Controllers
                         users.Add(new User
                         {
                             Name = user.Name,
-                            DisplayName = user.DisplayName,
+                            DisplayName = user?.DisplayName ?? "",
                             Office = user.Office,
                             Department = user.Department
                         });

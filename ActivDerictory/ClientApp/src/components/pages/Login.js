@@ -35,8 +35,6 @@ export class Login extends Component {
     }
 
     valueChangeHandler = (e) => {
-        console.log(e.target.name)
-        console.log(e.target.value)
         this.setState({
             form: {
                 ...this.state.form, [e.target.name]: e.target.value
