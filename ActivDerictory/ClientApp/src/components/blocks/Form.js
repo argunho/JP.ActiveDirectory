@@ -16,6 +16,10 @@ import colors from 'color-name-list';
 import Response from './Response';
 import PDFConverter from './PDFConverter';
 
+// Don't remove this comment line below, this uses for useEffect
+/* eslint-disable react-hooks/exhaustive-deps */
+
+
 export default function Form(props) {
     const { title, api, buttonText, name, multiple, users = [] } = props;
     const defaultForm = {
@@ -47,6 +51,7 @@ export default function Form(props) {
     const [savedPdf, setSavedPdf] = useState(null);
     const [randomPasswordWord, setRandomPasswordWord] = useState(null);
 
+    const history = useHistory()
     const dslGenerate = !strongPassword && !ready;
 
     // Student school and class
@@ -88,9 +93,7 @@ export default function Form(props) {
         { label: "Djur", value: "animals" },
         { label: "Kattens namn (smeknamn)", value: "cats" },
         { label: "Bilar", value: "cars" }
-    ]
-
-    const history = useHistory();
+    ];
 
     // To manipulate elements like js getElementById
     const refSubmit = useRef(null);
@@ -99,6 +102,7 @@ export default function Form(props) {
     // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
     const eng = (/^[A-Za-z]+$/);
+
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -114,20 +118,13 @@ export default function Form(props) {
             setTimeout(() => { setIsOpenTip(!isOpenTip) })
     }, [isOpenTip])
 
-    useEffect(() => {
-        resetForm(!variousPassword);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [variousPassword])
+    useEffect(() => { resetForm(!variousPassword); }, [variousPassword])
 
-    useEffect(() => {
-        setPreviewList([]);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [randomNumber])
+    useEffect(() => { setPreviewList([]); }, [randomNumber])
 
     useEffect(() => {
         if (savedPdf != null && savePdf)
             sendEmailWidthFile();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedPdf])
 
     useEffect(() => {
@@ -141,8 +138,8 @@ export default function Form(props) {
 
             setRandomPasswordWord(capitalize(str));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wordsList])
+
 
     // Set password type
     const setPassType = (value) => {
@@ -221,9 +218,9 @@ export default function Form(props) {
                 }
 
                 password = strongPassword ? returnGeneratedPassword() : capitalize(password);
-                password = "afafafafa_A23";
-                console.log(usersArray.indexOf(password))
-                if (regex.test(password) && !broken && usersArray.indexOf(password) === -1) {
+                const noExists = usersArray.find(x => x.password === password) === undefined;
+
+                if (regex.test(password) && !broken && noExists) {
                     usersArray.push({
                         name: users[i].name,
                         displayName: users[i].displayName,
