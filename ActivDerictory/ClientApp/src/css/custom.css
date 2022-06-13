@@ -18,7 +18,6 @@ body {
   padding-bottom: 50px;
 }
 
-
 /* Home */
 .loading {
   margin-bottom: 30px;
@@ -76,25 +75,35 @@ body {
   padding: 0 !important;
   display: flex;
   justify-content: right;
+  margin: 0 auto;
 }
 
 .nav-wrapper ul li {
   list-style: none;
   width: auto !important;
-  height: 100%;
-  line-height: 65px;
+  margin: auto 0;
   color: #fff !important;
   font-weight: 600 !important;
 }
 .link-home {
   position: absolute;
   left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center !important;
+  text-transform: none !important;
 }
 
 .link {
   text-decoration: none !important;
   color: #fff !important;
   cursor: pointer !important;
+  font-weight: 600 !important;
+}
+
+.link span {
+  margin-left: 10px;
+  vertical-align: middle;
 }
 
 .link,
@@ -110,50 +119,22 @@ body {
 }
 
 .link svg {
-  margin: -5px 10px 0 0;
   font-size: 28px;
 }
 
-.displayName {
-  /* position: absolute;
-  right: 0;
-  top: 0; */
-  overflow: hidden;
-  height: 100%;
-}
-
-.displayName > p,
-.displayName > button {
-  display: inline-block !important;
-}
-
-.displayName:hover > .link {
-  background-color: transparent !important;
-  color: #fff !important;
-  pointer-events: none !important;
-}
-
-.logout-btn, .link-btn {
+.nav-btn {
   color: #fff !important;
   border-color: #fff !important;
-  margin-top: -5px !important;
+  margin-left: 15px !important;
 }
 
-.logout-btn {
-  margin-left: 30px !important;
-}
-
-.link-btn {
-  margin-left: 10px !important;
-}
-
-.logout-btn:hover, .link-btn:hover {
+.nav-btn:hover {
   background-color: #fff !important;
   color: #1f722f !important;
 }
 
-.logout-btn svg {
-  margin-top: -2px;
+.nav-btn:last-child svg {
+  font-size: 24px !important;
 }
 
 /* Search */
@@ -624,21 +605,18 @@ pre {
     max-height: 2.77778em;
   }
   .nav-wrapper {
-    height: 50px !important;
+    height: 60px !important;
   }
   .nav-wrapper ul {
     margin-top: 0 !important;
   }
-  .nav-wrapper ul li {
-    line-height: 50px !important;
-  }
-  .logout-btn {
+  .nav-btn {
     padding-left: 0 !important;
     padding-right: 0 !important;
     transform: scale(0.9);
-    margin-left: 10px !important;
+    margin-left: 0 !important;
   }
-  .logout-btn > span {
+  .nav-btn > span {
     display: none !important;
   }
   .logout-btn svg {
@@ -653,6 +631,10 @@ pre {
     margin: 10px 0;
     line-height: 0;
   }
+  .nav-wrapper {
+    padding-right: 4px !important;
+    padding-left: 4px !important;
+  }
 }
 
 @media (max-width: 415px) {
@@ -660,7 +642,7 @@ pre {
     padding-right: 8px !important;
     padding-left: 8px !important;
   }
-  .displayName > p,
+  .displayname,
   .switch-btn,
   .mobile-hidden {
     display: none !important;

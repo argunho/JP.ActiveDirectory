@@ -37,22 +37,24 @@ export default function Header({ isAuthorized }) {
                 <ul className='container'>
                     <li className="link-home">
                         <Link className="link" to="/find-user">
-                            <HomeSharp />Unlock User
+                            <HomeSharp /><span>Unlock User</span>
                         </Link>
                     </li>
                     {isAuthorized ?
-                        // Button to logout
-                        <li className='displayName'>
-                            <p className='link'>{displayName}</p>
-                            <Button variant='outlined' size="large" className='logout-btn' onClick={() => logout()}>
-                                <Logout />&nbsp;&nbsp;<span>Logga ut</span>
-                            </Button>
-                        </li>
+                        <>
+                            <li className=''>{displayName}</li>
+                            <li>
+                                {/* Button to logout */}
+                                <Button variant='outlined' size="large" className='nav-btn' onClick={() => logout()}>
+                                    <Logout />&nbsp;&nbsp;<span>Logga ut</span>
+                                </Button>
+                            </li>
+                        </>
                         : null}
                     <li className='link'>
                         <Tooltip arrow title="Kontakta support"
                             classes={{ tooltip: "tooltip tooltip-margin" }}>
-                            <Button variant='outlined' size="large" className='link-btn' onClick={() => history.push("/contact")}>
+                            <Button variant='outlined' size="large" className='nav-btn' onClick={() => history.push("/contact")}>
                                 <LiveHelp />
                             </Button>
                         </Tooltip>
