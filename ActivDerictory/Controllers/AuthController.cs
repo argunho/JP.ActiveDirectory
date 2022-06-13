@@ -1,12 +1,10 @@
 ﻿using ActiveDirectory.Interface;
 using ActiveDirectory.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text;
 using ActiveDirectory.Extensions;
 
@@ -18,96 +16,15 @@ public class AuthController : ControllerBase
 {
     private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
     private readonly IConfiguration _config; // Implementation of configuration file => ActiveDerictory/appsettings.json
-    //private readonly IHttpContextAccessor _contextAccessor;
 
-    public AuthController(IActiveDirectoryProvider provider, IConfiguration config)//IHttpContextAccessor httpContextAccessor
+    public AuthController(IActiveDirectoryProvider provider, IConfiguration config)
     {
         _provider = provider;
         _config = config;
-        //_contextAccessor = httpContextAccessor;
     }
 
     #region GET
-    // Validate user access first with Windows authentication username when user started application
-    [HttpGet]
-    public JsonResult AccessValidation()
-    {
-        string? errorMessage = null;
-        try
-        {
-            var name = Environment.UserName; // Get windows username;
-            if (name == null) // If failed to get username, try other way to get windows username
-            {
-                var currentUser = WindowsIdentity.GetCurrent();
-                if (currentUser != null)
-                    name = currentUser?.Name.ToString().Split('\\')[1];
-            }
 
-            if (name?.Length > 0)
-            {
-                var user = _provider.FindUserByExtensionProperty(name); // Get user from Active Directory
-                if (user != null && _provider.MembershipCheck(name, "Password Reset Students-EDU")) // Check user's membership
-                {
-                    // If user is found, create Jwt Token to get all other information and to get access to other functions
-                    var token = CreateJwtToken(user);
-                    return new JsonResult(new
-                    {
-                        access = true,
-                        alert = "success",
-                        token = token,
-                        msg = "Din åtkomstbehörighet har bekräftats."
-                    });
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-
-        return new JsonResult(new
-        {
-            access = false,
-            alert = "warning",
-            msg = "Åtkomst nekad! Du har inte behörighet att redigera elevs lösenord",
-            errorMessage = errorMessage ?? "Inga windows-uppgifter kunde identifieras."
-        });
-    }
-
-    // Save admin password
-    [HttpGet("credential/{password}")]
-    [Authorize]
-    public JsonResult SetFullCredential(string password)
-    {
-        ProtectAccount();
-        var errorMessage = "Felaktig lösenord.";
-
-        // If the user is not locked, validate user's password
-        UserCredentials.BlockTime = null;
-        try
-        {
-            if (_provider.AccessValidation(UserCredentials.Username, password))
-            {
-                UserCredentials.Password = password;
-                UserCredentials.Attempt = 0;
-                return new JsonResult(new { success = true });
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "Fel: " + ex?.InnerException?.Message ?? ex.Message;
-        }
-
-        // If the user tried to put in a wrong password, save this like +1 a wrong attempt and the max is 4 attempts
-        UserCredentials.Attempt += 1;
-        if (UserCredentials.Attempt == 3)
-        {
-            UserCredentials.Attempt = 0;
-            UserCredentials.BlockTime = DateTime.Now;
-        }
-
-        return new JsonResult(new { success = false, msg = errorMessage });
-    }
     #endregion
 
     #region POST
@@ -135,28 +52,26 @@ public class AuthController : ControllerBase
                 return new JsonResult(new { alert = "error", msg = "Felaktig användarnamn eller lösenord." }); //Incorrect username or password"
             }
 
-            // Define and save a group in which members have the right to administer
-            GroupNames.GroupToManage = (model.Group == "Politician") ? "IntuneUser-Politiker" : model.Group;
-
             // Define and save a group in which member/members will be managed in the current session
-            GroupNames.PasswordResetGroup = (model.Group == "Students") ? "Password Reset Students-EDU" : "";
+            GroupNames.GroupToManage = (model.Group == "Politician") ? "Ciceron-Assistentanvändare" : model.Group;
+
+            // Define and save a group in which members have the right to administer this group which was defined above
+            GroupNames.PasswordResetGroup = (model.Group == "Students") ? "Password Reset Students-EDU" : "Password Reset Politiker";
 
             // Check the logged user's right to administer
             if (_provider.MembershipCheck(model.Username, GroupNames.PasswordResetGroup))
             {
                 var user = _provider.FindUserByExtensionProperty(model.Username);
-                // If user is found, create Jwt Token to get all other information and to get access to other functions
+                // If the logged user is found, create Jwt Token to get all other information and to get access to other functions
                 var token = CreateJwtToken(user, model.Password);
                 return new JsonResult(new { access = true, alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
-            }
+            } else
+                return new JsonResult(new { alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att ändra lösenord." }); // Failed! You do not have permission to edit a student's password
         }
         catch (Exception ex)
         {
             return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", consoleMsg = ex.Message }); //Something went wrong, please try again later
         }
-
-        var members = (model.Group == "Students") ? "elevs" : "politikers";
-        return new JsonResult(new { alert = "warning", msg = $"Åtkomst nekad! Du har inte behörighet att redigera {members} lösenord" }); // Failed! You do not have permission to edit a student's password
     }
     #endregion
 
@@ -176,6 +91,7 @@ public class AuthController : ControllerBase
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.Name, user.Name));
         claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
+        claims.Add(new Claim("DisplayName", user.DisplayName));
         claims.Add(new Claim("GroupToManage", GroupNames.GroupToManage));
         //foreach (var r in roles)
         //    claim.Add(new Claim(opt.ClaimsIdentity.RoleClaimType, r));
@@ -220,8 +136,7 @@ public class AuthController : ControllerBase
     #endregion
 }
 
-
-public static class UserCredentials // Class to save and use admin credentials
+public static class UserCredentials // Class to save and use admin credentials into current session
 {
     public static string? Username { get; set; }
     public static string? FullName { get; set; }
@@ -235,4 +150,4 @@ public static class GroupNames
 {
     public static string? PasswordResetGroup { get; set; }
     public static string? GroupToManage { get; set; }
-}
+} // Class to save and use GroupName into current session

@@ -106,7 +106,7 @@ export class Login extends Component {
                         {/* Loop of radio input choices */}
                         <Label className='login-label'>Hantera</Label>
                         {[{name: "Studenter", value: 'Students' }, 
-                          {name: "Politeker", value: 'Politician'}].map((p, index) => (
+                          {name: "Politiker", value: 'Politician'}].map((p, index) => (
                             <FormControlLabel
                                 key={index}
                                 value={p.value}

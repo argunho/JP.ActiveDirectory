@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Switch, withRouter } from 'react-router-dom';
-import { Home } from './components/pages/Home';
 import { Login } from './components/pages/Login';
 import { UserManager } from './components/pages/UserManager';
 import UsersManager from './components/pages/UsersManager';
@@ -35,11 +34,9 @@ class App extends Component {
   }
 
   render() {
-    // const { isAuthorized } = this.state;
     return (
       <Layout isAuthorized={this.state.isAuthorized}>
         <Switch>
-          {/* <Route exact path='/' render={(props) => <Home {...props} isAuthorized={isAuthorized} />} /> */}
           <Route exact path={['/', '/login']} component={Login} />
           <Route exact path='/find-user' component={Search} />
           <Route exact path='/manage-user/:id' component={UserManager} />
