@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
-import { HomeSharp, Logout } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { HomeSharp, LiveHelp, Logout } from '@mui/icons-material';
+import { Button, Tooltip } from '@mui/material';
 import logo from './../../images/logotype.png'
 
 export default function Header({ isAuthorized }) {
@@ -35,7 +35,7 @@ export default function Header({ isAuthorized }) {
             </div>
             <nav className="nav-wrapper">
                 <ul className='container'>
-                    <li>
+                    <li className="link-home">
                         <Link className="link" to="/find-user">
                             <HomeSharp />Unlock User
                         </Link>
@@ -49,6 +49,14 @@ export default function Header({ isAuthorized }) {
                             </Button>
                         </li>
                         : null}
+                    <li className='link'>
+                        <Tooltip arrow title="Kontakta support"
+                            classes={{ tooltip: "tooltip tooltip-margin" }}>
+                            <Button variant='outlined' size="large" className='link-btn' onClick={() => history.push("/contact")}>
+                                <LiveHelp />
+                            </Button>
+                        </Tooltip>
+                    </li>
                 </ul>
             </nav>
         </header>

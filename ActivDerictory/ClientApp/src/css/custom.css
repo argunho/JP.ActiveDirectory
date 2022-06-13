@@ -74,6 +74,8 @@ body {
   height: 100%;
   width: 100%;
   padding: 0 !important;
+  display: flex;
+  justify-content: right;
 }
 
 .nav-wrapper ul li {
@@ -84,10 +86,15 @@ body {
   color: #fff !important;
   font-weight: 600 !important;
 }
+.link-home {
+  position: absolute;
+  left: 0;
+}
 
 .link {
   text-decoration: none !important;
   color: #fff !important;
+  cursor: pointer !important;
 }
 
 .link,
@@ -108,9 +115,9 @@ body {
 }
 
 .displayName {
-  position: absolute;
+  /* position: absolute;
   right: 0;
-  top: 0;
+  top: 0; */
   overflow: hidden;
   height: 100%;
 }
@@ -126,14 +133,21 @@ body {
   pointer-events: none !important;
 }
 
-.logout-btn {
-  margin-left: 30px !important;
+.logout-btn, .link-btn {
   color: #fff !important;
   border-color: #fff !important;
   margin-top: -5px !important;
 }
 
-.logout-btn:hover {
+.logout-btn {
+  margin-left: 30px !important;
+}
+
+.link-btn {
+  margin-left: 10px !important;
+}
+
+.logout-btn:hover, .link-btn:hover {
   background-color: #fff !important;
   color: #1f722f !important;
 }
