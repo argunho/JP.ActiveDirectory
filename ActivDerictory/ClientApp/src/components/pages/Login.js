@@ -22,7 +22,8 @@ export class Login extends Component {
                 { label: "Lösenord", name: "password", type: "password" }
             ],
             response: null,
-            load: false
+            load: false,
+            contact: false
         }
 
         this.loginWithWindowsCredentials = this.loginWithWindowsCredentials.bind(this);
@@ -51,13 +52,13 @@ export class Login extends Component {
         sessionStorage.setItem("group", form.group);
 
         await axios.post("auth", form).then(res => {
-            const { access, token, consoleMsg } = res.data;
+            const { access, token, errorMsg } = res.data;
 
             this.setState({
-                load: false, response: res.data
+                load: false, response: res.data, contact: errorMsg?.length > 0
             })
 
-            if (consoleMsg) console.error("Error => " + consoleMsg);
+            if (errorMsg) console.error("Error => " + errorMsg);
 
             if (access) {
                 sessionStorage.setItem("token", token);
@@ -66,6 +67,9 @@ export class Login extends Component {
                     this.props.history.push("/find-user");
                 }, 1000)
             }
+        }, error => {         
+            this.setState({ load: true, contact: true });
+            console.error("Error => " + error);;
         })
     }
 
@@ -100,6 +104,7 @@ export class Login extends Component {
                             onChange={this.valueChangeHandler} />
                     </FormControl>
                 ))}
+
                 {/* Radio buttons to choice one of search alternatives */}
                 <FormControl className='checkbox-block-mobile' style={{ display: "inline-block" }}>
                     <RadioGroup row name="row-radio-buttons-group">
