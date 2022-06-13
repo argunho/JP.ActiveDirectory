@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import axios from 'axios'
-import ModalHelpTexts from './../blocks/ModalHelpTexts'
-
+import { capitalize } from '@mui/material'
 import { SearchOffSharp, SearchSharp } from '@mui/icons-material'
 import {
     Button, Checkbox, FormControl, FormControlLabel, Tooltip,
     Radio, RadioGroup, TextField, Switch, Autocomplete
 } from '@mui/material'
 import Result from '../blocks/Result'
-import { capitalize } from '@mui/material'
+import ModalHelpTexts from './../blocks/ModalHelpTexts'
+import schools from './../../json/schools.json'; // List of all schools in Alvesta municipalities
 
 export class Search extends Component {
     static displayName = Search.name;
@@ -46,24 +46,10 @@ export class Search extends Component {
         this.source = axios.CancelToken.source();
 
         // Search options
-        const sOptionsParams = [
+       this.sOptions = [
             { label: "Änvändare", value: "user" },
             { label: "Klass elever", value: "members" }
         ]
-
-        this.sOptions = (sessionStorage.getItem("group") === "Students") ? sOptionsParams : sOptionsParams.slice(0,-1);
-
-        // All schools list in Alvesta kommun
-        this.schools = [
-            { label: "Capellaskolan (Alvesta)", value: "Capellaskolan" },
-            { label: "Grönkullaskolan (Alvesta)", value: "Grönkullaskolan" },
-            { label: "Hagaskolan (Alvesta)", value: "Hagaskolan" },
-            { label: "Hjortsbergaskolan (Hjortsberga)", value: "Hjortsbergaskolan" },
-            { label: "Mohedaskolan (Moheda)", value: "Mohedaskolan" },
-            { label: "Prästängsskolan (Alvesta)", value: "Prästängsskolan" },
-            { label: "Skatelövskolan (Grimslöv)", value: "Skatelövskolan" },
-            { label: "Vislandaskolan (Vislanda)", value: "Vislandaskolan" }
-        ];
 
         // Help texts
         this.helpTexts = [
@@ -75,6 +61,11 @@ export class Search extends Component {
             { label: "Tips", tip: "Genom att klicka på detta alternativ under varje sökalternativ aktiveras en dold tipsruta som visas när du för musen över sökalternativen.", value: "tips" },
             { label: "Resultat", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", value: "", color: "#c00" }
         ]
+
+        if(sessionStorage.getItem("group") !== "Students"){
+            this.sOptions.splice(1,1);
+            this.helpTexts.splice(1,1);
+        }
     }
 
     componentDidMount() {
@@ -101,7 +92,7 @@ export class Search extends Component {
             isResult: false,
             users: [],
             warning: false,
-            isNoOptions: (open) ? this.schools.filter(x => x.value.includes(inp.value)).length === 0 : false,
+            isNoOptions: (open) ? schools.filter(x => x.value.includes(inp.value)).length === 0 : false,
             isCapitalize: (inpRadio && inp.value !== "true") ? false : this.state.isCapitalize
         })
         // Capitalize i js
@@ -269,7 +260,7 @@ export class Search extends Component {
                             freeSolo
                             disableClearable
                             className={s.clsName || 'search-input'}
-                            options={this.schools}
+                            options={schools}
                             getOptionLabel={(option) => option.label || ""}
                             autoHighlight
                             open={s.autoOpen && isOpen && !isNoOptions}
