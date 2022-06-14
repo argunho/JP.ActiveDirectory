@@ -74,28 +74,7 @@ export default function PDFConverter({ name, subTitle, names, list, savedPdf }) 
         // }
     }
 
-    return (
-
-        <Table 
-            names={names}
+    return ( <Table names={names}
             list={list} 
-            cls={" hidden-content"} />
-        // <table className="table hidden-content" id="list">
-        //     <thead>
-        //         <tr>
-        //             <th scope="col">#</th>
-        //             {names.map((n, i) => (<th scope="col" key={i}>{n}</th>))}
-        //         </tr>
-        //     </thead>
-        //     <tbody>
-        //         {list.map((l, ind) => (
-        //             <tr key={ind}>
-        //                 <th scope="row">{ind + 1}</th>
-        //                 <td>{l[keys[0]]}</td>
-        //                 <td>{l[keys[2]]}</td>
-        //             </tr>
-        //         ))}
-        //     </tbody>
-        // </table>
-    )
+            cls={" hidden-content"} /> )
 }

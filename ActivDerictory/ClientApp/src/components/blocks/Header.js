@@ -10,17 +10,20 @@ export default function Header({ isAuthorized }) {
     const history = useHistory();
     const [displayName, setDisplayName] = useState("");
 
+    // Check current user authentication
     useEffect(() => {
         if (isAuthorized) {
             const token = sessionStorage.getItem("token");
             if (token !== null && token !== undefined) {
                 const decodedToken = jwt_decode(token);
+                // If the current user is logged in, the name of the user is visible in the navigation bar
                 setDisplayName(decodedToken?.DisplayName)
             }
         }
     }, [isAuthorized])
 
     const logout = () => {
+        // If the user is logged out, clear and remove all credential which was saved for the current session
         sessionStorage.clear();
         sessionStorage.setItem("login", "true");
         history.push("/login");

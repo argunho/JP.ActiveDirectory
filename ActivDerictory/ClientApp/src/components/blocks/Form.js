@@ -52,7 +52,7 @@ export default function Form(props) {
     const [randomPasswordWord, setRandomPasswordWord] = useState(null);
 
     const history = useHistory()
-    const dslGenerate = !strongPassword && !ready;
+    const disableGenerate = !strongPassword && !ready;
 
     // Student school and class
     const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
@@ -69,7 +69,7 @@ export default function Form(props) {
         { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }
     ]
 
-    // Help texts
+    // Help texts (password)
     const helpTexts = [
         {
             label: "Lösenord ska innehålla",
@@ -81,7 +81,7 @@ export default function Form(props) {
         }
     ]
 
-    // List of password's alternative
+    // List of alternative to select words list category to generate password
     const passwordKeys = [
         { label: "Länder", value: "countries" },
         { label: "Alla städer/tätort", value: "cities" },
@@ -103,14 +103,12 @@ export default function Form(props) {
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
     const eng = (/^[A-Za-z]+$/);
 
-
+    // Check current user authentication
     useEffect(() => {
         const token = sessionStorage.getItem("token");
         // Return to the start page if a user is unauthorized
         if (token === null || token === undefined)
             history.push("/");
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -572,10 +570,10 @@ export default function Form(props) {
 
                         {/* Generate password button */}
                         <Tooltip arrow
-                            title={dslGenerate ? "Lösenords kategory är inte vald." : ""}
+                            title={disableGenerate ? "Lösenords kategory är inte vald." : ""}
                             classes={{
-                                tooltip: `tooltip tooltip-margin tooltip-${dslGenerate ? 'error' : 'blue'}`,
-                                arrow: `arrow-${dslGenerate ? 'error' : 'blue'}`
+                                tooltip: `tooltip tooltip-margin tooltip-${disableGenerate ? 'error' : 'blue'}`,
+                                arrow: `arrow-${disableGenerate ? 'error' : 'blue'}`
                             }}>
                             <span>
                                 <Button variant="text"
@@ -584,7 +582,7 @@ export default function Form(props) {
                                     size="small"
                                     className="generate-password"
                                     onClick={() => generatePassword()}
-                                    disabled={load || dslGenerate}>
+                                    disabled={load || disableGenerate}>
                                     Generera {previewList.length > 0 ? "andra " : ""} lösenord
                                 </Button>
                             </span>

@@ -35,6 +35,7 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
 
+    // Close modal window
     const clickHandle = (save) => {
         inverseFunction(save);
         setOpen(false);
@@ -71,15 +72,15 @@ function ModalHelpTexts({ arr, cls = " situated-btn", isTable = false, isSubmit 
                 <DialogContent style={{ marginBottom: "25px" }}>
                     {isTable ? <Table
                         name={isTitle}
-                        names={["Namn", "Lösenord"]} list={arr} />
-                        : arr.map((a, i) => (
+                        names={["Namn", "Lösenord"]} list={arr} /> // The table component is required to display the list of students and a list of generated passwords for them.
+                        : arr.map((a, i) => ( // Loop of help texts
                             <div key={i} className="modal_content">
                                 <AlertTitle style={{ fontWeight: 600 }}>
                                     <span style={{ color: (a?.color ? a.color : "#000") }}>{a[keys[0]]}</span>
                                 </AlertTitle>
                                 <div dangerouslySetInnerHTML={{ __html: a[keys[1]] }}></div>
                             </div>
-                        ))}
+                        ))} 
                 </DialogContent>
 
                 <DialogActions className="no-print modal-buttons-wrapper">

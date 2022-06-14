@@ -5,6 +5,8 @@ import { useHistory } from 'react-router-dom'
 
 export default function Info({ name, displayName, subTitle }) {
     const history = useHistory(null);
+
+    // Print out user's info
     return (<List sx={{ width: '100%' }}>
         <ListItem className='search-result-reset'>
             {/* Users data */}
