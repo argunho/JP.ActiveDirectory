@@ -74,11 +74,11 @@ body {
   display: flex;
   align-items: center !important;
   text-transform: none !important;
-  height: 80%;
+  /* height: 80%;
   border: 4px double #fff;
   top: 10%;
   padding: 0 10px;
-  border-radius: 3px;
+  border-radius: 3px; */
 }
 
 .link {
@@ -306,7 +306,7 @@ body {
 
 .contacts-wrapper p {
   vertical-align: middle;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
   color: #464646 !important;
 }
 .contacts-wrapper p svg {
