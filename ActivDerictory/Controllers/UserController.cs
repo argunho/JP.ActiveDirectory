@@ -1,4 +1,5 @@
-﻿using ActiveDirectory.Interface;
+﻿using ActivDerictory.ViewModels;
+using ActiveDirectory.Interface;
 using ActiveDirectory.Models;
 using ActiveDirectory.Repositories;
 using ActiveDirectory.ViewModels;
@@ -77,23 +78,33 @@ public class UserController : ControllerBase
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); 
     }
 
-    [HttpPost("mail/{str}")] // Send mail to admin
+    [HttpPost("mail/{str}")] // Send email to admin
     public JsonResult SendEmail(string str, IFormFile attachedFile)
     {
-        var send = false;
         try
         {
             MailRepository ms = new MailRepository(); // Implementation of MailRepository class where email content is structured and SMTP connection with credentials
-            var mail = UserCredentials.Email;
-            send = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
+            string mail = UserCredentials.Email ?? String.Empty;
+            var success = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
                         $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.", attachedFile);
+            if(!success)
+                return new JsonResult(new { success = false, msg = "Fel: => " + MailRepository._message });
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { success = send, msg = "Fel: => " + ex.Message});
+            return new JsonResult(new { success = false, msg = "Fel: => " + ex.Message});
         }
 
-        return new JsonResult(new { result = send });
+        return new JsonResult(new { result = true });
+    }
+
+    [HttpPost("contact")] // Send email to support
+    [AllowAnonymous]
+    public JsonResult SendEmailToSupport(ContactViewModel model)
+    {
+        MailRepository ms = new MailRepository();
+        var success = ms.SendContactEmail(model);
+        return new JsonResult(new { result = true });
     }
     #endregion
 

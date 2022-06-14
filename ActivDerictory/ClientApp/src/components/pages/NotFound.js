@@ -1,17 +1,16 @@
 import React from 'react'
-import wrongWay from './../../images/wrongWay.jpg'
+import { WrongLocation } from '@mui/icons-material'
+import error from './../../images/error.jpg'
 import './../../css/notfound.css'
-import { useHistory } from 'react-router-dom'
 
 export default function NotFound(props) {
-    const history = useHistory()
 
     return (
         <div className='notfound-container'>
+            <img className='notfound-img' src={error} alt={props.location.pathname} />
             <div className='notfound-wrapper'>
-                <img className='notfound-img' src={wrongWay} alt={props.location.pathname} />
-                <p className='wrong-url'>{window.location.href}</p>
-                <p className='right-url' onClick={() => history.push("/")}>Klicka här ...</p>
+                <p className='notfound-title'>Sidan kunde inte hittas</p>
+                <p className='notfound-url'><WrongLocation /> <span>{window.location.href}</span></p>
             </div>
         </div>
     )

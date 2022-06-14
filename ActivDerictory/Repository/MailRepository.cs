@@ -1,4 +1,5 @@
-﻿using ActiveDirectory.Controllers;
+﻿using ActivDerictory.ViewModels;
+using ActiveDirectory.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,13 +13,15 @@ namespace ActiveDirectory.Repositories;
 public class MailRepository
 {
     // Template params
-    public static string mailHtml = "<div style=\"width:98%;display:block;margin:auto;background-color:#FFFFFF;font-family:Tahoma\">" +
+    private static string mailHtml = "<div style=\"width:98%;display:block;margin:auto;background-color:#FFFFFF;font-family:Tahoma\">" +
                                         "<div style=\"width:100%;display:block;background:#FFF;border-bottom:2px solid #198938\">" +
                                             "<img src=\"data:image/png;base64,{logo}\" alt='Alvesta Kommun' width='150' height='75' style=\"display: block;margin: 30pt\"/></div>" +
                                         "<div style=\"width:auto;padding:35px 25px;font-size:'14px';display:block;\"><br/><br/>{content}</div>" +
                                         "<div style=\"width:96%;margin:20px 1%;display:block;padding:25px 1%;text-align:center;line-height:25px;font-size:16px;border-top:1px solid #D8D8D8;display:flex;justify-content:center;\">" +
                                             "<div style=\"width:50%;min-width:320px;display:block;margin:auto;font-family:Franklin Gothic Medium;\">" +
                                             "</div></div></div>";
+
+    public static string? _message { get; set; }
 
     // Send mail service
     public bool SendMail(string toEmail, string mailSubject, string mailContent, IFormFile? attachedFile = null)
@@ -54,6 +57,27 @@ public class MailRepository
         catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
+            _message = ex.Message;
+            return false;
+        }
+    }
+
+    public bool SendContactEmail(ContactViewModel model) // Email sending without user's email credentials
+    {
+        try
+        {
+            var logo = ImageToBase64(@"wwwroot/alvestakommun.png");
+            MailMessage _mail = new MailMessage(new MailAddress("unlock.contact@alvesta.se", "Unlock User"), new MailAddress("aslan.khadizov@alvesta.se"));
+            SmtpClient _smtp = new SmtpClient("smtp.alvesta.local");
+            _mail.Subject = model.Title;
+            _mail.Body = mailHtml.Replace("{content}", model.Text).Replace("{logo}", logo);
+            _mail.IsBodyHtml = true;
+            _smtp.Send(_mail);
+            return true;
+        }catch(Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            _message = ex.Message;
             return false;
         }
     }

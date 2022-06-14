@@ -447,3 +447,26 @@ const handleKeydown = (e) => {
 ```
 
 ### - end Reactjs
+
+### CSS
+[comment]: <> Put this ccs code into custom.css file
+``` css
+/* Home */
+.loading {
+  margin-bottom: 30px;
+}
+
+.login-link {
+  font-size: 12px !important;
+  margin-top: 25px !important;
+}
+.access-response {
+  font-family: monospace;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: 1px;
+  color: rgb(30, 70, 32);
+}
+```
+### - end css
