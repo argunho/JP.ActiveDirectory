@@ -156,13 +156,13 @@ export default withRouter((props) => <App {...props} />);
 #### Home.js, you can find outside this folder. Copy this and place into .\ActivDerictory\ClientApp\src\components\pages
 #### Update Form.js with code below
 
-[comment]: # Place among parameters
+<!---  Place among parameters -->
 ```js 
 const [adminPassword, setAdminPassword] = useState("");
 const [credentials, setCredentials] = useState(sessionStorage.getItem("credentials") === "ok");
 ```
 
-[comment]: # Place this after Helptexts array
+<!---  Place this after Helptexts array -->
 ```js
 /* Help texts fro admin password */
 const helpTextCredentialAccess = [
@@ -170,7 +170,7 @@ const helpTextCredentialAccess = [
 ]
 ```
 
-[comment]: # Put these functions below somewhere after the useEffect function
+<!---  Put these functions below somewhere after the useEffect function -->
 ```js
 // Confirm credential
 const confirmCredential = async (e) => {
@@ -204,7 +204,7 @@ const handleKeydown = (e) => {
 }
 ```
 
-[comment]: # This current bit of code which is returned to the user interface into return block return () at the bottom of the page Form.js, replace with this code below
+<!---  This current bit of code which is returned to the user interface into return block return () at the bottom of the page Form.js, replace with this code below -->
 ```js
 <div className='collapse-wrapper'>
     {/* The curtain over the block disables all action if the form data is submitted and waiting for a response */}
@@ -449,7 +449,7 @@ const handleKeydown = (e) => {
 ### - end Reactjs
 
 ### CSS
-[comment]: # Put this ccs code into custom.css file
+<!---  Put this ccs code into custom.css file -->
 ``` css
 /* Home */
 .loading {
