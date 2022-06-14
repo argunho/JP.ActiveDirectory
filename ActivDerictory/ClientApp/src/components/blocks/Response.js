@@ -6,33 +6,30 @@ import axios from 'axios';
 export default function Response({ error, response, reset }) {
 
     const occurredError = sessionStorage.getItem("occurredError");
-    const [supportLink, setSupportLink] = useState(false);
+    const [supportLink, setSupportLink] = useState(true);
 
     const sendMsgToSupport = async () => {
-        await axios.post("user/support", occurredError)
+        await axios.post("user/contact", occurredError)
             .then(res => {
                 setSupportLink(false);
                 reset();
-        })
+            })
     }
+    
+    if (occurredError === response?.errorMsg) {
+        setSupportLink(true);
+        sessionStorage.removeItem("occurredError")
+    } else
+        sessionStorage.setItem("occurredError", error?.response);
 
-    if (error) {
-        if (occurredError === error?.response) {
-            setSupportLink(true);
-            sessionStorage.removeItem("occurredError")
-        } else
-            sessionStorage.setItem("occurredError", error?.response);
-
-        console.error("Error => " + error.response);
-
+    if (supportLink) {
+        console.error("Error => " + response?.errorMsg);
         return (
-            <Alert severity='error' variant='filled' onClose={() => reset()}>
-                <AlertTitle>Fel</AlertTitle>
-                Något har gått fel. 
-                {supportLink ? 
-                    <Button variant="text" color="primary" onClick={() => sendMsgToSupport()}>
-                        Skicka meddelande systemadministratör om felet kvarstår
-                    </Button> : null}
+            <Alert severity='error' onClose={() => reset()}>
+                <AlertTitle>Något har gått fel.</AlertTitle>
+                <Button variant="contained" color='error' style={{ display: "block", marginTop: "20px" }} onClick={() => sendMsgToSupport()}>
+                    Meddela systemadministratör
+                </Button>
             </Alert>
         )
     } else

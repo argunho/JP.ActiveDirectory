@@ -10,6 +10,7 @@ import Loading from './Loading';
 import loadImg from './../../images/search.gif'
 import user from './../../images/student.png'
 import { useHistory } from 'react-router-dom';
+import Response from './Response';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
@@ -18,6 +19,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
     const refResult = useRef(null);
     const [selectedList, setSelectedList] = useState([]);
     const [isOpenTip, setIsOpenTip] = useState(false);
+    const [response, setResponse] = useState({alert: isAlertBg, msg: isResponseMessage});
 
     const history = useHistory();
 
@@ -184,7 +186,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                 </List> : null}
 
             {/* Message if result is null */}
-            {(isResult && ul === 0) ? <Alert className='alert' severity={isAlertBg}>{isResponseMessage}</Alert> : null}
+            {(isResult && ul === 0) ? 
+                <Response error={true} response={response} reset={() => {}} /> : null}
         </div>
     )
 }

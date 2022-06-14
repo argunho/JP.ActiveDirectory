@@ -14,9 +14,14 @@ body {
   margin: 70px auto;
 }
 
+.loading {
+  margin-bottom: 20px;
+}
+
 .container:not(.l-centered):not(.logo-wrapper) {
   padding-bottom: 50px;
 }
+
 
 /* #region Header*/
 /* header {

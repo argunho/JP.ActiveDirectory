@@ -98,10 +98,15 @@ public class UserController : ControllerBase
         return new JsonResult(new { result = true });
     }
 
-    [HttpPost("contact")] // Send email to support
+    [HttpPost("contact/{error}")] // Send email to support
     [AllowAnonymous]
-    public JsonResult SendEmailToSupport(ContactViewModel model)
+    public JsonResult SendEmailToSupport(string error)
     {
+        var model = new ContactViewModel
+        {
+            Title = "Unlock User : Felmeddelande",
+            Text = error
+        };
         MailRepository ms = new MailRepository();
         var success = ms.SendContactEmail(model);
         return new JsonResult(new { result = true });
