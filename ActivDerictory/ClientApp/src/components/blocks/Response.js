@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Alert, AlertTitle, Button } from '@mui/material'
 import axios from 'axios';
 
-
 export default function Response({ response, reset }) {
 
     const [supportLink, setSupportLink] = useState(false);
@@ -11,6 +10,7 @@ export default function Response({ response, reset }) {
 
     const sendMsgToSupport = async () => {
         reset();
+        setSupportLink(false);
         await axios.post("user/contact", occurredError)
             .then(res => {
                 setSupportLink(false);
@@ -19,7 +19,7 @@ export default function Response({ response, reset }) {
 
     const getTimeLeftToUnblock = () => {
         if (!response?.timeLeft) return;
-console.log(response?.timeLeft)
+
         const num = (timeLeft ? timeLeft : response?.timeLeft).split(":") ;
         let sec = parseInt(num[2]);
         let min = parseInt(num[1]);

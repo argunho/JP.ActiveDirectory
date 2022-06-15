@@ -88,11 +88,11 @@ public class UserController : ControllerBase
             var success = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
                         $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.", attachedFile);
             if(!success)
-                return new JsonResult(new { success = false, msg = "Fel: => " + MailRepository._message });
+                return new JsonResult(new { alert = "warning", msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}", errorMessage = MailRepository._message });
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { success = false, msg = "Fel: => " + ex.Message});
+            return new JsonResult(new { alert = "warning", msg = "Fel vid försök att skicka e-post med pdf dokument.", errorMessage = ex.Message});
         }
 
         return new JsonResult(new { result = true });
@@ -102,6 +102,7 @@ public class UserController : ControllerBase
     [AllowAnonymous]
     public JsonResult SendEmailToSupport(string error)
     {
+
         var model = new ContactViewModel
         {
             Title = "Unlock User : Felmeddelande",
