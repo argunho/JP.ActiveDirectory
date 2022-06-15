@@ -109,7 +109,7 @@ public class UserController : ControllerBase
         };
         MailRepository ms = new MailRepository();
         var success = ms.SendContactEmail(model);
-        return new JsonResult(new { result = true });
+        return new JsonResult(true);
     }
     #endregion
 

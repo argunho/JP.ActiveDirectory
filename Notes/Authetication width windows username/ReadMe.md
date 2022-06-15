@@ -446,6 +446,29 @@ const handleKeydown = (e) => {
 </div>
 ```
 
+[comment]: <> Place this code into constructor before constructor close collaborate in Login.js
+``` js
+this.loginWithWindowsCredentials = this.loginWithWindowsCredentials.bind(this);
+```
+
+[comment]: <> Place this function after or before submit function in Login.js
+``` js
+loginWithWindowsCredentials() {
+    sessionStorage.removeItem("login");
+    this.props.history.push("/");
+}
+```
+[comment]: <> Place this code after submit button code in Login.js
+```js
+<Button variant='text'
+    color="primary"
+    type="button"
+    title="Logga in med Windows-autentiseringsuppgifter"
+    onClick={this.loginWithWindowsCredentials}
+    disabled={load}>
+    <DesktopWindows />
+</Button>
+```
 ### - end Reactjs
 
 ### CSS
