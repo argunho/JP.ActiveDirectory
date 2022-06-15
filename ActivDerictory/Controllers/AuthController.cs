@@ -36,12 +36,14 @@ public class AuthController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Felaktigt eller ofullständigt ifyllda formulär" }); //Forms filled out incorrectly
         try
         {
-            if(model.Block != null && model.Username == model.Block?.Username)
+            if (model.BlockTime != null)
             {
-                Login.BlockTime = Convert.ToDateTime(model.Block?.Time);
+                Login.BlockTime = Convert.ToDateTime(model.BlockTime);
+                Login.Attempt = 4;
             }
 
-            ProtectAccount(model.Username);
+            var response = ProtectAccount();
+            if (response != null) return response;
 
             // Validate username and password
             var isAutheticated = _provider.AccessValidation(model.Username, model.Password);
@@ -49,13 +51,13 @@ public class AuthController : ControllerBase
             {
                 // If the user tried to put in a wrong password, save this like +1 a wrong attempt and the max is 4 attempts
                 Login.Attempt += 1;
-                if (Login.Attempt > 3)
+                if (Login.Attempt >= 4)
                 {
-                    Login.Attempt = 0;
-                    Login.BlockTime = DateTime.Now; 
-                    ProtectAccount(model.Username);
+                    Login.BlockTime = DateTime.Now;
+                    response = ProtectAccount();
+                    if (response != null) return response;
                 }
-                return new JsonResult(new { alert = "error", msg = "Felaktig användarnamn eller lösenord." }); //Incorrect username or password"
+                return new JsonResult(new { alert = "error", msg = $"<b>Felaktig användarnamn eller lösenord.</b><br/> Du har {4 - Login.Attempt} försök kvar och efter 4 fel försök du bör vänta 30 min innan nästa nytt försök. Spärrtiden är att undvika din kontoblockering." }); //Incorrect username or password"
             }
 
             // Define and save a group in which member/members will be managed in the current session
@@ -70,13 +72,15 @@ public class AuthController : ControllerBase
                 var user = _provider.FindUserByExtensionProperty(model.Username);
                 // If the logged user is found, create Jwt Token to get all other information and to get access to other functions
                 var token = CreateJwtToken(user, model.Password);
+                Login.Attempt = 0;
                 return new JsonResult(new { alert = "success", token = token, msg = "Din åtkomstbehörighet har bekräftats." }); // Your access has been confirmed.
-            } else
+            }
+            else
                 return new JsonResult(new { alert = "warning", msg = "Åtkomst nekad! Du har inte behörighet att ändra lösenord." }); // Failed! You do not have permission to edit a student's password
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Var vänlig försök igen.", errorMesssage = ex.Message ?? String.Empty }); //Something went wrong, please try again later
+            return new JsonResult(new { alert = "warning", msg = "Något har gått snett. Var vänlig försök igen.", errorMessage = ex.Message ?? String.Empty }); //Something went wrong, please try again later
         }
     }
     #endregion
@@ -117,26 +121,28 @@ public class AuthController : ControllerBase
     }
 
     // Protection against account blocking after several attempts to enter incorrect data
-    public JsonResult? ProtectAccount(string username)
+    public JsonResult? ProtectAccount()
     {
         // Check if the user is blocked from further attempts to enter incorrect data
         // Unclock time after 4 incorrect passwords
-        if (Login.BlockTime != null)
+        if (Login.Attempt >= 4)
         {
             // Current time - Block time to know is user unlocked or not
-            var time = DateTime.Now.Ticks - Login.BlockTime?.AddMinutes(30).Ticks;
+            var time = DateTime.Now.Ticks - Login.BlockTime.AddMinutes(30).Ticks;
 
             // If the user until unlocked
             if (time < 0)
             {
+                var timeLeft = new DateTime(Math.Abs(time));
                 return new JsonResult(new
                 {
                     alert = "warning",
-                    msg = $"Du har redan gjort 4 försök att logga in och för att undvika ditt konto blockering, bör du vänta {time?.ToString("HH:mm:ss")}",
-                    blockTimeStamp = Login.BlockTime,
-                    username = username
+                    msg = $"Du gjrode 4 fel försök att logga in. Tiden som kvarstår till nästa nytt försök är: ",
+                    timeLeft = timeLeft.ToString("HH:mm:ss"),
+                    blockTimeStamp = Login.BlockTime
                 });
-            }
+            } else
+                Login.Attempt = 0;
         }
 
         return null;
@@ -144,7 +150,9 @@ public class AuthController : ControllerBase
     #endregion
 }
 
-public static class UserCredentials // Class to save and use admin credentials into current session
+
+// Class to save and use admin credentials into current session
+public static class UserCredentials
 {
     public static string? Username { get; set; }
     public static string? FullName { get; set; }
@@ -152,14 +160,16 @@ public static class UserCredentials // Class to save and use admin credentials i
     public static string? Password { get; set; }
 }
 
+// Account blocking protection
 public static class Login
 {
     public static int Attempt { get; set; }
-    public static Nullable<DateTime> BlockTime { get; set; }
-} // Account blocking protection
+    public static DateTime BlockTime { get; set; }
+}
 
+// Class to save and use GroupName into current session
 public static class GroupNames
 {
     public static string? PasswordResetGroup { get; set; }
     public static string? GroupToManage { get; set; }
-} // Class to save and use GroupName into current session
+}

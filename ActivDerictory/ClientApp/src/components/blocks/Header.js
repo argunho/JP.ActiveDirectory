@@ -25,6 +25,7 @@ export default function Header({ isAuthorized }) {
     const logout = () => {
         // If the user is logged out, clear and remove all credential which was saved for the current session
         sessionStorage.clear();
+        localStorage.clear();
         sessionStorage.setItem("login", "true");
         history.push("/login");
     }

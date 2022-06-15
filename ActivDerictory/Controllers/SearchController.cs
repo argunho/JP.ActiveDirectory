@@ -59,6 +59,7 @@ namespace ActiveDirectory.Controllers
                     if (member == null) // Return if member not found by name
                         return new JsonResult(new
                         {
+                            alert = "warning",
                             warning = true,
                             msg = $"Användaren {name} hittades inte. Deta kan bli så att användaren {name} tillhör " +
                                         $"inte studentgruppen eller felstavat namn/användarnamn. " +
@@ -81,10 +82,12 @@ namespace ActiveDirectory.Controllers
 
                 group.Dispose();
 
-                if (users.Count > 0) // If search got no results
+                // If the search got a successful result
+                if (users.Count > 0) 
                     return new JsonResult(new { users = users.OrderBy(x => x.Name) });
 
-                return new JsonResult(new { msg = "Inga användarkonto hittades." });
+                // If search got no results
+                return new JsonResult(new { alert = "warning", msg = "Inga användarkonto hittades." });
             }
             catch (Exception ex)
             {
@@ -128,7 +131,7 @@ namespace ActiveDirectory.Controllers
                 if (users.Count > 0)
                     return new JsonResult(new { users = users.Distinct().OrderBy(x => x.Name) });
 
-                return new JsonResult(new { msg = "Inga användarkonto hittades. Var vänlig kontrollera klass- och skolnamn." });
+                return new JsonResult(new { alert = "warning", msg = "Inga användarkonto hittades. Var vänlig kontrollera klass- och skolnamn." });
             }
             catch (Exception ex)
             {
@@ -142,7 +145,7 @@ namespace ActiveDirectory.Controllers
         // Return message if sommething went wrong.
         public JsonResult Error(string msg) => new JsonResult(
             new { alert = "error", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", 
-                errorMsg = msg }); 
+                errorMessage = msg }); 
         #endregion
     }
 }

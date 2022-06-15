@@ -351,6 +351,8 @@ input::placeholder {
 .alert {
   width: 100% !important;
   margin: 10px auto 25px auto !important;
+  text-align: left !important;
+  font-size: 12px !important;
 }
 
 .collapse-wrapper .alert {

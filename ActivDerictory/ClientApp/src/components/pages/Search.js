@@ -32,12 +32,10 @@ export class Search extends Component {
             ],
             clsStudents: clsSearch,
             match: true,
-            warning: false,
             isCapitalize: clsSearch,
             isOpen: false,
             isNoOptions: false,
-            msg: "",
-            alert: "warning",
+            response: null,
             showTips: localStorage.getItem("showTips") === "true",
         }
 
@@ -46,7 +44,7 @@ export class Search extends Component {
         this.source = axios.CancelToken.source();
 
         // Search options
-       this.sOptions = [
+        this.sOptions = [
             { label: "Änvändare", value: "user" },
             { label: "Klass elever", value: "members" }
         ]
@@ -62,9 +60,9 @@ export class Search extends Component {
             { label: "Resultat", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", value: "", color: "#c00" }
         ]
 
-        if(sessionStorage.getItem("group") !== "Students"){
-            this.sOptions.splice(1,1);
-            this.helpTexts.splice(1,1);
+        if (sessionStorage.getItem("group") !== "Students") {
+            this.sOptions.splice(1, 1);
+            this.helpTexts.splice(1, 1);
         }
     }
 
@@ -91,7 +89,7 @@ export class Search extends Component {
                 : (this.state.isCapitalize ? capitalize(inp.value) : inp.value),
             isResult: false,
             users: [],
-            warning: false,
+            response: null,
             isNoOptions: (open) ? schools.filter(x => x.value.includes(inp.value)).length === 0 : false,
             isCapitalize: (inpRadio && inp.value !== "true") ? false : this.state.isCapitalize
         })
@@ -108,7 +106,7 @@ export class Search extends Component {
             isCapitalize: capitalized,
             isResult: false,
             users: [],
-            warning: false
+            response: null
         })
     }
 
@@ -143,7 +141,7 @@ export class Search extends Component {
 
     // Reset form
     resetResult = () => {
-        this.setState({ users: [], isResult: false });
+        this.setState({ users: [], isResult: false, response: null });
 
         // Remove result from sessionStorage
         sessionStorage.removeItem("users");
@@ -178,10 +176,10 @@ export class Search extends Component {
         const { input, match, isCapitalize, sOption, additionInput, clsStudents } = this.state;
 
         // Return if form is invalid
-        if (input.length < 1){
+        if (input.length < 1) {
             this.setState({ inProgress: false });
             return;
-        } 
+        }
 
         // API parameters by chosen searching alternative
         const params = (!clsStudents) ? match + "/" + isCapitalize : additionInput;
@@ -189,7 +187,8 @@ export class Search extends Component {
         // API request
         await axios.get("search/" + sOption + "/" + input + "/" + params, _config).then(res => {
             // Response
-            const { warning, msg, users, errorMsg, alert } = res.data;
+            const { users, errorMessage } = res.data;
+
             // Update state parameters
             setTimeout(() => {
                 this.setState({
@@ -198,37 +197,39 @@ export class Search extends Component {
                     isResult: true,
                     input: users?.length > 0 ? "" : input,
                     additionInput: users?.length > 0 ? "" : additionInput,
-                    warning: warning,
-                    msg: msg,
-                    alert: (alert) ? alert : this.state.alert
+                    response: res.data
                 })
             }, 100);
 
             // If something is wrong, view error message in browser console
-            if (errorMsg) console.error("Error => " + errorMsg)
+            if (errorMessage) console.error("Error => " + errorMessage)
         }, error => {
             // Error handle 
-            this.setState({  inProgress: false })
+            this.setState({ inProgress: false })
 
-            if (error?.response?.status === 401) {   
+            if (error?.response?.status === 401) {
                 this.setState({
-                    msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
-                    alert: "error",
+                    response: {
+                        msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
+                        alert: "error"
+                    },
                     isResult: true
                 })
                 setTimeout(() => {
                     this.props.history.push("/");
                 }, 3000)
-            } else if(error.code === "ERR_CANCELED"){
+            } else if (error.code === "ERR_CANCELED") {
                 this.source = axios.CancelToken.source();
                 this.setState({
-                    msg: error.message,
-                    alert: "warning",
+                    response: {
+                        msg: error.message,
+                        alert: "warning"
+                    },
                     isResult: true
                 })
-                setTimeout(() => {  this.resetResult(); }, 3000)
-            }else
-                console.error("Error => " + error.response)   
+                setTimeout(() => { this.resetResult(); }, 3000)
+            } else
+                console.error("Error => " + error.response)
         });
     }
 
@@ -237,8 +238,8 @@ export class Search extends Component {
     render() {
         // State parameters
         const { users, inProgress,
-            isResult, choiceList, match, msg, warning,
-            alert, isCapitalize, sOption, showTips,
+            isResult, choiceList, match, response,
+            isCapitalize, sOption, showTips,
             clsStudents, isOpen, isNoOptions } = this.state;
 
         // List of text fields
@@ -274,7 +275,7 @@ export class Search extends Component {
                                     {...params}
                                     name={s.name}
                                     label={s.label}
-                                    error={warning}
+                                    error={response?.warning || false}
                                     required
                                     InputProps={{
                                         ...params.InputProps,
@@ -316,7 +317,7 @@ export class Search extends Component {
                 <div className="checkbox-radio-wrapper" >
 
                     {/* Modal  window with help texts */}
-                    <ModalHelpTexts arr={this.helpTexts} cls="" isTitle="Förklaring av sökparametrar"/>
+                    <ModalHelpTexts arr={this.helpTexts} cls="" isTitle="Förklaring av sökparametrar" />
 
                     {/* Switchable box */}
                     <FormControlLabel className='switch-btn'
@@ -388,8 +389,7 @@ export class Search extends Component {
                     isResult={isResult}
                     isVisibleTips={showTips}
                     inProgress={inProgress}
-                    isResponseMessage={msg}
-                    isAlertBg={alert}
+                    response={response}
                     cancelRequest={() => this.source.cancel("Pågående sökning har avbrutits ...")}
                     resetResult={this.resetResult.bind(this)}
                 />

@@ -45,7 +45,6 @@ export default function Form(props) {
     const [previewList, setPreviewList] = useState([]);
     const [preview, setPreview] = useState(false);
     const [credentialError, setCredentialError] = useState(false);
-    const [error, setError] = useState(null);
     const [confirmSavePdf, setConfirmSavePdf] = useState(false);
     const [savePdf, setSavePdf] = useState(false);
     const [savedPdf, setSavedPdf] = useState(null);
@@ -320,13 +319,12 @@ export default function Form(props) {
     const alert = (visible) => {
         if (!visible) return null;
 
-        return <Response error={error} response={response} reset={() => responseReset()} />
+        return <Response response={response} reset={() => responseReset()} />
     }
 
     // Response reset
     const responseReset = () => {
         setResponse(null);
-        setError(null);
         setCredentialError(false);
     }
 
@@ -411,7 +409,8 @@ export default function Form(props) {
             resetForm(false);
             setLoad(false);
             if (error?.response.status === 401) noAccess();
-            else setError(true);
+            else
+                console.error("Error => " + error.response);
         })
     }
 
@@ -423,12 +422,12 @@ export default function Form(props) {
         data.append('attachedFile', savedPdf);
 
         await axios.post(`user/mail/${inf[1]} ${inf[0]}`, data, _config).then(res => {
-            if (res.data?.success)
-                setResponse(res.data);
+            if (res.data?.errorMessage)
+                console.error("Error response => " + res.data.errorMessage);
         }, error => {
             // Handle of error
             if (error?.response.status === 401) noAccess();
-            else setError(true);
+            else console.error("Error => " + error.response)
         })
     }
 

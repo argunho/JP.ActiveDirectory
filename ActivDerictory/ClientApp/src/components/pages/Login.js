@@ -23,7 +23,8 @@ export class Login extends Component {
                 username: "", 
                 password: "", 
                 group: "", 
-                block: JSON.parse(localStorage.getItem("block")) || null },
+                blockTime: localStorage.getItem("blockTime") || null
+            },
             formFields: [
                 { label: "Användarnamn", name: "username", type: "text" },
                 { label: "Lösenord", name: "password", type: "password" }
@@ -55,7 +56,7 @@ export class Login extends Component {
         this.setState({ load: true })
 
         await axios.post("auth", form).then(res => {
-            const { alert, token, blockTimeSpan, username, errorMessage } = res.data;
+            const { alert, token, blockTimeStamp, errorMessage } = res.data;
 
             this.setState({
                 load: false, response: res.data
@@ -71,11 +72,9 @@ export class Login extends Component {
                     this.props.history.push("/find-user");
                 }, 1000)
             } else if (errorMessage)
-                console.error("Error => " + errorMessage);
-            else if (blockTimeSpan){
-                localStorage.setItem("block", JSON.stringify({time: blockTimeSpan, user: username }))
-            }
-
+                console.error("Error response => " + errorMessage);
+            else if (blockTimeStamp)
+                localStorage.setItem("blockTime", blockTimeStamp);
         }, error => {
             this.setState({ load: true });
             console.error("Error => " + error);
@@ -100,7 +99,7 @@ export class Login extends Component {
                             required
                             inputProps={{
                                 maxLength: 20,
-                                minLength: 6,
+                                minLength: 5,
                                 autoComplete: form[x.name],
                                 form: { autoComplete: 'off', }
                             }}
