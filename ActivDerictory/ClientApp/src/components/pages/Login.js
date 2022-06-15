@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Alert, Button, CircularProgress, FormControl, 
-        FormControlLabel, Radio, RadioGroup,
-        TextField } from '@mui/material';
+import {
+    Button, CircularProgress, FormControl,
+    FormControlLabel, Radio, RadioGroup,
+    TextField
+} from '@mui/material';
 import { withRouter } from 'react-router-dom'
+import { Label } from 'reactstrap';
+import Response from './../blocks/Response';
 
 import './../../css/login.css';
 import keys from './../../images/keys.png';
-import { Label } from 'reactstrap';
 
 export class Login extends Component {
     static displayName = Login.name;
@@ -16,17 +19,18 @@ export class Login extends Component {
         super(props);
 
         this.state = {
-            form: { username: "", password: "", group: "" },
+            form: { 
+                username: "", 
+                password: "", 
+                group: "", 
+                block: JSON.parse(localStorage.getItem("block")) || null },
             formFields: [
                 { label: "Användarnamn", name: "username", type: "text" },
                 { label: "Lösenord", name: "password", type: "password" }
             ],
             response: null,
-            load: false,
-            contact: false
+            load: false
         }
-
-        this.loginWithWindowsCredentials = this.loginWithWindowsCredentials.bind(this);
     }
 
     componentDidMount() {
@@ -49,33 +53,33 @@ export class Login extends Component {
         const { form } = this.state;
 
         this.setState({ load: true })
-        sessionStorage.setItem("group", form.group);
 
         await axios.post("auth", form).then(res => {
-            const { access, token, errorMsg } = res.data;
+            const { alert, token, blockTimeSpan, username, errorMessage } = res.data;
 
             this.setState({
-                load: false, response: res.data, contact: errorMsg?.length > 0
+                load: false, response: res.data
             })
 
-            if (errorMsg) console.error("Error => " + errorMsg);
-
-            if (access) {
+            if (alert === "success") {
+                sessionStorage.setItem("group", form.group);
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("credentials", "ok");
+                localStorage.removeItem("blockTime");
+
                 setTimeout(() => {
                     this.props.history.push("/find-user");
                 }, 1000)
+            } else if (errorMessage)
+                console.error("Error => " + errorMessage);
+            else if (blockTimeSpan){
+                localStorage.setItem("block", JSON.stringify({time: blockTimeSpan, user: username }))
             }
-        }, error => {         
-            this.setState({ load: true, contact: true });
-            console.error("Error => " + error);;
-        })
-    }
 
-    loginWithWindowsCredentials() {
-        sessionStorage.removeItem("login");
-        this.props.history.push("/");
+        }, error => {
+            this.setState({ load: true });
+            console.error("Error => " + error);
+        })
     }
 
     render() {
@@ -83,7 +87,7 @@ export class Login extends Component {
         return (
             <form className='login-form' onSubmit={this.submitForm}>
                 <p className='form-title'>Logga in</p>
-                {response != null ? <Alert className='alert' severity={response.alert}>{response.msg}</Alert> : null}
+                {response != null ? <Response response={response} reset={() => this.setState({ response: null })} /> : null}
                 {formFields.map((x, i) => (
                     <FormControl key={i}>
                         <TextField
@@ -105,20 +109,21 @@ export class Login extends Component {
                     </FormControl>
                 ))}
 
-                {/* Radio buttons to choice one of search alternatives */}
+                {/* Radio buttons to choose one of the search alternatives */}
                 <FormControl className='checkbox-block-mobile' style={{ display: "inline-block" }}>
                     <RadioGroup row name="row-radio-buttons-group">
                         {/* Loop of radio input choices */}
                         <Label className='login-label'>Hantera</Label>
-                        {[{name: "Studenter", value: 'Students' }, 
-                          {name: "Politiker", value: 'Politician'}].map((p, index) => (
+                        {[{ name: "Studenter", value: 'Students' },
+                        { name: "Politiker", value: 'Politician' }].map((p, index) => (
                             <FormControlLabel
                                 key={index}
                                 value={p.value}
                                 control={<Radio
-                                size='small'
-                                checked={form.group === p.value}
-                                color="success" />}
+                                    size='small'
+                                    checked={form.group === p.value}
+                                    color="success"
+                                    disabled={load} />}
                                 label={p.name}
                                 name="group"
                                 required
@@ -135,15 +140,6 @@ export class Login extends Component {
                     title="Logga in"
                     disabled={load || form.username.length < 5 || form.password.length < 5 || form.group.length < 1} >
                     {load ? <CircularProgress style={{ width: "12px", height: "12px", marginTop: "3px" }} /> : "Skicka"}</Button>
-                {/* <Button variant='text'
-                    color="primary"
-                    type="button"
-                    title="Logga in med Windows-autentiseringsuppgifter"
-                    onClick={this.loginWithWindowsCredentials}
-                    disabled={load}>
-                    <DesktopWindows />
-                </Button> */}
-
                 <img src={keys} alt="Unlock user" className='login-form-img' />
             </form>
         )

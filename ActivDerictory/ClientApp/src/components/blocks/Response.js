@@ -3,7 +3,7 @@ import { Alert, AlertTitle, Button } from '@mui/material'
 import axios from 'axios';
 
 
-export default function Response({ error, response, reset }) {
+export default function Response({ response, reset }) {
 
     const occurredError = sessionStorage.getItem("occurredError");
     const [supportLink, setSupportLink] = useState(true);
@@ -16,11 +16,11 @@ export default function Response({ error, response, reset }) {
             })
     }
     
-    if (occurredError === response?.errorMsg) {
+    if (occurredError === response?.errorMessage) {
         setSupportLink(true);
         sessionStorage.removeItem("occurredError")
     } else
-        sessionStorage.setItem("occurredError", error?.response);
+        sessionStorage.setItem("occurredError", response?.errorMessage);
 
     if (supportLink) {
         console.error("Error => " + response?.errorMsg);
