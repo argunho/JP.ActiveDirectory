@@ -1,5 +1,6 @@
 ﻿using ActivDerictory.ViewModels;
 using ActiveDirectory.Controllers;
+using ActiveDirectory.Interface;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ namespace ActiveDirectory.Repositories;
 
 public class MailRepository
 {
+
     // Template params
     private static string mailHtml = "<div style=\"width:98%;display:block;margin:auto;background-color:#FFFFFF;font-family:Tahoma\">" +
                                         "<div style=\"width:100%;display:block;background:#FFF;border-bottom:2px solid #198938\">" +
@@ -24,8 +26,9 @@ public class MailRepository
     public static string? _message { get; set; }
 
     // Send mail service
-    public bool SendMail(string toEmail, string mailSubject, string mailContent, IFormFile? attachedFile = null)
+    public bool SendMail(string toEmail, string mailSubject, string mailContent, string emailFrom, string password, IFormFile? attachedFile = null)
     {
+
         try
         {
             var logo = ImageToBase64(@"wwwroot/alvestakommun.png");
@@ -46,8 +49,8 @@ public class MailRepository
             _smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
 
             NetworkCredential credential = new NetworkCredential();
-            credential.UserName = UserCredentials.Email;
-            credential.Password = UserCredentials.Password;
+            credential.UserName = emailFrom;
+            credential.Password = password;
             _smtp.UseDefaultCredentials = false;
             _smtp.Credentials = credential;
 

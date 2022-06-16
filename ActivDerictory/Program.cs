@@ -1,7 +1,6 @@
 using ActiveDirectory.Interface;
 using ActiveDirectory.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -10,6 +9,7 @@ ConfigurationManager configuration = builder.Configuration;
 
 // Add interfaces and repositories --- 
 builder.Services.AddScoped<IActiveDirectoryProvider, ActiveDirectoryProvider>();
+builder.Services.AddScoped<ISessionData, SessionData>();
 
 // Authennticatio with Jwt ---
 builder.Services.AddAuthentication(options =>
@@ -32,10 +32,20 @@ builder.Services.AddAuthentication(options =>
 });
 
 // Add http accessor ---
-//builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Add session ---
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 
 // Add windows authentication ---
 //builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);
@@ -59,6 +69,8 @@ app.UseCors(builder => builder.WithOrigins(configuration["JwtSettings:Url"])
 
 app.UseAuthentication(); // ---
 app.UseAuthorization(); // ---
+
+app.UseSession(); // ---
 
 //app.MapControllerRoute(
 //    name: "default",

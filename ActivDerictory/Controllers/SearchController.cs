@@ -15,9 +15,11 @@ namespace ActiveDirectory.Controllers
     public class SearchController : ControllerBase
     {
         private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
-        public SearchController(IActiveDirectoryProvider provider)
+        private readonly IHttpContextAccessor _contextAccessor;
+        public SearchController(IActiveDirectoryProvider provider, IHttpContextAccessor contextAccessor)
         {
             _provider = provider;
+            _contextAccessor = contextAccessor;
         }
 
         #region GET
@@ -28,7 +30,8 @@ namespace ActiveDirectory.Controllers
 
             try
             {
-                var group = _provider.FindGroupName(GroupNames.GroupToManage); // Get group by name
+                var groupName = User.Claims.ToList().FirstOrDefault(x => x.Type == "GroupToManage")?.Value ?? "";
+                var group = _provider.FindGroupName(groupName); // Get group by name
 
                 if (match) // If search is by keywords matching
                 {
@@ -37,24 +40,27 @@ namespace ActiveDirectory.Controllers
                             ? (x.Name.ToLower().Contains(name.ToLower()) || x.DisplayName.ToLower().Contains(name.ToLower()))
                             : (x.Name.Contains(name) || x.DisplayName.Contains(name)))).ToList();
 
-                    // Loopin of all members
-                    foreach (Principal p in members)
+                    if (members?.Count > 0)
                     {
-                        var user = _provider.FindUserByExtensionProperty(p.Name); // Find users with extension property 
-                        // Add user to this empty list of users 
-                        users.Add(new User
+                        // Loopin of all members
+                        foreach (Principal p in members)
                         {
-                            Name = user.Name,
-                            DisplayName = user?.DisplayName ?? "",
-                            Office = user.Office,
-                            Department = user.Department
-                        });
+                            var user = _provider.FindUserByExtensionProperty(p.Name); // Find users with extension property 
+                                                                                      // Add user to this empty list of users 
+                            users.Add(new User
+                            {
+                                Name = user.Name,
+                                DisplayName = user?.DisplayName ?? "",
+                                Office = user.Office,
+                                Department = user.Department
+                            });
+                        }
                     }
                 }
                 else
                 {
                     // Check if the one for whom the search is in the group of "Group to manage"  
-                    var member = group.GetMembers(true).FirstOrDefault(x => x.Name == name || x.DisplayName == name);
+                    var member = group?.GetMembers(true).FirstOrDefault(x => x.Name == name || x.DisplayName == name);
 
                     if (member == null) // Return if member not found by name
                         return new JsonResult(new
@@ -83,7 +89,7 @@ namespace ActiveDirectory.Controllers
                 group.Dispose();
 
                 // If the search got a successful result
-                if (users.Count > 0) 
+                if (users.Count > 0)
                     return new JsonResult(new { users = users.OrderBy(x => x.Name) });
 
                 // If search got no results
@@ -144,8 +150,12 @@ namespace ActiveDirectory.Controllers
         #region Helpers
         // Return message if sommething went wrong.
         public JsonResult Error(string msg) => new JsonResult(
-            new { alert = "error", msg = "Något har gått snett. Felmeddelande visas i browser konsolen.", 
-                errorMessage = msg }); 
+            new
+            {
+                alert = "error",
+                msg = "Något har gått snett. Felmeddelande visas i browser konsolen.",
+                errorMessage = msg
+            });
         #endregion
     }
 }

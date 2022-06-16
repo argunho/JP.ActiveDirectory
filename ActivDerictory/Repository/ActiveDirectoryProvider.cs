@@ -11,7 +11,6 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
     private string domain = "alvesta";
     private string defaultOU = "DC=alvesta,DC=local";
 
-
     #region Interface methods
     public UserPrincipal FindUserByName(string name)
         => UserPrincipal.FindByIdentity(PContext(), name); // Method to get a user from Active Dericotry
@@ -43,7 +42,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
     {
         try
         {
-            using (var context = PContexAccessCheck())
+            using (var context = PContexAccessCheck(model.Credentials))
             {
                 using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
                 {
@@ -65,7 +64,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
 
     public string UnlockUser(UserViewModel model) // Method to unlock user
     {
-        using (var context = PContexAccessCheck())
+        using (var context = PContexAccessCheck(model.Credentials))
         {
             using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
             {
@@ -94,7 +93,8 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
     public PrincipalContext PContext() =>
         new PrincipalContext(ContextType.Domain, domain, defaultOU); // Context to build a connection to local host
 
-    public PrincipalContext PContexAccessCheck() 
-        => new PrincipalContext(ContextType.Domain, domain, defaultOU, UserCredentials.Username, UserCredentials.Password); // Context to build a connection with credentials to local host
+    public PrincipalContext PContexAccessCheck(UserCredentials model) 
+        => new PrincipalContext(ContextType.Domain, domain, defaultOU, model.Username, model.Password);
+    // Context to build a connection with credentials to local host
     #endregion
 }

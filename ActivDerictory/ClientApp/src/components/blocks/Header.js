@@ -4,6 +4,7 @@ import jwt_decode from "jwt-decode";
 import { HomeSharp, LiveHelp, Logout } from '@mui/icons-material';
 import { Button, Tooltip } from '@mui/material';
 import logo from './../../images/logotype.png'
+import axios from 'axios';
 
 export default function Header({ isAuthorized }) {
 
@@ -22,11 +23,17 @@ export default function Header({ isAuthorized }) {
         }
     }, [isAuthorized])
 
-    const logout = () => {
+    const logout = async () => {
         // If the user is logged out, clear and remove all credential which was saved for the current session
         sessionStorage.clear();
         localStorage.clear();
         sessionStorage.setItem("login", "true");
+        await axios.get("account/login").then(res => {
+            if(res.data?.errorMessage)
+            console.error("Error response => " + res.data.errorMessage);
+        }, error => {
+            console.error("Error => " + error?.response)
+        })
         history.push("/login");
     }
 

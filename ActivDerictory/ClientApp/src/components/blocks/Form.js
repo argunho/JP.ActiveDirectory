@@ -338,7 +338,6 @@ export default function Form(props) {
     const resetForm = (reset, save = false) => {
         setRegexError(false);
         setConfirmed(false);
-        setShowPassword(false);
         setConfirmSubmit(false);
         setPassType(true);
         setPreview(false);
@@ -349,6 +348,7 @@ export default function Form(props) {
             setNoConfirm(false);
             setForm(defaultForm);
             setErrors([]);
+            setShowPassword(false);
             setVariousPassword(false);
             setConfirmSavePdf(false);
             setSavePdf(false);

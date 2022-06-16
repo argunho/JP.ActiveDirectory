@@ -5,6 +5,7 @@ using ActiveDirectory.Repositories;
 using ActiveDirectory.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace ActiveDirectory.Controllers;
 
@@ -13,7 +14,7 @@ namespace ActiveDirectory.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    
+
     private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
     public UserController(IActiveDirectoryProvider provider)
     {
@@ -49,7 +50,7 @@ public class UserController : ControllerBase
             return warning;
 
         // Set password to one student
-       return ReturnResultMessage(_provider.ResetPassword(model));
+        return ReturnResultMessage(_provider.ResetPassword(UpdatedUser(model)));
     }
 
     [HttpPost("setPasswords")] // Set password to class students
@@ -63,7 +64,7 @@ public class UserController : ControllerBase
 
         // Set password to class students
         foreach (var user in model.Users)
-            message += _provider.ResetPassword(user);
+            message += _provider.ResetPassword(UpdatedUser(user));
 
         return ReturnResultMessage(message);
     }
@@ -71,11 +72,11 @@ public class UserController : ControllerBase
     [HttpPost("unlock")] // Unlock user
     public JsonResult UnlockUser(UserViewModel model)
     {
-        var message = _provider.UnlockUser(model);
+        var message = _provider.UnlockUser(UpdatedUser(model));
         if (message.Length > 0)
             return new JsonResult(new { alert = "warning", msg = message });
 
-        return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" }); 
+        return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" });
     }
 
     [HttpPost("mail/{str}")] // Send email to admin
@@ -83,16 +84,19 @@ public class UserController : ControllerBase
     {
         try
         {
+            var _session = HttpContext.Session;
             MailRepository ms = new MailRepository(); // Implementation of MailRepository class where email content is structured and SMTP connection with credentials
-            string mail = UserCredentials.Email ?? String.Empty;
-            var success = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever", 
-                        $"Hej {UserCredentials.FullName}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.", attachedFile);
-            if(!success)
+
+            string mail = _session.GetString("Email") ?? String.Empty;
+            var success = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever",
+                        $"Hej {_session.GetString("FullName")}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.",
+                        _session.GetString("Email") ?? "", _session.GetString("Password") ?? "", attachedFile);
+            if (!success)
                 return new JsonResult(new { alert = "warning", msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}", errorMessage = MailRepository._message });
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { alert = "warning", msg = "Fel vid försök att skicka e-post med pdf dokument.", errorMessage = ex.Message});
+            return new JsonResult(new { alert = "warning", msg = "Fel vid försök att skicka e-post med pdf dokument.", errorMessage = ex.Message });
         }
 
         return new JsonResult(new { result = true });
@@ -122,7 +126,7 @@ public class UserController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = "Felaktigt eller ofullständigt ifyllda formulär" }); // Forms filled out incorrectly
         else if (model.Password != model.ConfirmPassword)
             return new JsonResult(new { alert = "warning", msg = "Fällts för Lösenord och Bekräfta lösenord matchar inte" }); // Password and ConfirmPassword doesn't matchs
-        else if(model.Name == null && model.Users.Count() == 0)
+        else if (model.Name == null && model.Users.Count() == 0)
             return new JsonResult(new { alert = "warning", msg = "Användare för lösenordsåterställning har inte specificerats." }); // Password reset user not specified
 
         return null;
@@ -135,6 +139,25 @@ public class UserController : ControllerBase
             return new JsonResult(new { alert = "warning", msg = message });
 
         return new JsonResult(new { success = true, alert = "success", msg = "Lösenordsåterställningen lyckades!" }); //Success! Password reset was successful!
+    }
+
+    // Return extension of User
+    public UserViewModel UpdatedUser(UserViewModel user)
+    {
+        var _session = HttpContext.Session;
+        var claims = User.Claims.ToList();
+
+        // Get password token and decode encoded password
+        byte[] passwordBytes = Convert.FromBase64String(claims.FirstOrDefault(x => x.Type == "Password")?.Value ?? "");
+        var reversedPassword = Encoding.Default.GetString(passwordBytes).ToArray();
+        Array.Reverse(reversedPassword);
+        string decodedPassword = string.Join("", reversedPassword);
+
+        user.Credentials = new UserCredentials();
+        user.Credentials.Username = claims.FirstOrDefault(x => x.Type == "Email")?.Value ?? "";
+        user.Credentials.Password = decodedPassword;
+
+        return user;
     }
     #endregion
 }

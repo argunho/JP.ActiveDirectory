@@ -14,8 +14,13 @@ public class UserViewModel
 
     [DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = string.Empty;
-
+    public UserCredentials? Credentials { get; set; } = null;
     public string? Group { get; set; }
 
     public List<UserViewModel> Users { get; set; } = new List<UserViewModel>();
+}
+
+public class UserCredentials {
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }
