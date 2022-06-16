@@ -144,7 +144,6 @@ public class UserController : ControllerBase
     // Return extension of User
     public UserViewModel UpdatedUser(UserViewModel user)
     {
-        var _session = HttpContext.Session;
         var claims = User.Claims.ToList();
 
         // Get password token and decode encoded password
