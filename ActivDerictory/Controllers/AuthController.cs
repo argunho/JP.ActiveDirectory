@@ -37,10 +37,7 @@ public class AuthController : ControllerBase
         try
         {
             if (model.BlockTime != null)
-            {
                 Login.BlockTime = Convert.ToDateTime(model.BlockTime);
-                Login.Attempt = 4;
-            }
 
             var response = ProtectAccount();
             if (response != null) return response;
@@ -57,7 +54,7 @@ public class AuthController : ControllerBase
                     response = ProtectAccount();
                     if (response != null) return response;
                 }
-                return new JsonResult(new { alert = "error", msg = $"<b>Felaktig användarnamn eller lösenord.</b><br/> Du har {4 - Login.Attempt} försök kvar och efter 4 fel försök du bör vänta 30 min innan nästa nytt försök. Spärrtiden är att undvika din kontoblockering." }); //Incorrect username or password"
+                return new JsonResult(new { alert = "error", msg = $"<b>Felaktig användarnamn eller lösenord.</b><br/> {4 - Login.Attempt} försök kvar." }); //Incorrect username or password"
             }
 
             // Define and save a group in which member/members will be managed in the current session
@@ -125,24 +122,23 @@ public class AuthController : ControllerBase
     {
         // Check if the user is blocked from further attempts to enter incorrect data
         // Unclock time after 4 incorrect passwords
-        if (Login.Attempt >= 4)
+        if (Login.BlockTime != null)
         {
             // Current time - Block time to know is user unlocked or not
-            var time = DateTime.Now.Ticks - Login.BlockTime.AddMinutes(30).Ticks;
+            var time = DateTime.Now.Ticks - Login.BlockTime?.AddMinutes(30).Ticks;
 
             // If the user until unlocked
             if (time < 0)
             {
-                var timeLeft = new DateTime(Math.Abs(time));
+                var timeLeft = new DateTime(Math.Abs(time ?? 0));
                 return new JsonResult(new
                 {
                     alert = "warning",
-                    msg = $"Du gjrode 4 fel försök att logga in. Tiden som kvarstår till nästa nytt försök är: ",
+                    msg = $"Vänta {timeLeft.ToString("HH:mm:ss")} minuter innan du försöker igen.",
                     timeLeft = timeLeft.ToString("HH:mm:ss"),
                     blockTimeStamp = Login.BlockTime
                 });
-            } else
-                Login.Attempt = 0;
+            } 
         }
 
         return null;
@@ -164,7 +160,7 @@ public static class UserCredentials
 public static class Login
 {
     public static int Attempt { get; set; }
-    public static DateTime BlockTime { get; set; }
+    public static DateTime? BlockTime { get; set; }
 }
 
 // Class to save and use GroupName into current session

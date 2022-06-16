@@ -289,6 +289,7 @@ body {
   height: auto;
   margin: auto;
   font-size: 18px !important;
+  border: 1px solid #757575;
 }
 
 .contact-img {

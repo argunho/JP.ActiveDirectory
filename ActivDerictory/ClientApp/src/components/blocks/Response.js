@@ -64,6 +64,6 @@ export default function Response({ response, reset }) {
         )
     } else
         return <Alert className='alert' severity={response?.alert} onClose={() => reset()}>
-            <span dangerouslySetInnerHTML={{ __html: response?.msg + (timeLeft ? timeLeft : "")}}></span>
+            <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg)}}></span>
         </Alert>;
 }
