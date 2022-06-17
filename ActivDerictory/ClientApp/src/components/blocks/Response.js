@@ -8,6 +8,7 @@ export default function Response({ response, reset }) {
     const [timeLeft, setTimeLeft] = useState(null);
     const occurredError = sessionStorage.getItem("occurredError") || null;
 
+    // Send a message to the system developer about the occurred error
     const sendMsgToSupport = async () => {
         reset();
         setSupportLink(false);
@@ -17,6 +18,7 @@ export default function Response({ response, reset }) {
             })
     }
 
+    // The timer with countdown, a view of the time left to unblock login
     const getTimeLeftToUnblock = () => {
         if (!response?.timeLeft) return;
 
@@ -41,19 +43,21 @@ export default function Response({ response, reset }) {
         }, 1000)
     }
 
-    if (response?.errorMessage) {
+//  Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
+    if (response?.errorMessage && response?.repeatedError >= 3) {
         if (occurredError && occurredError === response?.errorMessage) {
             setSupportLink(true);
             sessionStorage.removeItem("occurredError")
         } else
             sessionStorage.setItem("occurredError", response?.errorMessage);
-    } else if (response?.timeLeft)
+    } else if (response?.timeLeft) //If login is blocked temporarily and lock time is not passed out 
         getTimeLeftToUnblock();
 
     if (supportLink) {
         return (
+            // Error alert
             <Alert className="alert" severity='error' onClose={() => reset()}>
-                <AlertTitle>Något har gått fel. {response?.msg ? response?.msg : ""}</AlertTitle>
+                <AlertTitle>Något har gått fel.</AlertTitle>
                 <Button variant="contained"
                     color='error'
                     style={{ display: "block", marginTop: "20px" }}

@@ -47,10 +47,11 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
                 using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
                 {
                     if (user == null)
-                        return $"Avbrott i processen. Användaren {model.Name} hittades inte"; // Canceled operation. User {model.Name} not found
+                        return $"Användaren {model.Name} hittades inte"; // Canceled operation. User {model.Name} not found
 
                     user.SetPassword(model.Password);
                     user.Dispose();
+                    return string.Empty;
                 }
             }
         }
@@ -58,8 +59,6 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
         {
             return "Fel: " + ex?.InnerException?.Message ?? ex.Message;
         }
-
-        return string.Empty;
     }
 
     public string UnlockUser(UserViewModel model) // Method to unlock user
@@ -69,23 +68,23 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
             using (AuthenticablePrincipal user = UserPrincipal.FindByIdentity(context, model.Name))
             {
                 if (user == null)
-                    return "Användaren hittades inte."; // User not found
+                    return $"Användaren {model.Name} hittades inte."; // User not found
                 try
                 {
                     if (!user.IsAccountLockedOut())
                         user.UnlockAccount();
                     else
-                        return "Avbrott i processen. Användarkontot är inte blockerat.";// The process is cancelled! The user's account is not locked!
+                        return $"Användarkontot {model.Name} är inte blockerat.";// The process is cancelled! The user's account is not locked!
 
                     user.Save();
+                    return string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    return "Fel: " + ex.Message;
+                    return ex.Message;
                 }
             }
         }
-        return string.Empty;
     }
     #endregion
 
@@ -93,7 +92,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
     public PrincipalContext PContext() =>
         new PrincipalContext(ContextType.Domain, domain, defaultOU); // Context to build a connection to local host
 
-    public PrincipalContext PContexAccessCheck(UserCredentials model) 
+    public PrincipalContext PContexAccessCheck(UserCredentials model)
         => new PrincipalContext(ContextType.Domain, domain, defaultOU, model.Username, model.Password);
     // Context to build a connection with credentials to local host
     #endregion

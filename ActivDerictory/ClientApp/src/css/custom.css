@@ -289,7 +289,8 @@ body {
   height: auto;
   margin: auto;
   font-size: 18px !important;
-  border: 1px solid #757575;
+  border: 1px solid #c4c4c4;
+  box-shadow: 0 0 1px 1px #c4c4c4;
 }
 
 .contact-img {
@@ -323,7 +324,7 @@ div.contact-info {
   padding: 0 10px !important;
   font-size: 9px !important;
   width: 80% !important;
-  margin: 50px auto !important;
+  margin: 50px auto 34px auto !important;
   text-align: left;
 }
 
@@ -376,7 +377,7 @@ input::placeholder {
   overflow: hidden !important;
   max-height: 0;
   padding: 0;
-  margin: 0;
+  margin: 5px 0 0 0;
   width: 100%;
   overflow: hidden;
   clear: both;
@@ -458,9 +459,8 @@ input::placeholder {
 }
 
 .buttons-interior-wrapper {
-  width: auto;
-  display: inline-block;
-  margin-left: -20px;
+  width: max-content;
+  display: inline-flex;
 }
 
 form .buttons-wrapper {

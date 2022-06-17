@@ -7,10 +7,11 @@
   align-content: center;
   text-align: center;
   display: block;
-  border: 1px solid #c4c4c4;
   overflow: hidden;
   border-radius: 3px;
   position: relative;
+  border: 1px solid #c4c4c4;
+  box-shadow: 0 0 1px 1px #c4c4c4;
   /* background: url('./../images/keys.png');
   background-position: bottom left;
   background-repeat: no-repeat;

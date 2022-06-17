@@ -5,11 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-ConfigurationManager configuration = builder.Configuration;
+ConfigurationManager configuration = builder.Configuration; // ---
 
 // Add interfaces and repositories --- 
 builder.Services.AddScoped<IActiveDirectoryProvider, ActiveDirectoryProvider>();
-builder.Services.AddScoped<ISessionData, SessionData>();
 
 // Authennticatio with Jwt ---
 builder.Services.AddAuthentication(options =>
@@ -41,11 +40,10 @@ builder.Services.AddControllers();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    //options.IdleTimeout = TimeSpan.FromSeconds(1800); ---
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
 
 // Add windows authentication ---
 //builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);

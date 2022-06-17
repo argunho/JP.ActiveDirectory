@@ -26,7 +26,7 @@ export default function Header({ isAuthorized }) {
     const logout = async () => {
         // If the user is logged out, clear and remove all credential which was saved for the current session
         sessionStorage.clear();
-        localStorage.clear();
+        localStorage.removeItem("blockTime");
         sessionStorage.setItem("login", "true");
         await axios.get("account/login").then(res => {
             if(res.data?.errorMessage)

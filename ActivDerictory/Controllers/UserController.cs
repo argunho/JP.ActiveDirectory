@@ -16,9 +16,13 @@ public class UserController : ControllerBase
 {
 
     private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
-    public UserController(IActiveDirectoryProvider provider)
+    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly ISession _session;
+    public UserController(IActiveDirectoryProvider provider, IHttpContextAccessor contextAccessor)
     {
         _provider = provider;
+        _contextAccessor = contextAccessor;
+        _session = _contextAccessor.HttpContext.Session;
     }
 
     #region GET
@@ -84,19 +88,21 @@ public class UserController : ControllerBase
     {
         try
         {
-            var _session = HttpContext.Session;
             MailRepository ms = new MailRepository(); // Implementation of MailRepository class where email content is structured and SMTP connection with credentials
 
-            string mail = _session.GetString("Email") ?? String.Empty;
+            string mail = _session?.GetString("Email") ?? String.Empty;
+
             var success = ms.SendMail(mail, "Lista över nya lösenord till " + str + " elever",
-                        $"Hej {_session.GetString("FullName")}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.",
-                        _session.GetString("Email") ?? "", _session.GetString("Password") ?? "", attachedFile);
+                        $"Hej {_session?.GetString("DisplayName")}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.",
+                        mail ?? "", _session?.GetString("Password") ?? "", attachedFile);
             if (!success)
-                return new JsonResult(new { alert = "warning", msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}", errorMessage = MailRepository._message });
+                return new JsonResult(new { alert = "warning", 
+                    msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}", 
+                    errorMessage = MailRepository._message });
         }
         catch (Exception ex)
         {
-            return new JsonResult(new { alert = "warning", msg = "Fel vid försök att skicka e-post med pdf dokument.", errorMessage = ex.Message });
+            return Error(ex.Message);
         }
 
         return new JsonResult(new { result = true });
@@ -144,19 +150,26 @@ public class UserController : ControllerBase
     // Return extension of User
     public UserViewModel UpdatedUser(UserViewModel user)
     {
-        var claims = User.Claims.ToList();
-
-        // Get password token and decode encoded password
-        byte[] passwordBytes = Convert.FromBase64String(claims.FirstOrDefault(x => x.Type == "Password")?.Value ?? "");
-        var reversedPassword = Encoding.Default.GetString(passwordBytes).ToArray();
-        Array.Reverse(reversedPassword);
-        string decodedPassword = string.Join("", reversedPassword);
-
         user.Credentials = new UserCredentials();
-        user.Credentials.Username = claims.FirstOrDefault(x => x.Type == "Email")?.Value ?? "";
-        user.Credentials.Password = decodedPassword;
+        user.Credentials.Username = _session.GetString("Username");
+        user.Credentials.Password = _session.GetString("Password");
 
         return user;
+    }
+
+    // Return Error response
+    public JsonResult Error(string msg)
+    {
+        // Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
+        var repeated = _session?.GetInt32("RepeatedError") ?? 0;
+        _session?.SetInt32("RepeatedError", repeated += 1);
+        return new JsonResult(new
+        {
+            alert = "warning",
+            msg = "Något har gått snett. Var vänlig försök igen.",
+            repeatedError = repeated,
+            errorMessage = msg
+        }); // Something went wrong, please try again later
     }
     #endregion
 }

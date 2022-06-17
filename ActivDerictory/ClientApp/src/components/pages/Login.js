@@ -19,10 +19,10 @@ export class Login extends Component {
         super(props);
 
         this.state = {
-            form: { 
-                username: "", 
-                password: "", 
-                group: "", 
+            form: {
+                username: "",
+                password: "",
+                group: "",
                 blockTime: localStorage.getItem("blockTime") || null
             },
             formFields: [
@@ -52,11 +52,12 @@ export class Login extends Component {
     submitForm = async (e) => {
         e.preventDefault();
         const { form } = this.state;
+        console.log(form.blockTime)
 
         this.setState({ load: true })
 
         await axios.post("auth", form).then(res => {
-            const { alert, token, blockTimeStamp, errorMessage } = res.data;
+            const { alert, token, blockTime, errorMessage } = res.data;
 
             this.setState({
                 load: false, response: res.data
@@ -73,8 +74,8 @@ export class Login extends Component {
                 }, 1000)
             } else if (errorMessage)
                 console.error("Error response => " + errorMessage);
-            else if (blockTimeStamp)
-                localStorage.setItem("blockTime", blockTimeStamp);
+            else if (blockTime) 
+                localStorage.setItem("blockTime", blockTime);
         }, error => {
             this.setState({ load: true });
             console.error("Error => " + error);

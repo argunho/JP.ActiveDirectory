@@ -16,10 +16,12 @@ namespace ActiveDirectory.Controllers
     {
         private readonly IActiveDirectoryProvider _provider; // Implementation of interface, all interface functions are used and are called from the file => ActiveDerictory/Repository/ActiveProviderRepository.cs
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ISession _session;
         public SearchController(IActiveDirectoryProvider provider, IHttpContextAccessor contextAccessor)
         {
             _provider = provider;
             _contextAccessor = contextAccessor;
+            _session = _contextAccessor.HttpContext.Session;
         }
 
         #region GET
@@ -149,13 +151,19 @@ namespace ActiveDirectory.Controllers
 
         #region Helpers
         // Return message if sommething went wrong.
-        public JsonResult Error(string msg) => new JsonResult(
-            new
+        public JsonResult Error(string msg)
+        {
+            // Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
+            var repeated = _session.GetInt32("RepeatedError") ?? 0;
+            _session.SetInt32("RepeatedError", repeated += 1);
+            return new JsonResult(new
             {
-                alert = "error",
-                msg = "Något har gått snett. Felmeddelande visas i browser konsolen.",
+                alert = "warning",
+                msg = "Något har gått snett. Var vänlig försök igen.",
+                repeatedError = repeated,
                 errorMessage = msg
-            });
+            }); //Something went wrong, please try again later
+        }
         #endregion
     }
 }

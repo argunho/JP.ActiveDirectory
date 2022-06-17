@@ -63,7 +63,7 @@
 
 .pr-inputs {
   display: inline-flex;
-  margin: 0 2px !important;
+  margin: 5px 2px !important;
   width: 100%;
 }
 .pr-inputs input {
