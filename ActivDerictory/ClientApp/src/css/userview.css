@@ -33,7 +33,7 @@
 .select-label {
   width: max-content;
   padding: 0 5px !important;
-  background: #FFF;
+  background: #fff;
 }
 
 .form-actions label > span {
@@ -42,7 +42,8 @@
   letter-spacing: 0.5px;
 }
 
-.label, .label-small {
+.label,
+.label-small {
   color: rgb(49, 47, 47) !important;
   width: max-content;
   margin: 15px 15px 5px 0;
@@ -59,6 +60,35 @@
   margin-bottom: 20px;
   clear: both;
   transition: all 0.5s eas;
+}
+
+.unlock-block {
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid #bdbdbd;
+  margin: 10px 0;
+  position: relative;
+  height: 60px;
+  line-height: 55px;
+  vertical-align: middle;
+}
+.unlock-block > span {
+  margin-left: 15px;
+  color: #1976d2;
+  vertical-align: middle;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+}
+.unlock-block svg:not(.locked svg) {
+  color: #1976d2;
+}
+.locked-account svg,
+.locked-account > span {
+  color: #cc0000;
+}
+.unlock-btn {
+  position: absolute !important;
+  right: 10px;
+  top: 14px;
 }
 
 .pr-inputs {

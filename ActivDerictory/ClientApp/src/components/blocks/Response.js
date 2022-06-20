@@ -1,16 +1,31 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, AlertTitle, Button } from '@mui/material'
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
-export default function Response({ response, reset }) {
+export default function Response(props) {
 
     const [supportLink, setSupportLink] = useState(false);
     const [timeLeft, setTimeLeft] = useState(null);
+    const [response, setResponse] = useState(props.response)
     const occurredError = sessionStorage.getItem("occurredError") || null;
+
+    const history = useHistory();
+
+    useEffect(() => {
+        if(props.noAccess && !props.response){
+            setResponse({
+                msg: "Åtkomst nekad! Dina atkomstbehörigheter måste kontrolleras på nytt.",
+                alert: "error"
+            })
+            setTimeout(() => { history.push("/"); }, 5000);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.noAccess])
 
     // Send a message to the system developer about the occurred error
     const sendMsgToSupport = async () => {
-        reset();
+        props.reset();
         setSupportLink(false);
         await axios.post("user/contact", occurredError)
             .then(res => {
@@ -29,7 +44,7 @@ export default function Response({ response, reset }) {
         setInterval(() => {
             if (sec + min === 0 || response === null) {
                 clearInterval();
-                reset();
+                props.reset();
             } else {
                 if (sec === 0) {
                     if (min > 0)  min -= 1;
@@ -43,7 +58,7 @@ export default function Response({ response, reset }) {
         }, 1000)
     }
 
-//  Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
+    //  Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
     if (response?.errorMessage && response?.repeatedError >= 3) {
         if (occurredError && occurredError === response?.errorMessage) {
             setSupportLink(true);
@@ -56,7 +71,7 @@ export default function Response({ response, reset }) {
     if (supportLink) {
         return (
             // Error alert
-            <Alert className="alert" severity='error' onClose={() => reset()}>
+            <Alert className="alert" severity='error' onClose={() => props.reset()}>
                 <AlertTitle>Något har gått fel.</AlertTitle>
                 <Button variant="contained"
                     color='error'
@@ -67,7 +82,7 @@ export default function Response({ response, reset }) {
             </Alert>
         )
     } else
-        return <Alert className='alert' severity={response?.alert} onClose={() => reset()}>
+        return <Alert className='alert' severity={response?.alert} onClose={() => props.reset()}>
             <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg)}}></span>
         </Alert>;
 }

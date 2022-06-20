@@ -1,15 +1,14 @@
 
 import React, { Component } from 'react'
-import {
-    Alert, Collapse, List, ListItemButton, ListItemIcon, ListItemText
-} from '@mui/material';
+import { Alert, Button } from '@mui/material';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { ExpandLess, ExpandMore, Lock, LockOpen, Password } from '@mui/icons-material';
+import { Lock, LockOpen } from '@mui/icons-material';
 import Form from './../blocks/Form';
 import Info from '../blocks/Info';
 
 import './../../css/userview.css';
+import Response from '../blocks/Response';
 
 export class UserManager extends Component {
     static displayName = UserManager.name;
@@ -26,11 +25,10 @@ export class UserManager extends Component {
             },
             response: null,
             load: false,
-            open: false,
-            openIndex: null,
-            list: [],
             noAccess: false
         }
+
+        this.unlockUser = this.unlockUser.bind(this);
     }
 
     componentDidMount() {
@@ -56,11 +54,7 @@ export class UserManager extends Component {
                         isLocked: user.isLocked,
                         date: user.date,
                         subTitle: user?.office + " " + user?.department
-                    },
-                    list: [
-                        { name: "Lås upp konto", symbol: user.isLocked ? <Lock /> : <LockOpen />, disabled: !user.isLocked },
-                        { name: "Återställ lösenord", symbol: <Password />, disabled: false }
-                    ]
+                    }
                 })
             }
         }, error => {
@@ -75,46 +69,50 @@ export class UserManager extends Component {
         })
     }
 
-    handleClick = (i) => {
-        this.setState({
-            openIndex: (i !== this.state.openIndex) ? i : null,
-            open: (i !== this.state.openIndex)
+    // Unlock user
+    unlockUser = async () => {
+        const _config = {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
+        };
+
+        this.setState({ load: true })
+
+        // Request
+        await axios.post("user/unlock/" + this.state.user.name, _config).then(res => {
+            this.setState({ load: false, response: res.data })
+            this.getUser();
+        }, error => {
+            // Handle of error
+            this.setState({ load: false })
+            if (error?.response.status === 401)
+                this.setState({ noAccess: true });
+            else
+                console.error("Error => " + error.response);
         })
     }
 
     render() {
-        const { user, noAccess, open, openIndex, list, name } = this.state;
+        const { user, noAccess, name, load, response } = this.state;
 
         return (
-            noAccess ? <Alert severity='error'>Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.</Alert>
-                :
-                <div className='interior-div'>
-                    <Info name={user?.name} displayName={user?.displayName} subTitle={user?.subTitle}/>
+            noAccess ? <Response response={null} noAccess={true} />
+                : <div className='interior-div'>
+                    <Info name={user?.name} displayName={user?.displayName} subTitle={user?.subTitle} />
+                    {response ? <Response response={response} /> : null}
+                    <div className={'unlock-block' + (user.isLocked ? "locked-account" : "")}>
+                        {user.isLocked ? <Lock /> : <LockOpen />}
+                        <span>{user.isLocked ? "Lås upp konto" : "Aktiv konto"}</span>
 
-                    <List sx={{ width: '100%' }} component="nav">
-                        {list.map((l, i) => (
-                            <div key={i}>
-                                <ListItemButton
-                                    disabled={l.disabled}
-                                    onClick={() => this.handleClick(i)} className={(open && openIndex === i) ? "dropdown-list-active" : ""}>
-                                    <ListItemIcon>
-                                        {l.symbol}
-                                    </ListItemIcon>
-                                    <ListItemText primary={l.disabled ? "Användarkontot är inte låst" : l.name} />
-                                    {(open && openIndex === i) ? <ExpandLess /> : <ExpandMore />}
-                                </ListItemButton>
-                                <Collapse in={open && openIndex === i} timeout="auto" unmountOnExit>
-                                    {i === 0 ?
-                                        <Form api="unlock"
-                                            name={name}
-                                            title="Lås upp konto"
-                                            buttonText="Lås upp"
-                                            refreshUserData={() => this.setState({ user: { ...this.state.user, isLocked: false } })} />
-                                        : <Form title={"Återställa lösenord"} api="resetPassword" name={name} buttonText="Återställ" />}
-                                </Collapse>
-                            </div>
-                        ))}
-                    </List>
+                        {/* Unlock user - button */}
+                        <Button variant="contained"
+                            color="error"
+                            disabled={!user.isLocked || load}
+                            onClick={() => this.unlockUser()}
+                            className="unlock-btn">
+                            Lås upp
+                        </Button>
+                    </div>
+                    <Form title={"Återställa lösenord"} api="resetPassword" name={name} buttonText="Återställ" />
                 </div>
         )
     }

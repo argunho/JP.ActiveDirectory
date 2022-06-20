@@ -73,9 +73,15 @@ public class UserController : ControllerBase
         return ReturnResultMessage(message);
     }
 
-    [HttpPost("unlock")] // Unlock user
-    public JsonResult UnlockUser(UserViewModel model)
+    [HttpPost("unlock/{name}")] // Unlock user
+    [AllowAnonymous]
+    public JsonResult UnlockUser(string name)
     {
+        var model = new UserViewModel
+        {
+            Name = name
+        };
+
         var message = _provider.UnlockUser(UpdatedUser(model));
         if (message.Length > 0)
             return new JsonResult(new { alert = "warning", msg = message });

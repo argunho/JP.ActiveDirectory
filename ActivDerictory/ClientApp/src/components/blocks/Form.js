@@ -20,6 +20,38 @@ import PDFConverter from './PDFConverter';
 /* eslint-disable react-hooks/exhaustive-deps */
 
 
+// Form inputs
+const formList = [
+    { name: "password", label: "Lösenord", placeholder: "", regex: true },
+    { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }
+]
+
+// Help texts (password)
+const helpTexts = [
+    {
+        label: "Lösenord ska innehålla",
+        tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
+            "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
+            "<pre>* Minst en siffra</pre>" +
+            "<pre>* Minst ett specialtecken</pre>" +
+            "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
+    }
+]
+
+// List of alternative to select words list category to generate password
+const passwordKeys = [
+    { label: "Länder", value: "countries" },
+    { label: "Alla städer/tätort", value: "cities" },
+    { label: "Svenska städer/tätort", value: "svCities" },
+    { label: "Färg", value: "colors" },
+    { label: "Blommor", value: "flowers" },
+    { label: "Frukter", value: "fruits" },
+    { label: "Grönsaker", value: "vegetables" },
+    { label: "Djur", value: "animals" },
+    { label: "Kattens namn (smeknamn)", value: "cats" },
+    { label: "Bilar", value: "cars" }
+];
+
 export default function Form(props) {
     const { title, api, buttonText, name, multiple, users = [] } = props;
     const defaultForm = {
@@ -41,6 +73,7 @@ export default function Form(props) {
     const [isOpenTip, setIsOpenTip] = useState(false);
     const [wordsList, setWordsList] = useState([]);
     const [randomNumber, setRandomNumber] = useState(1000);
+    const [accessDenied, setAccessDenied] = useState(false);
     const [ready, setReady] = useState([]);
     const [previewList, setPreviewList] = useState([]);
     const [preview, setPreview] = useState(false);
@@ -61,38 +94,6 @@ export default function Form(props) {
     const _config = {
         headers: { 'Authorization': `Bearer ${_token}` }
     };
-
-    // Form inputs
-    const formList = [
-        { name: "password", label: "Lösenord", placeholder: "", regex: true },
-        { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }
-    ]
-
-    // Help texts (password)
-    const helpTexts = [
-        {
-            label: "Lösenord ska innehålla",
-            tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
-                "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
-                "<pre>* Minst en siffra</pre>" +
-                "<pre>* Minst ett specialtecken</pre>" +
-                "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
-        }
-    ]
-
-    // List of alternative to select words list category to generate password
-    const passwordKeys = [
-        { label: "Länder", value: "countries" },
-        { label: "Alla städer/tätort", value: "cities" },
-        { label: "Svenska städer/tätort", value: "svCities" },
-        { label: "Färg", value: "colors" },
-        { label: "Blommor", value: "flowers" },
-        { label: "Frukter", value: "fruits" },
-        { label: "Grönsaker", value: "vegetables" },
-        { label: "Djur", value: "animals" },
-        { label: "Kattens namn (smeknamn)", value: "cats" },
-        { label: "Bilar", value: "cars" }
-    ];
 
     // To manipulate elements like js getElementById
     const refSubmit = useRef(null);
@@ -306,15 +307,6 @@ export default function Form(props) {
         }, 500)
     }
 
-    // No access
-    const noAccess = () => {
-        setResponse({
-            msg: "Åtkomst nekad! Dina atkomstbehörigheter ska kontrolleras på nytt.",
-            alert: "error"
-        })
-        setTimeout(() => { history.push("/"); }, 5000);
-    }
-
     // Response alert
     const alert = (visible) => {
         if (!visible) return null;
@@ -399,16 +391,13 @@ export default function Form(props) {
                 setSavePdf(confirmSavePdf);
                 setTimeout(() => {
                     resetForm(true, true);
-
-                    if (res.data?.unlocked)
-                        props.refreshUserData();
                 }, 5000)
             }
         }, error => {
             // Handle of error
             resetForm(false);
             setLoad(false);
-            if (error?.response.status === 401) noAccess();
+            if (error?.response.status === 401) setAccessDenied(true);
             else
                 console.error("Error => " + error.response);
         })
@@ -426,211 +415,214 @@ export default function Form(props) {
                 console.error("Error response => " + res.data.errorMessage);
         }, error => {
             // Handle of error
-            if (error?.response.status === 401) noAccess();
+            if (error?.response.status === 401) setAccessDenied(true);
             else console.error("Error => " + error.response)
         })
     }
 
-    return (
-        <div className='collapse-wrapper'>
+    if (accessDenied)
+        return <Response response={null} noAccess={true} />;
+    else
+        return (
+            <div className='collapse-wrapper'>
 
-            {/* The curtain over the block disables all action if the form data is submitted and waiting for a response */}
-            {load ? <div className='curtain-block'></div> : null}
+                {/* The curtain over the block disables all action if the form data is submitted and waiting for a response */}
+                {load ? <div className='curtain-block'></div> : null}
 
 
-            {/* Confirm actions block */}
-            {confirmSubmit ? <div className='confirm-wrapper'>
-                <div className='confirm-block'>
-                    Är du säker att du vill göra det?
-                    <div className='buttons-wrapper'>
-                        <Button type="submit" variant='contained' color="error" onClick={() => confirmHandle()}>Ja</Button>
-                        <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
-                    </div>
-                </div>
-            </div> : null}
-
-            {/* Modal  window with help texts */}
-            <ModalHelpTexts arr={helpTexts} isTitle="Lösenordskrav" />
-
-            {/* Title */}
-            <p className='form-title'>{title}</p>
-
-            {/* Response message */}
-            {alert(!credentialError && response)}
-
-            {/* Form actions */}
-            <div className='form-actions'>
-
-                {multiple ? <>
-                    {/* Loop of radio input choices to choose is password same or not for all students */}
-                    {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
-                        <FormControlLabel
-                            key={index}
-                            control={<Radio size='small' />}
-                            checked={p.value === variousPassword}
-                            label={p.label}
-                            name="samePassword"
-                            onChange={() => setVariousPassword(p.value)} />
-                    ))}
-
-                    {/* Different alternatives for password generation */}
-                    <div className={`dropdown-div${(variousPassword ? " dropdown-open" : "")}`}>
-                        <div className='dropdown-interior-div'>
-                            {/* Loop of radio input choices to choose password type strong or not */}
-                            <FormLabel className="label">Lösenordstyp</FormLabel>
-                            {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
-                                <FormControlLabel
-                                    key={index}
-                                    control={<Radio
-                                        size='small'
-                                        checked={p.value === strongPassword}
-                                        color={strongPassword ? "error" : "success"} />}
-                                    label={p.label}
-                                    name="strongPassword"
-                                    onChange={() => setPassType(p.value)} />
-                            ))}
-
-                            <FormControl className={'select-list' + (!strongPassword ? "" : " disabled")}>
-                                <InputLabel className='select-label'>Lösenords kategory</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-standard-label"
-                                    value={selectedCategory}
-                                    onChange={handleSelectListChange}
-                                    label="Lösenords kategory"
-                                    disabled={strongPassword}
-                                >
-                                    <MenuItem value=""><span style={{ marginLeft: "10px", color: "#1976D2" }}>Välj en från listan ...</span></MenuItem>
-                                    <MenuItem></MenuItem>
-                                    {passwordKeys.map((l, index) => (
-                                        <MenuItem value={l.label} key={index}>
-                                            <span style={{ marginLeft: "10px" }}> - {l.label}</span>
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-
-                            {ready ?
-                                <div className="last-options">
-                                    <FormLabel className="label-small">Lösenords alternativ (antal siffror i lösenord)</FormLabel>
-                                    {[{ label: "012_", value: 1000 },
-                                    { label: "01_", value: 100 },
-                                    { label: "0_", value: 10 }].map((p, index) => (
-                                        <FormControlLabel
-                                            key={index}
-                                            control={<Radio
-                                                size='small'
-                                                checked={p.value === randomNumber}
-                                                color="info" />}
-                                            label={randomPasswordWord + p.label}
-                                            name="digits"
-                                            onChange={() => setRandomNumber(p.value)} />
-                                    ))}</div>
-                                : null}
+                {/* Confirm actions block */}
+                {confirmSubmit ? <div className='confirm-wrapper'>
+                    <div className='confirm-block'>
+                        Är du säker att du vill göra det?
+                        <div className='buttons-wrapper'>
+                            <Button type="submit" variant='contained' color="error" onClick={() => confirmHandle()}>Ja</Button>
+                            <Button variant='contained' color="primary" onClick={() => resetForm(false)}>Nej</Button>
                         </div>
-                    </div></> : null}
-
-                {/* Password form */}
-                <form className='user-view-form' onSubmit={submitForm}>
-                    {/* Passwords inputs */}
-                    <div className={`inputs-wrapper dropdown-div${(!variousPassword ? " dropdown-open" : "")}`}>
-                        {formList.length > 0 ? formList.map((n, i) => (
-                            <FormControl key={i} className="pr-inputs">
-                                <TextField
-                                    label={n.label}
-                                    name={n.name}
-                                    type={showPassword ? "text" : "password"}
-                                    variant="outlined"
-                                    required
-                                    value={form[n.name] || ""}
-                                    inputProps={{
-                                        maxLength: 20,
-                                        minLength: 8,
-                                        autoComplete: formList[n.name],
-                                        form: { autoComplete: 'off', }
-                                    }}
-                                    className={(n.regex && regexError) ? "error" : ""}
-                                    error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
-                                    placeholder={n.placeholder}
-                                    disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || variousPassword}
-                                    onChange={valueChangeHandler}
-                                    onBlur={() => validateField(n.name)}
-                                />
-                            </FormControl>)) : null}
                     </div>
+                </div> : null}
 
-                    <div className='buttons-wrapper'>
-                        {/* Change the password input type */}
-                        {variousPassword ? null : <FormControlLabel className='checkbox'
-                            control={<Checkbox
-                                size='small'
-                                checked={showPassword}
-                                onClick={() => setShowPassword(!showPassword)} />}
-                            label="Visa lösenord" />}
+                {/* Modal  window with help texts */}
+                <ModalHelpTexts arr={helpTexts} isTitle="Lösenordskrav" />
 
-                        {/* Generate password button */}
-                        <Tooltip arrow
-                            title={disableGenerate ? "Lösenords kategory är inte vald." : ""}
-                            classes={{
-                                tooltip: `tooltip tooltip-margin tooltip-${disableGenerate ? 'error' : 'blue'}`,
-                                arrow: `arrow-${disableGenerate ? 'error' : 'blue'}`
-                            }}>
-                            <span>
-                                <Button variant="text"
-                                    color="primary"
+                {/* Title */}
+                <p className='form-title'>{title}</p>
+
+                {/* Response message */}
+                {alert(!credentialError && response)}
+
+                {/* Form actions */}
+                <div className='form-actions'>
+
+                    {multiple ? <>
+                        {/* Loop of radio input choices to choose is password same or not for all students */}
+                        {[{ label: "Samma lösenord", value: false }, { label: "Olika lösenord", value: true }].map((p, index) => (
+                            <FormControlLabel
+                                key={index}
+                                control={<Radio size='small' />}
+                                checked={p.value === variousPassword}
+                                label={p.label}
+                                name="samePassword"
+                                onChange={() => setVariousPassword(p.value)} />
+                        ))}
+
+                        {/* Different alternatives for password generation */}
+                        <div className={`dropdown-div${(variousPassword ? " dropdown-open" : "")}`}>
+                            <div className='dropdown-interior-div'>
+                                {/* Loop of radio input choices to choose password type strong or not */}
+                                <FormLabel className="label">Lösenordstyp</FormLabel>
+                                {[{ label: "Komplicerad", value: true }, { label: "Enkel", value: false }].map((p, index) => (
+                                    <FormControlLabel
+                                        key={index}
+                                        control={<Radio
+                                            size='small'
+                                            checked={p.value === strongPassword}
+                                            color={strongPassword ? "error" : "success"} />}
+                                        label={p.label}
+                                        name="strongPassword"
+                                        onChange={() => setPassType(p.value)} />
+                                ))}
+
+                                <FormControl className={'select-list' + (!strongPassword ? "" : " disabled")}>
+                                    <InputLabel className='select-label'>Lösenords kategory</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        value={selectedCategory}
+                                        onChange={handleSelectListChange}
+                                        label="Lösenords kategory"
+                                        disabled={strongPassword}
+                                    >
+                                        <MenuItem value=""><span style={{ marginLeft: "10px", color: "#1976D2" }}>Välj en från listan ...</span></MenuItem>
+                                        <MenuItem></MenuItem>
+                                        {passwordKeys.map((l, index) => (
+                                            <MenuItem value={l.label} key={index}>
+                                                <span style={{ marginLeft: "10px" }}> - {l.label}</span>
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+
+                                {ready ?
+                                    <div className="last-options">
+                                        <FormLabel className="label-small">Lösenords alternativ (antal siffror i lösenord)</FormLabel>
+                                        {[{ label: "012_", value: 1000 },
+                                        { label: "01_", value: 100 },
+                                        { label: "0_", value: 10 }].map((p, index) => (
+                                            <FormControlLabel
+                                                key={index}
+                                                control={<Radio
+                                                    size='small'
+                                                    checked={p.value === randomNumber}
+                                                    color="info" />}
+                                                label={randomPasswordWord + p.label}
+                                                name="digits"
+                                                onChange={() => setRandomNumber(p.value)} />
+                                        ))}</div>
+                                    : null}
+                            </div>
+                        </div></> : null}
+
+                    {/* Password form */}
+                    <form className='user-view-form' onSubmit={submitForm}>
+                        {/* Passwords inputs */}
+                        <div className={`inputs-wrapper dropdown-div${(!variousPassword ? " dropdown-open" : "")}`}>
+                            {formList.length > 0 ? formList.map((n, i) => (
+                                <FormControl key={i} className="pr-inputs">
+                                    <TextField
+                                        label={n.label}
+                                        name={n.name}
+                                        type={showPassword ? "text" : "password"}
+                                        variant="outlined"
+                                        required
+                                        value={form[n.name] || ""}
+                                        inputProps={{
+                                            maxLength: 20,
+                                            minLength: 8,
+                                            autoComplete: formList[n.name],
+                                            form: { autoComplete: 'off', }
+                                        }}
+                                        className={(n.regex && regexError) ? "error" : ""}
+                                        error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
+                                        placeholder={n.placeholder}
+                                        disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || variousPassword}
+                                        onChange={valueChangeHandler}
+                                        onBlur={() => validateField(n.name)}
+                                    />
+                                </FormControl>)) : null}
+                        </div>
+
+                        <div className='buttons-wrapper'>
+                            {/* Change the password input type */}
+                            {variousPassword ? null : <FormControlLabel className='checkbox'
+                                control={<Checkbox
+                                    size='small'
+                                    checked={showPassword}
+                                    onClick={() => setShowPassword(!showPassword)} />}
+                                label="Visa lösenord" />}
+
+                            {/* Generate password button */}
+                            <Tooltip arrow
+                                title={disableGenerate ? "Lösenords kategory är inte vald." : ""}
+                                classes={{
+                                    tooltip: `tooltip tooltip-margin tooltip-${disableGenerate ? 'error' : 'blue'}`,
+                                    arrow: `arrow-${disableGenerate ? 'error' : 'blue'}`
+                                }}>
+                                <span>
+                                    <Button variant="text"
+                                        color="primary"
+                                        type="button"
+                                        size="small"
+                                        className="generate-password"
+                                        onClick={() => generatePassword()}
+                                        disabled={load || disableGenerate}>
+                                        Generera {previewList.length > 0 ? "andra " : ""} lösenord
+                                    </Button>
+                                </span>
+                            </Tooltip>
+
+                            <div className='buttons-interior-wrapper'>
+                                {/* Reset button */}
+                                <Button variant="contained"
+                                    color="error"
                                     type="button"
-                                    size="small"
-                                    className="generate-password"
-                                    onClick={() => generatePassword()}
-                                    disabled={load || disableGenerate}>
-                                    Generera {previewList.length > 0 ? "andra " : ""} lösenord
-                                </Button>
-                            </span>
-                        </Tooltip>
+                                    disabled={load || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
+                                    onClick={() => resetForm(true)}
+                                ><ClearOutlined /></Button>
 
-                        <div className='buttons-interior-wrapper'>
-                            {/* Reset button */}
-                            <Button variant="contained"
-                                color="error"
-                                type="button"
-                                disabled={load || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
-                                onClick={() => resetForm(true)}
-                            ><ClearOutlined /></Button>
-
-                            {/* Submit/Preview form {variousPassword ? "contained" : "outlined"} */}
-                            <Button variant="contained"
-                                ref={refSubmit}
-                                className='button-btn'
-                                color="primary"
-                                type='submit'
-                                disabled={load || (!variousPassword && (noConfirm || regexError)) || (variousPassword && previewList.length === 0)}>
-                                {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : (variousPassword ? "Granska" : buttonText)}</Button>
+                                {/* Submit/Preview form {variousPassword ? "contained" : "outlined"} */}
+                                <Button variant="contained"
+                                    ref={refSubmit}
+                                    className='button-btn'
+                                    color="primary"
+                                    type='submit'
+                                    disabled={load || (!variousPassword && (noConfirm || regexError)) || (variousPassword && previewList.length === 0)}>
+                                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : (variousPassword ? "Granska" : buttonText)}</Button>
+                            </div>
                         </div>
-                    </div>
 
-                </form>
+                    </form>
+                </div>
+
+                {/* Preview the list of generated passwords */}
+                {multiple && users.length > 0
+                    ? <ModalHelpTexts
+                        arr={previewList}
+                        cls={" none"}
+                        isTitle={`${title} <span class='typography-span'>${location}</span>`}
+                        isTable={true}
+                        isSubmit={true}
+                        setPreview={() => setPreview(false)}
+                        regeneratePassword={() => generatePassword(true)}
+                        inverseFunction={(save) => (save ? saveApply() : refSubmit.current.click())}
+                        ref={refModal} /> : null}
+
+                {/* Save document to pdf */}
+                {savePdf ? <PDFConverter
+                    name={title}
+                    subTitle={location}
+                    names={["Namn", "Lösenord"]}
+                    list={previewList}
+                    savedPdf={(pdf) => setSavedPdf(pdf)}
+                /> : null}
             </div>
-
-            {/* Preview the list of generated passwords */}
-            {multiple && users.length > 0
-                ? <ModalHelpTexts
-                    arr={previewList}
-                    cls={" none"}
-                    isTitle={`${title} <span class='typography-span'>${location}</span>`}
-                    isTable={true}
-                    isSubmit={true}
-                    setPreview={() => setPreview(false)}
-                    regeneratePassword={() => generatePassword(true)}
-                    inverseFunction={(save) => (save ? saveApply() : refSubmit.current.click())}
-                    ref={refModal} /> : null}
-
-            {/* Save document to pdf */}
-            {savePdf ? <PDFConverter
-                name={title}
-                subTitle={location}
-                names={["Namn", "Lösenord"]}
-                list={previewList}
-                savedPdf={(pdf) => setSavedPdf(pdf)}
-            /> : null}
-        </div>
-    )
+        )
 }

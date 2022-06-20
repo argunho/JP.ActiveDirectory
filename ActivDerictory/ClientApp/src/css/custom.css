@@ -534,10 +534,6 @@ button {
   background: transparent !important;
 }
 
-.dropdown-list-active {
-  background-color: #dadada !important;
-}
-
 .collapse-wrapper {
   width: 100%;
   padding: 10px;
