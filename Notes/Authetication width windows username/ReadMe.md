@@ -60,7 +60,6 @@ public JsonResult AccessValidation()
 [Authorize]
 public JsonResult SetFullCredential(string password)
 {
-    ProtectAccount();
     var errorMessage = "Felaktig lösenord.";
 
     // If the user is not locked, validate user's password
