@@ -245,7 +245,7 @@ export default function Form(props) {
     // Generate strong password
     const returnGeneratedPassword = () => {
         let _password = "";
-        for (var i = 0; i < 12; i++) {
+        for (var i = 0; i < minimal; i++) {
             var chars = randomChars(i);
             var sortedChars = chars[Math.floor(Math.random() * chars.length)];
             if (i > 10 && !regex.test(_password + sortedChars)) {
