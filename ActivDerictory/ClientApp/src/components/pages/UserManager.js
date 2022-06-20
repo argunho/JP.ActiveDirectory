@@ -58,7 +58,7 @@ export class UserManager extends Component {
                 })
             }
         }, error => {
-            if (error.response.status === 401) {
+            if (error?.response?.status === 401) {
                 this.setState({ noAccess: true });
 
                 setTimeout(() => {
@@ -75,7 +75,7 @@ export class UserManager extends Component {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
 
-        this.setState({ load: true })
+        this.setState({ load: true, response: null })
 
         // Request
         await axios.post("user/unlock/" + this.state.user.name, _config).then(res => {
@@ -97,8 +97,11 @@ export class UserManager extends Component {
         return (
             noAccess ? <Response response={null} noAccess={true} />
                 : <div className='interior-div'>
+                    {/* Info about user */}
                     <Info name={user?.name} displayName={user?.displayName} subTitle={user?.subTitle} />
-                    {response ? <Response response={response} /> : null}
+                    {/* Response */}
+                    {response ? <Response response={response} reset={() => this.setState({response: null})} /> : null}
+                    {/* Unlock user */}
                     <div className={'unlock-block' + (user.isLocked ? " locked-account" : "")}>
                         {user.isLocked ? <Lock /> : <LockOpen />}
                         <span>{user.isLocked ? "Lås upp konto" : "Aktiv konto"}</span>
@@ -112,7 +115,8 @@ export class UserManager extends Component {
                             {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Lås upp"}
                         </Button>
                     </div>
-                    <Form title="Återställa lösenord" api="resetPassword" name={name} />
+                    {/* Change password */}
+                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load} />
                 </div>
         )
     }

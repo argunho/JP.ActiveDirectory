@@ -74,7 +74,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
                     if (user.IsAccountLockedOut())
                         user.UnlockAccount();
                     else
-                        return $"Användarkontot {model.Name} är inte blockerat.";// The process is cancelled! The user's account is not locked!
+                        return $"Användarkontot {model.Name} är redan aktiv.";// The process is cancelled! The user's account is not locked!
 
                     user.Save();
                     return string.Empty;

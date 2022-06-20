@@ -543,7 +543,7 @@ export default function Form(props) {
                                         className={(n.regex && regexError) ? "error" : ""}
                                         error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
                                         placeholder={n.placeholder}
-                                        disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || variousPassword}
+                                        disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || variousPassword || props.disabled}
                                         onChange={valueChangeHandler}
                                         onBlur={() => validateField(n.name)}
                                     />
@@ -556,6 +556,7 @@ export default function Form(props) {
                                 control={<Checkbox
                                     size='small'
                                     checked={showPassword}
+                                    disabled={load || props.disabled}
                                     onClick={() => setShowPassword(!showPassword)} />}
                                 label="Visa lösenord" />}
 
@@ -573,7 +574,7 @@ export default function Form(props) {
                                         size="small"
                                         className="generate-password"
                                         onClick={() => generatePassword()}
-                                        disabled={load || disableGenerate}>
+                                        disabled={load || disableGenerate || props.disabled}>
                                         Generera {previewList.length > 0 ? "andra " : ""} lösenord
                                     </Button>
                                 </span>
@@ -584,7 +585,7 @@ export default function Form(props) {
                                 <Button variant="contained"
                                     color="error"
                                     type="button"
-                                    disabled={load || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
+                                    disabled={load || props.disabled || ((form.password + form.confirmPassword).length === 0 && !variousPassword)}
                                     onClick={() => resetForm(true)}
                                 ><ClearOutlined /></Button>
 
@@ -594,7 +595,7 @@ export default function Form(props) {
                                     className='button-btn'
                                     color="primary"
                                     type='submit'
-                                    disabled={load || (!variousPassword && (noConfirm || regexError)) || (variousPassword && previewList.length === 0)}>
+                                    disabled={load || props.disabled || (!variousPassword && (noConfirm || regexError)) || (variousPassword && previewList.length === 0)}>
                                     {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : (variousPassword ? "Granska" : "Verkställ")}</Button>
                             </div>
                         </div>

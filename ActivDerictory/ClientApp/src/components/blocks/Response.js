@@ -82,7 +82,7 @@ export default function Response(props) {
             </Alert>
         )
     } else
-        return <Alert className='alert' severity={response?.alert} onClose={() => props.reset()}>
+        return <Alert className='alert' severity={response?.alert} onClose={() => ((!props.noAccess) ? props.reset() : {})}>
             <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg)}}></span>
         </Alert>;
 }
