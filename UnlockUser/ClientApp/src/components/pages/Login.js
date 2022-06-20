@@ -68,13 +68,14 @@ export class Login extends Component {
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("credentials", "ok");
                 localStorage.removeItem("blockTime");
-
+                document.title = "Unlock User | " + (form.group === "Students" ? "Studenter" : "Politiker");
+                
                 setTimeout(() => {
                     this.props.history.push("/find-user");
                 }, 1000)
             } else if (errorMessage)
                 console.error("Error response => " + errorMessage);
-            else if (blockTime) 
+            else if (blockTime)
                 localStorage.setItem("blockTime", blockTime);
         }, error => {
             this.setState({ load: true });

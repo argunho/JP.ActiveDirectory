@@ -10,6 +10,7 @@ export default function Header({ isAuthorized }) {
 
     const history = useHistory();
     const [displayName, setDisplayName] = useState("");
+    const [linkName, setLinkName] = useState("Unlock User");
 
     // Check current user authentication
     useEffect(() => {
@@ -20,7 +21,9 @@ export default function Header({ isAuthorized }) {
                 // If the current user is logged in, the name of the user is visible in the navigation bar
                 setDisplayName(decodedToken?.DisplayName)
             }
+            setLinkName(linkName + " | " + (sessionStorage.getItem("group") === "Students" ? "Studenter" : "Politiker"));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAuthorized])
 
     const logout = async () => {
@@ -29,8 +32,8 @@ export default function Header({ isAuthorized }) {
         localStorage.removeItem("blockTime");
         sessionStorage.setItem("login", "true");
         await axios.get("account/login").then(res => {
-            if(res.data?.errorMessage)
-            console.error("Error response => " + res.data.errorMessage);
+            if (res.data?.errorMessage)
+                console.error("Error response => " + res.data.errorMessage);
         }, error => {
             console.error("Error => " + error?.response)
         })
@@ -48,7 +51,8 @@ export default function Header({ isAuthorized }) {
                 <ul className='container'>
                     <li className="link-home">
                         <Link className="link" to="/find-user">
-                            <HomeSharp /><span>Unlock User</span>
+                            <HomeSharp />
+                            <span>{linkName}</span>
                         </Link>
                     </li>
                     {isAuthorized ?
