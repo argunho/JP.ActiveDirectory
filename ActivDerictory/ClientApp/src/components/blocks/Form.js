@@ -26,18 +26,6 @@ const formList = [
     { name: "confirmPassword", label: "Bekräfta lösenord", placeholder: "", regex: true }
 ]
 
-// Help texts (password)
-const helpTexts = [
-    {
-        label: "Lösenord ska innehålla",
-        tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
-            "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
-            "<pre>* Minst en siffra</pre>" +
-            "<pre>* Minst ett specialtecken</pre>" +
-            "<pre>* Minst 8 & Max 20 karaktär i längd</pre>"
-    }
-]
-
 // List of alternative to select words list category to generate password
 const passwordKeys = [
     { label: "Länder", value: "countries" },
@@ -85,6 +73,7 @@ export default function Form(props) {
 
     const history = useHistory()
     const disableGenerate = !strongPassword && !ready;
+    const minimal = sessionStorage.getItem("group") === "Students" ? 8 : 12;
 
     // Student school and class
     const location = (users.length > 0) ? users[0]?.office + " " + users[0]?.department : "";
@@ -98,6 +87,18 @@ export default function Form(props) {
     // To manipulate elements like js getElementById
     const refSubmit = useRef(null);
     const refModal = useRef(null);
+
+    // Help texts (password)
+    const helpTexts = [
+        {
+            label: "Lösenord ska innehålla",
+            tip: "<pre>* Minst en engelsk versal (stor bokstav)</pre>" +
+                "<pre>* Minst en liten engelsk gemen (liten bokstav)</pre>" +
+                "<pre>* Minst en siffra</pre>" +
+                "<pre>* Minst ett specialtecken</pre>" +
+                "<pre>* Minst " + minimal + " karaktär i längd</pre>"
+        }
+    ]
 
     // Regex to validate password
     const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
@@ -285,7 +286,7 @@ export default function Form(props) {
 
     // Validate form's field
     const validateField = (name) => {
-        if (form[name].length < 6 && errors?.indexOf(name) === -1)
+        if (form[name].length < minimal && errors?.indexOf(name) === -1)
             if (errors.length > 0) setErrors(errors => [...errors, name]);
             else setErrors([name]);
         else if (errors?.indexOf(name) > -1)
@@ -354,7 +355,7 @@ export default function Form(props) {
         // Validate form
         if (!variousPassword) {
             let arrErrors = [];
-            formList.forEach(x => { if (form[x.name].length < 6) arrErrors.push(x.name) })
+            formList.forEach(x => { if (form[x.name].length < minimal) arrErrors.push(x.name) })
             if (arrErrors.length > 0) {
                 setErrors(arrErrors);
                 return;
@@ -535,15 +536,14 @@ export default function Form(props) {
                                         required
                                         value={form[n.name] || ""}
                                         inputProps={{
-                                            maxLength: 20,
-                                            minLength: 8,
+                                            minLength: minimal,
                                             autoComplete: formList[n.name],
                                             form: { autoComplete: 'off', }
                                         }}
                                         className={(n.regex && regexError) ? "error" : ""}
                                         error={(n.name === "confirmPassword" && noConfirm) || (n.regex && regexError) || errors?.indexOf(n.name) > -1}
                                         placeholder={n.placeholder}
-                                        disabled={load || (n.name === "confirmPassword" && !form.password) || confirmSubmit || variousPassword || props.disabled}
+                                        disabled={load || (n.name === "confirmPassword" && form.password.length < minimal) || confirmSubmit || variousPassword || props.disabled}
                                         onChange={valueChangeHandler}
                                         onBlur={() => validateField(n.name)}
                                     />

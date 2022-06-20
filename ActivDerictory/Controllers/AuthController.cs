@@ -74,7 +74,7 @@ public class AuthController : ControllerBase
                 // If the user tried to put in a wrong password, save this like +1 a wrong attempt and the max is 4 attempts
                 _session?.SetInt32("LoginAttempt", loginAttempt += 1);
 
-                if (loginAttempt >= 10)
+                if (loginAttempt >= 4)
                 {
                     response = ProtectAccount(loginAttempt, model?.BlockTime);
                     if (response != null) return response;
@@ -84,7 +84,7 @@ public class AuthController : ControllerBase
                 {
                     alert = "error",
                     loginAttempt = loginAttempt,
-                    msg = $"<b>Felaktig användarnamn eller lösenord.</b><br/> {10 - loginAttempt} försök kvar."
+                    msg = $"<b>Felaktig användarnamn eller lösenord.</b><br/> {4 - loginAttempt} försök kvar."
                 }); //Incorrect username or password
             }
 
@@ -164,7 +164,7 @@ public class AuthController : ControllerBase
     {
         var blockTime = _session?.GetString("LoginBlockTime") ?? null;
 
-        if (attempt >= 10)
+        if (attempt >= 4)
         {
             _session?.SetString("LoginBlockTime", DateTime.Now.ToString());
             _session?.SetInt32("LoginAttempt", 0);

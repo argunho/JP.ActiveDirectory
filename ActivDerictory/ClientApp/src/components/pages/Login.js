@@ -54,7 +54,7 @@ export class Login extends Component {
         const { form } = this.state;
         console.log(form.blockTime)
 
-        this.setState({ load: true })
+        this.setState({ load: true, response: null })
 
         await axios.post("auth", form).then(res => {
             const { alert, token, blockTime, errorMessage } = res.data;

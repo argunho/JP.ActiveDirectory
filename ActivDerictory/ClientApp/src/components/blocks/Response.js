@@ -13,14 +13,14 @@ export default function Response(props) {
     const history = useHistory();
 
     useEffect(() => {
-        if(props.noAccess && !props.response){
+        if (props.noAccess && !props.response) {
             setResponse({
                 msg: "Åtkomst nekad! Dina atkomstbehörigheter måste kontrolleras på nytt.",
                 alert: "error"
             })
             setTimeout(() => { history.push("/"); }, 5000);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.noAccess])
 
     // Send a message to the system developer about the occurred error
@@ -37,7 +37,7 @@ export default function Response(props) {
     const getTimeLeftToUnblock = () => {
         if (!response?.timeLeft) return;
 
-        const num = (timeLeft ? timeLeft : response?.timeLeft).split(":") ;
+        const num = (timeLeft ? timeLeft : response?.timeLeft).split(":");
         let sec = parseInt(num[2]);
         let min = parseInt(num[1]);
 
@@ -47,7 +47,7 @@ export default function Response(props) {
                 props.reset();
             } else {
                 if (sec === 0) {
-                    if (min > 0)  min -= 1;
+                    if (min > 0) min -= 1;
                     else min = 59;
                     sec = 59;
                 } else
@@ -83,6 +83,6 @@ export default function Response(props) {
         )
     } else
         return <Alert className='alert' severity={response?.alert} onClose={() => ((!props.noAccess) ? props.reset() : {})}>
-            <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg)}}></span>
+            <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg) }}></span>
         </Alert>;
 }

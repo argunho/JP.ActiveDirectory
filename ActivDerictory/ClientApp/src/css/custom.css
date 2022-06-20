@@ -22,7 +22,6 @@ body {
   padding-bottom: 50px;
 }
 
-
 /* #region Header*/
 /* header {
   background: url('./../images/keys.png');
@@ -348,6 +347,11 @@ label {
 
 input::placeholder {
   font-size: 12px !important;
+}
+
+input[type="password"]:disabled {
+  opacity: 0.5 !important;
+  background: #ececec;
 }
 
 .alert {
