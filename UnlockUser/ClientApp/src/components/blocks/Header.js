@@ -26,6 +26,10 @@ export default function Header({ isAuthorized }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAuthorized])
 
+    useEffect(() => {
+        document.title = linkName;
+    }, [linkName])
+
     const logout = async () => {
         // If the user is logged out, clear and remove all credential which was saved for the current session
         sessionStorage.clear();
@@ -37,6 +41,7 @@ export default function Header({ isAuthorized }) {
         }, error => {
             console.error("Error => " + error?.response)
         })
+        setLinkName("Unlock User");
         history.push("/login");
     }
 
