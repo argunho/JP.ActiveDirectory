@@ -71,7 +71,7 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
                     return $"Användaren {model.Name} hittades inte."; // User not found
                 try
                 {
-                    if (!user.IsAccountLockedOut())
+                    if (user.IsAccountLockedOut())
                         user.UnlockAccount();
                     else
                         return $"Användarkontot {model.Name} är inte blockerat.";// The process is cancelled! The user's account is not locked!
@@ -88,12 +88,14 @@ public class ActiveDirectoryProvider : IActiveDirectoryProvider // Help class in
     }
     #endregion
 
-    #region Helpers
-    public PrincipalContext PContext() =>
-        new PrincipalContext(ContextType.Domain, domain, defaultOU); // Context to build a connection to local host
+    #region Helpers 
 
+    // Context to build a connection to local host
+    public PrincipalContext PContext() =>
+        new PrincipalContext(ContextType.Domain, domain, defaultOU);
+
+    // Context to build a connection with credentials to local host
     public PrincipalContext PContexAccessCheck(UserCredentials model)
         => new PrincipalContext(ContextType.Domain, domain, defaultOU, model.Username, model.Password);
-    // Context to build a connection with credentials to local host
     #endregion
 }

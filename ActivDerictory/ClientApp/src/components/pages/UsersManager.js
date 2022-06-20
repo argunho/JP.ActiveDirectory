@@ -35,8 +35,7 @@ export default class UsersManager extends Component {
                 <Form title={"Nya lösenord till " + this.users.length + " elev" + (this.users.length === 1 ? "" : "er")}
                     api="setPasswords"
                     users={this.users}
-                    multiple={true}
-                    buttonText="Verkställ" />
+                    multiple={true} />
             </div>
         )
     }

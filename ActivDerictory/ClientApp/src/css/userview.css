@@ -78,12 +78,12 @@
   vertical-align: middle;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
-.unlock-block svg:not(.locked svg) {
+.unlock-block svg {
   color: #1976d2;
 }
 .locked-account svg,
 .locked-account > span {
-  color: #cc0000;
+  color: #cc0000 !important;
 }
 .unlock-btn {
   position: absolute !important;

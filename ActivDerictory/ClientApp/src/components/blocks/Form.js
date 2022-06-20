@@ -53,7 +53,7 @@ const passwordKeys = [
 ];
 
 export default function Form(props) {
-    const { title, api, buttonText, name, multiple, users = [] } = props;
+    const { title, api, name, multiple, users = [] } = props;
     const defaultForm = {
         name: name, list: [],
         password: "", confirmPassword: ""
@@ -595,7 +595,7 @@ export default function Form(props) {
                                     color="primary"
                                     type='submit'
                                     disabled={load || (!variousPassword && (noConfirm || regexError)) || (variousPassword && previewList.length === 0)}>
-                                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : (variousPassword ? "Granska" : buttonText)}</Button>
+                                    {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : (variousPassword ? "Granska" : "Verkställ")}</Button>
                             </div>
                         </div>
 

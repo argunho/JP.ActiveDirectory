@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { Button } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import { Lock, LockOpen } from '@mui/icons-material';
@@ -99,7 +99,7 @@ export class UserManager extends Component {
                 : <div className='interior-div'>
                     <Info name={user?.name} displayName={user?.displayName} subTitle={user?.subTitle} />
                     {response ? <Response response={response} /> : null}
-                    <div className={'unlock-block' + (user.isLocked ? "locked-account" : "")}>
+                    <div className={'unlock-block' + (user.isLocked ? " locked-account" : "")}>
                         {user.isLocked ? <Lock /> : <LockOpen />}
                         <span>{user.isLocked ? "Lås upp konto" : "Aktiv konto"}</span>
 
@@ -108,11 +108,11 @@ export class UserManager extends Component {
                             color="error"
                             disabled={!user.isLocked || load}
                             onClick={() => this.unlockUser()}
-                            className="unlock-btn">
-                            Lås upp
+                            className="unlock-btn button-btn">
+                            {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Lås upp"}
                         </Button>
                     </div>
-                    <Form title={"Återställa lösenord"} api="resetPassword" name={name} buttonText="Återställ" />
+                    <Form title="Återställa lösenord" api="resetPassword" name={name} />
                 </div>
         )
     }
