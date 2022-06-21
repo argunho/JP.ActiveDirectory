@@ -25,7 +25,8 @@ export class UserManager extends Component {
             },
             response: null,
             load: false,
-            noAccess: false
+            noAccess: false,
+            disabled: false
         }
 
         this.unlockUser = this.unlockUser.bind(this);
@@ -92,7 +93,7 @@ export class UserManager extends Component {
     }
 
     render() {
-        const { user, noAccess, name, load, response } = this.state;
+        const { user, noAccess, name, load, response, disabled } = this.state;
 
         return (
             noAccess ? <Response response={null} noAccess={true} />
@@ -109,14 +110,14 @@ export class UserManager extends Component {
                         {/* Unlock user - button */}
                         <Button variant="contained"
                             color="error"
-                            disabled={!user.isLocked || load}
+                            disabled={!user.isLocked || load || disabled}
                             onClick={() => this.unlockUser()}
                             className="unlock-btn button-btn">
                             {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Lås upp"}
                         </Button>
                     </div>
                     {/* Change password */}
-                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load} />
+                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load} setDisabled={(val) => this.setState({disabled: val})} />
                 </div>
         )
     }

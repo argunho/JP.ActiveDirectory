@@ -139,6 +139,11 @@ export default function Form(props) {
         }
     }, [wordsList])
 
+    useEffect(() => {
+        if(props.setDisabled)
+            props.setDisabled(load);
+    }, [load])
+
 
     // Set password type
     const setPassType = (value) => {

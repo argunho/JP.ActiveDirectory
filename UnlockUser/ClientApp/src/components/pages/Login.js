@@ -52,7 +52,6 @@ export class Login extends Component {
     submitForm = async (e) => {
         e.preventDefault();
         const { form } = this.state;
-        console.log(form.blockTime)
 
         this.setState({ load: true, response: null })
 
