@@ -140,7 +140,7 @@ export default function Form(props) {
     }, [wordsList])
 
     useEffect(() => {
-        if(props.setDisabled)
+        if(props.setDisabled && !props.disabled)
             props.setDisabled(load);
     }, [load])
 
