@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, AlertTitle, Button } from '@mui/material'
+import { Alert, Button } from '@mui/material'
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 
@@ -9,10 +9,12 @@ export default function Response(props) {
     const [timeLeft, setTimeLeft] = useState(null);
     const [response, setResponse] = useState(props.response)
     const occurredError = sessionStorage.getItem("occurredError") || null;
+    const error = response?.errorMessage ?? null;
 
     const history = useHistory();
 
     useEffect(() => {
+        console.log("noacess")
         if (props.noAccess && !props.response) {
             setResponse({
                 msg: "Åtkomst nekad! Dina atkomstbehörigheter måste kontrolleras på nytt.",
@@ -28,7 +30,7 @@ export default function Response(props) {
         setSupportLink(false);
         var model = {
             link: window.location.href,
-            error: occurredError
+            error: error
         }
         setResponse({
             alert: "success",
@@ -46,6 +48,23 @@ export default function Response(props) {
                 props.reset();
             })
     }
+
+    // Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session    
+    useEffect(() => {
+        if (error && response?.repeatedError && response?.repeatedError >= 3) {
+            if (occurredError && occurredError === error) {
+                setTimeout(() => {
+                    setResponse({ alert: "error", msg: "Något har gått snett." })
+                    setSupportLink(true);
+                }, 100)
+                sessionStorage.removeItem("occurredError");
+            } else
+                sessionStorage.setItem("occurredError", error);
+        } else if (response?.timeLeft) //If login is blocked temporarily and lock time is not passed out 
+            getTimeLeftToUnblock();
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [response?.errorMessage])
 
     // The timer with countdown, a view of the time left to unblock login
     const getTimeLeftToUnblock = () => {
@@ -72,31 +91,14 @@ export default function Response(props) {
         }, 1000)
     }
 
-    //  Activate a button in the user interface for sending an error message to the system developer if the same error is repeated more than two times during the same session
-    if (response?.errorMessage && response?.repeatedError >= 3) {
-        if (occurredError && occurredError === response?.errorMessage) {
-            setSupportLink(true);
-            sessionStorage.removeItem("occurredError")
-        } else
-            sessionStorage.setItem("occurredError", response?.errorMessage);
-    } else if (response?.timeLeft) //If login is blocked temporarily and lock time is not passed out 
-        getTimeLeftToUnblock();
-
-    if (supportLink) {
-        return (
-            // Error alert
-            <Alert className="alert" severity='error' onClose={() => props.reset()}>
-                <AlertTitle>Något har gått fel.</AlertTitle>
-                <Button variant="contained"
-                    color='error'
-                    style={{ display: "block", marginTop: "20px" }}
-                    onClick={() => sendMsgToSupport()}>
-                    Meddela systemadministratör
-                </Button>
-            </Alert>
-        )
-    } else
-        return <Alert className='alert' severity={response?.alert} onClose={() => ((!props.noAccess) ? props.reset() : {})}>
-            <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg) }}></span>
-        </Alert>;
+    return <Alert className='alert' severity={response?.alert} onClose={() => ((!props.noAccess) ? props.reset() : {})}>
+        <span dangerouslySetInnerHTML={{ __html: (timeLeft ? response?.msg.replace(response?.timeLeft, timeLeft) : response?.msg) }}></span>
+        {supportLink ?
+            <Button variant="contained"
+                color='error'
+                style={{ display: "block", marginTop: "20px" }}
+                onClick={() => sendMsgToSupport()}>
+                Meddela systemadministratör
+            </Button> : null}
+    </Alert>;
 }
