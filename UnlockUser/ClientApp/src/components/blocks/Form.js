@@ -144,7 +144,6 @@ export default function Form(props) {
             props.setDisabled(load);
     }, [load])
 
-
     // Set password type
     const setPassType = (value) => {
         if (value) {

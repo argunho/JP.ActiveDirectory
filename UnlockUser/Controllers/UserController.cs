@@ -88,7 +88,7 @@ public class UserController : ControllerBase
         return new JsonResult(new { success = true, unlocked = true, alert = "success", msg = "Användaren har låsts upp!" });
     }
 
-    [HttpPost("mail/{str}")] // Send email to admin
+    [HttpPost("mail/{str}")] // Send email to current logged admin
     public JsonResult SendEmail(string str, IFormFile attachedFile)
     {
         try
@@ -101,9 +101,12 @@ public class UserController : ControllerBase
                         $"Hej {_session?.GetString("DisplayName")}!<br/> Här bifogas PDF document filen med nya lösenord till elever från klass {str}.",
                         mail ?? "", _session?.GetString("Password") ?? "", attachedFile);
             if (!success)
-                return new JsonResult(new { alert = "warning", 
-                    msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}", 
-                    errorMessage = MailRepository._message });
+                return new JsonResult(new
+                {
+                    alert = "warning",
+                    msg = $"Det gick inte att skicka e-post med pdf dokument till e-postadress {mail}",
+                    errorMessage = MailRepository._message
+                });
         }
         catch (Exception ex)
         {
@@ -113,18 +116,34 @@ public class UserController : ControllerBase
         return new JsonResult(new { result = true });
     }
 
-    [HttpPost("contact/{error}")] // Send email to support
+    [HttpPost("contact/error")] // Send email to support
     [AllowAnonymous]
-    public JsonResult SendEmailToSupport(string error)
+    public JsonResult SendEmailToSupport(ContactViewModel model)
     {
-
-        var model = new ContactViewModel
+        try
         {
-            Title = "Unlock User : Felmeddelande",
-            Text = error
-        };
-        MailRepository ms = new MailRepository();
-        var success = ms.SendContactEmail(model);
+            var group = _provider.FindGroupName("Topdesk-Operator IT");
+            var members = group?.GetMembers(true)?.ToList();
+
+            MailRepository ms = new MailRepository();
+            foreach (var u in members)
+            {
+                var user = _provider.FindUserByExtensionProperty(u.Name);
+                if(user != null && user.Title == "Systemutvecklare" && user.Department == "IT Serviceavdelning")
+                {
+                    model.Title = "Unlock User : Felmeddelande";
+                    model.Text = "Något har gott snett på " + model.Link + "<br/><br/><b>Fel: </b>" + model.Error +
+                        "<br/><br/>Avsändare: " + (_session.GetString("Username")?.Length > 0 ? _session.GetString("Username") : "Ej definerad");
+                    model.Email = user.EmailAddress;
+                    ms.SendContactEmail(model);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new {errorMessage = MailRepository._message});
+        }
+
         return new JsonResult(true);
     }
     #endregion

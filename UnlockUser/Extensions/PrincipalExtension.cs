@@ -25,21 +25,6 @@ public class UserPrincipalExtension : UserPrincipal
         set { ExtensionSet("department", value); }
     }
 
-
-    [DirectoryProperty("workplace")]
-    public string Workplace
-    {
-        get
-        {
-            if (ExtensionGet("workplace").Length != 1)
-                return string.Empty;
-
-            return (string)ExtensionGet("workplace")[0];
-        }
-
-        set { ExtensionSet("workplace", value); }
-    }
-
     [DirectoryProperty("title")]
     public string Title
     {
@@ -52,7 +37,6 @@ public class UserPrincipalExtension : UserPrincipal
         }
 
         set { ExtensionSet("title", value); }
-
     }
 
     [DirectoryProperty("physicalDeliveryOfficeName")]

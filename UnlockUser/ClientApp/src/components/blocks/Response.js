@@ -25,11 +25,25 @@ export default function Response(props) {
 
     // Send a message to the system developer about the occurred error
     const sendMsgToSupport = async () => {
-        props.reset();
         setSupportLink(false);
-        await axios.post("user/contact", occurredError)
+        var model = {
+            link: window.location.href,
+            error: occurredError
+        }
+        setResponse({
+            alert: "success",
+            msg: "Tack för ditt meddelande!"
+        })
+        sessionStorage.removeItem("occuredError");
+        await axios.post("user/contact/error", model)
             .then(res => {
-                setSupportLink(false);
+                if (res.data.errorMessage)
+                    console.log(res.data.errorMessage)
+                setTimeout(() => {
+                    props.reset();
+                }, 1000)
+            }, error => {
+                props.reset();
             })
     }
 
