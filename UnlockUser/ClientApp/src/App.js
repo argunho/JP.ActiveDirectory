@@ -40,7 +40,7 @@ class App extends Component {
         <Switch>
           <Route exact path={['/', '/login']} component={Login} />
           <Route exact path='/find-user' component={Search} />
-          <Route exact path='/manage-user/:id' component={UserManager} />
+          <Route exact path={['/manage-user/:id', '/profile/:id']} component={UserManager} />
           <Route exact path='/manage-users/:cls/:school' component={UsersManager} />        
           <Route exact path='/contact' component={Contacts} />
           <Route component={NotFound} />

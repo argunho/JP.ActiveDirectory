@@ -11,6 +11,7 @@ export default function Header({ isAuthorized }) {
     const history = useHistory();
     const [displayName, setDisplayName] = useState("");
     const [linkName, setLinkName] = useState("Unlock User");
+    const [username, setUsername] = useState(null);
 
     // Check current user authentication
     useEffect(() => {
@@ -19,11 +20,12 @@ export default function Header({ isAuthorized }) {
             if (token !== null && token !== undefined) {
                 const decodedToken = jwt_decode(token);
                 // If the current user is logged in, the name of the user is visible in the navigation bar
-                setDisplayName(decodedToken?.DisplayName)
+                setDisplayName(decodedToken?.DisplayName);
+                setUsername(decodedToken?.unique_name);
             }
             setLinkName(linkName + " | " + (sessionStorage.getItem("group") === "Students" ? "Studenter" : "Politiker"));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAuthorized])
 
     useEffect(() => {
@@ -35,7 +37,7 @@ export default function Header({ isAuthorized }) {
         sessionStorage.clear();
         localStorage.removeItem("blockTime");
         sessionStorage.setItem("login", "true");
-        await axios.get("account/login").then(res => {
+        await axios.get("auth/logout").then(res => {
             if (res.data?.errorMessage)
                 console.error("Error response => " + res.data.errorMessage);
         }, error => {
@@ -62,7 +64,11 @@ export default function Header({ isAuthorized }) {
                     </li>
                     {isAuthorized ?
                         <>
-                            <li className=''>{displayName}</li>
+                            <li>
+                                <Link className="link" to={"/profile/" + username}>
+                                    {displayName}
+                                </Link>
+                            </li>
                             <li>
                                 {/* Button to logout */}
                                 <Button variant='outlined' size="large" className='nav-btn' onClick={() => logout()}>

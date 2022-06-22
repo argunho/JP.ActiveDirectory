@@ -26,7 +26,8 @@ export class UserManager extends Component {
             response: null,
             load: false,
             noAccess: false,
-            disabled: false
+            disabled: false,
+            notFound: false
         }
 
         this.unlockUser = this.unlockUser.bind(this);
@@ -44,8 +45,19 @@ export class UserManager extends Component {
         const _config = {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
-
-        await axios.get("user/" + this.props.match.params.id, _config).then(res => {
+        const id = this.props.match.params?.id;
+        console.log(id)
+        if (id === undefined || id === null || id === "undefined") {
+            this.setState({
+                response: {
+                    alert: "warning",
+                    msg: "Användaren hittades inte."
+                },
+                notFound: true
+            });
+            return;
+        }
+        await axios.get("user/" + id, _config).then(res => {
             const { user } = res.data;
             if (user !== undefined) {
                 this.setState({
@@ -54,7 +66,7 @@ export class UserManager extends Component {
                         displayName: user.displayName,
                         isLocked: user.isLocked,
                         date: user.date,
-                        subTitle: user?.office + " " + user?.department
+                        subTitle: user?.office + (user.office !== user.department ? (" " + user?.department) : "")
                     }
                 })
             }
@@ -93,7 +105,7 @@ export class UserManager extends Component {
     }
 
     render() {
-        const { user, noAccess, name, load, response, disabled } = this.state;
+        const { user, noAccess, name, load, response, disabled, notFound } = this.state;
 
         return (
             noAccess ? <Response response={null} noAccess={true} />
@@ -101,23 +113,25 @@ export class UserManager extends Component {
                     {/* Info about user */}
                     <Info name={user?.name} displayName={user?.displayName} subTitle={user?.subTitle} />
                     {/* Response */}
-                    {response ? <Response response={response} reset={() => this.setState({response: null})} /> : null}
+                    {response ? <Response response={response} reset={() => this.setState({ response: null })} /> : null}
                     {/* Unlock user */}
-                    <div className={'unlock-block' + (user.isLocked ? " locked-account" : "")}>
-                        {user.isLocked ? <Lock /> : <LockOpen />}
-                        <span>{user.isLocked ? "Lås upp konto" : "Aktiv konto"}</span>
+                    {notFound ? null : <>
+                        <div className={'unlock-block' + (user.isLocked ? " locked-account" : "")}>
+                            {user.isLocked ? <Lock /> : <LockOpen />}
+                            <span>{user.isLocked ? "Lås upp konto" : "Aktiv konto"}</span>
 
-                        {/* Unlock user - button */}
-                        <Button variant="contained"
-                            color="error"
-                            disabled={!user.isLocked || load || disabled}
-                            onClick={() => this.unlockUser()}
-                            className="unlock-btn button-btn">
-                            {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Lås upp"}
-                        </Button>
-                    </div>
-                    {/* Change password */}
-                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load || user.isLocked} setDisabled={(val) => this.setState({disabled: val})} />
+                            {/* Unlock user - button */}
+                            <Button variant="contained"
+                                color="error"
+                                disabled={!user.isLocked || load || disabled}
+                                onClick={() => this.unlockUser()}
+                                className="unlock-btn button-btn">
+                                {load ? <CircularProgress style={{ width: "15px", height: "15px", marginTop: "3px" }} /> : "Lås upp"}
+                            </Button>
+                        </div>
+                        {/* Change password */}
+                        <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load || user.isLocked} setDisabled={(val) => this.setState({ disabled: val })} />
+                    </>}
                 </div>
         )
     }
