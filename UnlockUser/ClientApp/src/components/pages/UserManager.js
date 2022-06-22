@@ -117,7 +117,7 @@ export class UserManager extends Component {
                         </Button>
                     </div>
                     {/* Change password */}
-                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load} setDisabled={(val) => this.setState({disabled: val})} />
+                    <Form title="Återställa lösenord" api="resetPassword" name={name} disabled={load || user.isLocked} setDisabled={(val) => this.setState({disabled: val})} />
                 </div>
         )
     }

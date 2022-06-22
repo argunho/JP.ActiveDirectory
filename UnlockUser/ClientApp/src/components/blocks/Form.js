@@ -276,7 +276,7 @@ export default function Form(props) {
             String.fromCharCode(Math.floor(Math.random() * 26) + 65),
             String.fromCharCode(Math.floor(Math.random() * 10) + 48)
         ];
-        const lastChar = (num % 5 === 0) ? symbols[Math.floor(Math.random() * symbols.length)] :
+        const lastChar = (num % (minimal === 8 ? 6 : 5) === 0) ? symbols[Math.floor(Math.random() * symbols.length)] :
             strArr[Math.floor(Math.random() * strArr.length)];
         strArr.push(lastChar)
         return strArr;
