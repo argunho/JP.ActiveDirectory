@@ -70,6 +70,10 @@ export default function Form(props) {
     const [savePdf, setSavePdf] = useState(false);
     const [savedPdf, setSavedPdf] = useState(null);
     const [randomPasswordWord, setRandomPasswordWord] = useState(null);
+    
+    // Regex to validate password
+    const [regex, setRegex] = useState(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,50}$/);
+    const eng = (/^[A-Za-z]+$/);
 
     const history = useHistory()
     const disableGenerate = !strongPassword && !ready;
@@ -100,9 +104,6 @@ export default function Form(props) {
         }
     ]
 
-    // Regex to validate password
-    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
-    const eng = (/^[A-Za-z]+$/);
 
     // Check current user authentication
     useEffect(() => {
@@ -118,6 +119,11 @@ export default function Form(props) {
     }, [isOpenTip])
 
     useEffect(() => { resetForm(!variousPassword); }, [variousPassword])
+   
+    useEffect(() => {
+        if (minimal === 12)
+            setRegex(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*_]{12,50}$/);
+    }, [minimal])
 
     useEffect(() => { setPreviewList([]); }, [randomNumber])
 
@@ -193,7 +199,9 @@ export default function Form(props) {
         setPreviewList([]);
         if (strongPassword && !variousPassword) {
             resetForm(false);
-            const generatedPassword = returnGeneratedPassword();
+            let generatedPassword = returnGeneratedPassword();
+            while (!regex.test(generatedPassword))
+                generatedPassword = returnGeneratedPassword();
             setForm({ ...form, password: generatedPassword, confirmPassword: generatedPassword });
             setShowPassword(true);
         } else {

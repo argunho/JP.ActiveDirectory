@@ -14,7 +14,6 @@ export default function Response(props) {
     const history = useHistory();
 
     useEffect(() => {
-        console.log("noacess")
         if (props.noAccess && !props.response) {
             setResponse({
                 msg: "Åtkomst nekad! Dina atkomstbehörigheter måste kontrolleras på nytt.",
