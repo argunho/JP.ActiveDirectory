@@ -23,12 +23,6 @@ body {
 }
 
 /* #region Header*/
-/* header {
-  background: url('./../images/keys.png');
-  background-position: right 8%;
-  background-repeat: no-repeat;
-  background-size: auto 60%;
-} */
 .logo-wrapper {
   display: block;
   width: 100%;
@@ -78,11 +72,6 @@ body {
   display: flex;
   align-items: center !important;
   text-transform: none !important;
-  /* height: 80%;
-  border: 4px double #fff;
-  top: 10%;
-  padding: 0 10px;
-  border-radius: 3px; */
 }
 
 .link {
