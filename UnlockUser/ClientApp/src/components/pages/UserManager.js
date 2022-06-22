@@ -45,8 +45,7 @@ export class UserManager extends Component {
         const _config = {
             headers: { 'Authorization': `Bearer ${sessionStorage.getItem("token")}` }
         };
-        const id = this.props.match.params?.id;
-        console.log(id)
+        const id = this.state.name;
         if (id === undefined || id === null || id === "undefined") {
             this.setState({
                 response: {
@@ -57,6 +56,7 @@ export class UserManager extends Component {
             });
             return;
         }
+
         await axios.get("user/" + id, _config).then(res => {
             const { user } = res.data;
             if (user !== undefined) {

@@ -11,7 +11,6 @@ export default function Header({ isAuthorized }) {
     const history = useHistory();
     const [displayName, setDisplayName] = useState("");
     const [linkName, setLinkName] = useState("Unlock User");
-    const [username, setUsername] = useState(null);
 
     // Check current user authentication
     useEffect(() => {
@@ -21,7 +20,6 @@ export default function Header({ isAuthorized }) {
                 const decodedToken = jwt_decode(token);
                 // If the current user is logged in, the name of the user is visible in the navigation bar
                 setDisplayName(decodedToken?.DisplayName);
-                setUsername(decodedToken?.unique_name);
             }
             setLinkName(linkName + " | " + (sessionStorage.getItem("group") === "Students" ? "Studenter" : "Politiker"));
         }
@@ -64,11 +62,7 @@ export default function Header({ isAuthorized }) {
                     </li>
                     {isAuthorized ?
                         <>
-                            <li>
-                                <Link className="link" to={"/profile/" + username}>
-                                    {displayName}
-                                </Link>
-                            </li>
+                            <li>{displayName}</li>
                             <li>
                                 {/* Button to logout */}
                                 <Button variant='outlined' size="large" className='nav-btn' onClick={() => logout()}>
