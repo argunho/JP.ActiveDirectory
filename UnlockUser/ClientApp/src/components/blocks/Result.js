@@ -1,20 +1,18 @@
 
 
 import React, { useEffect, useRef, useState } from 'react'
-import {
-    Alert, Avatar, Button, Checkbox, List, ListItem,
+import {  Avatar, Button, Checkbox, List, ListItem,
     ListItemAvatar, ListItemText, Tooltip, Typography
 } from '@mui/material'
 import { DeleteSweep, Deselect, Password, SelectAll } from '@mui/icons-material';
 import Loading from './Loading';
-import loadImg from './../../images/search.gif'
-import user from './../../images/student.png'
+import loadImg from './../../images/search.gif';
 import { useHistory } from 'react-router-dom';
 import Response from './Response';
 /* eslint-disable react-hooks/exhaustive-deps */  // <= Do not remove this line
 
 
-export default function Result({ users, clsStudents, isVisibleTips, inProgress, response, isResult, resetResult, cancelRequest }) {
+export default function Result({ users, clsStudents, isResult, isVisibleTips, inProgress, response, group, cancelRequest, resetResult }) {
 
     const refResult = useRef(null);
     const [selectedList, setSelectedList] = useState([]);
@@ -25,7 +23,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
     const ul = users.length;
     const sl = selectedList.length;
     const selected = (ul === sl);
-
+console.log(group)
 
     useEffect(() => {
         refResult.current.scrollIntoView();
@@ -126,7 +124,7 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
                     {/* Select or deselect all list */}
                     <ListItem className='search-result-select'>
                         <ListItemAvatar>
-                            <Avatar className='user-avatar'>
+                            <Avatar className="user-avatar">
                                 {!selected ? <SelectAll /> : <Deselect color="primary" />}
                             </Avatar>
                         </ListItemAvatar>
@@ -157,8 +155,8 @@ export default function Result({ users, clsStudents, isVisibleTips, inProgress, 
 
                             {/* Avatar */}
                             <ListItemAvatar>
-                                <Avatar className='user-avatar'>
-                                    <img className="user-avatar" src={user} alt="user" />
+                                <Avatar className="user-avatar">
+                                    <img className={`${group}-avatar`} src={require(`./../../images/${group}.png`)} alt="unlock user" />
                                 </Avatar>
                             </ListItemAvatar>
 

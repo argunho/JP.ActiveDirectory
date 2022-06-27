@@ -60,7 +60,9 @@ export class Search extends Component {
             { label: "Resultat", tip: "Resultatet kan bli från 0 till flera hittade användare beroende på sökord och sökalternative.", value: "", color: "#c00" }
         ]
 
-        if (sessionStorage.getItem("group") !== "Students") {
+        this.group = sessionStorage.getItem("group");
+
+        if (this.group !== "Students") {
             this.sOptions.splice(1, 1);
             this.helpTexts.splice(1, 1);
         }
@@ -390,6 +392,7 @@ export class Search extends Component {
                     isVisibleTips={showTips}
                     inProgress={inProgress}
                     response={response}
+                    group={this.group?.toLowerCase()}
                     cancelRequest={() => this.source.cancel("Pågående sökning har avbrutits ...")}
                     resetResult={this.resetResult.bind(this)}
                 />

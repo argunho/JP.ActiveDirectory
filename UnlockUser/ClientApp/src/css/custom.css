@@ -252,6 +252,14 @@ body {
   background-color: #f0f0f0 !important;
 }
 
+.politician-avatar {
+  width: 70% !important;
+  opacity: 0.5;
+}
+.students-avatar {
+  width: 90% !important;
+}
+
 .typography-span {
   padding: 3px 8px;
   background-color: #faebd7;
